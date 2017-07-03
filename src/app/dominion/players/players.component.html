@@ -1,0 +1,9 @@
+
+<div class="bodyWithMargin">
+  <my-data-table
+      [data]='PlayersNameList'
+      [columnSettings]='columnSettings' >
+  </my-data-table>
+
+  <my-waiting-spinner [done]="httpGetDone"></my-waiting-spinner>
+</div>

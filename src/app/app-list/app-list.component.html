@@ -1,0 +1,16 @@
+<ng-container *ngIf="AppName">
+    <md-toolbar color="primary">
+        <span>{{AppName}}</span>
+    </md-toolbar>
+</ng-container>
+
+
+<div *ngFor="let app of Apps">
+    <md-card class="appElement"
+            [class.inService]="app.inService"
+            [class.notInService]="!(app.inService)"
+            [routerLink]="app.routerLink">
+        <md-card-title>{{app.title}} <span *ngIf="!app.inService"></span></md-card-title>
+        <md-card-subtitle>{{app.subtitle}}</md-card-subtitle>
+    </md-card>
+</div>
