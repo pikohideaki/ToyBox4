@@ -90,6 +90,11 @@ export class MyUtilitiesService {
     return this.removeAt( ar, ar.findIndex(f) );
   }
 
+
+  /**
+   * @description alias of `ar.splice( index, 1 )[0]`;  Delete the element at address `index`
+   * @return the deleted element
+   */  
   removeAt<T>( ar: Array<T>, index: number ): T {
     return ar.splice( index, 1 )[0];
   };

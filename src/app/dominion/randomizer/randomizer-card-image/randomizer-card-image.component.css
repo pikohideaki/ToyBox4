@@ -1,9 +1,3 @@
-.checked {
-  
-}
-
-
-
 
 .CardArea {
   padding: 10px;
@@ -12,23 +6,23 @@
 }
 
 
-#KingdomCards10 {
+.KingdomCards10 {
   background-color: #B5C8F1;
 }
 
-#Prosperity {
+.Prosperity {
 
 }
 
-#BaneCard__Obelisk {
+.BaneCard__Obelisk {
   background-color: #ECB6F3;
 }
 
-#EventCards__LandmarkCards {
+.EventCards__LandmarkCards {
   background-color: #9EDFA5;
 }
 
-#BlackMarketPile {
+.BlackMarketPile {
   background-color: #C6C5C5;
 }
 

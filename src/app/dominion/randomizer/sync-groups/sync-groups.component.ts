@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { NgForm } from '@angular/forms';
 
 import { MdSnackBar } from '@angular/material';
@@ -24,12 +24,13 @@ import { UserInfo } from "../../../user-info";
   templateUrl: './sync-groups.component.html',
   styleUrls: ['./sync-groups.component.css']
 })
-export class SyncGroupsComponent implements OnInit {
+export class SyncGroupsComponent implements OnInit, OnDestroy {
 
   @Input() DominionSetList: { name: string, selected: boolean }[] = [];
   @Input() SelectedCards: SelectedCards = new SelectedCards(); 
+  @Input() sidenav;
 
-  syncGroups: { id: string, selected: boolean, data: SyncGroup }[];
+  syncGroups: { id: string, selected: boolean, data: SyncGroup }[] = [];
   users: UserInfo[] = [];
 
   me: Observable<firebase.User>;
@@ -40,8 +41,9 @@ export class SyncGroupsComponent implements OnInit {
   newGroupName: string;
   newGroupPassword: string;
   signInPassword: string;
+  showWrongPasswordAlert: boolean = false;
 
-
+  subscriptions = [];
 
   constructor(
     public snackBar: MdSnackBar,
@@ -51,24 +53,34 @@ export class SyncGroupsComponent implements OnInit {
     public afAuth: AngularFireAuth
   ) {
     this.me = afAuth.authState;
-    this.me.subscribe( val => {
-      this.signedIn = !!val;
-      this.myID = ( this.signedIn ? val.uid : "" );
-    });
+    this.subscriptions.push(
+      this.me.subscribe( val => {
+        this.signedIn = !!val;
+        this.myID = ( this.signedIn ? val.uid : "" );
+      })
+    );
 
-    this.afDatabase.list("/userInfo")
-    .subscribe( val => {
-      this.users = val.map( e => new UserInfo(e) );
-    });
+    this.subscriptions.push(
+      this.afDatabase.list("/userInfo").subscribe( val => {
+        this.users = val.map( e => new UserInfo(e) );
+      })
+    );
 
-    this.afDatabase.list("/syncGroups", { preserveSnapshot: true })
-    .subscribe( snapshots => {
-      this.syncGroups = this.afDatabaseService.convertAs( snapshots, "syncGroups" );
-    });
+    this.subscriptions.push(
+      this.afDatabase.list("/syncGroups", { preserveSnapshot: true }).subscribe( snapshots => {
+        this.syncGroups = this.afDatabaseService.convertAs( snapshots, "syncGroups" );
+      })
+    );
   }
 
   ngOnInit() {
   }
+
+
+  ngOnDestroy() {
+    this.subscriptions.forEach( e => e.unsubscribe() );
+  }
+
 
   getUserNamesInGroup( groupID ) {
     return this.users.filter( user => user.dominionGroupID === groupID ).map( user => user.name );
@@ -93,13 +105,20 @@ export class SyncGroupsComponent implements OnInit {
     this.removeMemberEmptyGroup();
   }
 
-  groupClicked( index: number ) {
+  groupClicked( $event, index: number ) {
     this.syncGroups.forEach( g => g.selected = false );
     this.syncGroups[index].selected = true;
+    $event.stopPropagation();
+  }
+
+  backgroundClicked() {
+    this.syncGroups.forEach( g => g.selected = false );
   }
 
   signInPasswordIsValid( groupID ): boolean {
-    return ( this.signInPassword === this.syncGroups.find( g => g.id === groupID ).data.password );
+    let isValid = ( this.signInPassword === this.syncGroups.find( g => g.id === groupID ).data.password );
+    this.showWrongPasswordAlert = !isValid;
+    return isValid;
   }
 
   signIn( groupID ) {
@@ -107,6 +126,8 @@ export class SyncGroupsComponent implements OnInit {
     this.updateMyGroupID( groupID );
     this.openSnackBar("Successfully signed in!");
     this.removeMemberEmptyGroup();
+    this.signInPassword = undefined;
+    this.sidenav.close();
   }
 
   signOut( groupID ) {
@@ -114,12 +135,16 @@ export class SyncGroupsComponent implements OnInit {
     this.updateMyGroupID( "" );
     this.openSnackBar("Successfully signed out!");
     this.removeMemberEmptyGroup();
+    this.signInPassword = undefined;
+    this.sidenav.close();
   }
 
   removeMemberEmptyGroup() {
-    this.syncGroups
-      .filter( g => this.users.findIndex( user => user.dominionGroupID === g.id ) === -1 )
-      .forEach( g => this.afDatabase.list("/syncGroups").remove( g.id ) );
+    setTimeout(
+      () => this.syncGroups
+              .filter( g => this.users.findIndex( user => user.dominionGroupID === g.id ) === -1 )
+              .forEach( g => this.afDatabase.list("/syncGroups").remove( g.id ) )
+      , 3000 );
   }
 
   private openSnackBar( message: string ) {

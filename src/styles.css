@@ -11,16 +11,20 @@ a {
 }
 
 body {
-	margin: 0;
-	background-color: #F3EBAA;
+  margin: 0;
+  background-color: #F3EBAA;
 }
 
-.bodyWithMargin {
-  margin: 20px;
+input[type=number] {
+  text-align: right;
+}
+
+.bodyWithPadding {
+  padding: 20px;
 }
 
 .marginedElement {
-    margin: 10px;
+  margin: 10px;
 }
 
 .alert {

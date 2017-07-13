@@ -132,6 +132,17 @@ export class MyDataTableComponent implements OnInit, OnChanges  {
 
 
   clicked( rowIndex: number, columnName: string ) {
-    this.onClick.emit( { rowIndex: rowIndex, columnName: columnName } );
+    this.onClick.emit( {
+      rowIndex: this.indexOnDataBeforeFilter( this.itemsPerPage * this.selectedPageIndex + rowIndex ),
+      columnName: columnName } );
+  }
+
+  indexOnDataBeforeFilter( indexOnFilteredData: number ): number {
+    let filteredDataNum = 0;
+    for ( let i = 0; i < this.data.length; ++i ) {
+      if ( this.filterFunction(this.data[i]) ) filteredDataNum++;
+      if ( filteredDataNum > indexOnFilteredData ) return i;
+    }
+    return this.data.length - 1;
   }
 }

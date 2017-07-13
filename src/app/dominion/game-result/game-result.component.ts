@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import { Observable } from 'rxjs/Rx';
 
@@ -13,7 +13,9 @@ import { GameResult } from "../game-result";
   templateUrl: './game-result.component.html',
   styleUrls: ['./game-result.component.css']
 })
-export class GameResultComponent implements OnInit {
+export class GameResultComponent implements OnInit, OnDestroy {
+
+  subscriptions = [];
 
   httpGetDone: boolean = false;
   GameResultList: GameResult[] = [];
@@ -41,24 +43,33 @@ export class GameResultComponent implements OnInit {
       GameResultList$.first().toPromise(),
     ]).then( () => this.httpGetDone = true );
 
-    ScoringList$.subscribe( val => {
-      let ScoringList = this.afDatabaseService.convertAs( val, "ScoringList" );
+    this.subscriptions.push(
+      ScoringList$.subscribe( val => {
+        let ScoringList = this.afDatabaseService.convertAs( val, "ScoringList" );
 
-      GameResultList$.subscribe( val => {
-        this.GameResultList = this.afDatabaseService.convertAs( val, "GameResultList", ScoringList );
+        this.subscriptions.push(
+          GameResultList$.subscribe( val => {
+            this.GameResultList = this.afDatabaseService.convertAs( val, "GameResultList", ScoringList );
 
-        this.playerNumOptions
-          = this.utils.uniq( this.GameResultList.map( e => e.players.length ).sort() )
-                      .map( v => { return { playerNum: v, selected: true }; } );
-        this.resetFilter();
-      } );
-    });
+            this.playerNumOptions
+              = this.utils.uniq( this.GameResultList.map( e => e.players.length ).sort() )
+                          .map( v => { return { playerNum: v, selected: true }; } );
+            this.resetFilter();
+          } )
+        );
+      })
+    );
   }
 
 
 
   ngOnInit() {
   }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach( e => e.unsubscribe() );
+  }
+
 
 
   filterGameResultList() {

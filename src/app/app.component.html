@@ -7,7 +7,7 @@
   <span class="spacer"></span>
 
 
-  <span class="userName">{{ (user | async)?.displayName }}</span>
+  <span class="userName">{{ (user$ | async)?.displayName }}</span>
   <ng-container *ngIf="!signedIn">
     <a md-icon-button routerLink='/user_admin'> <md-icon>person</md-icon> </a>
   </ng-container>

@@ -1,5 +1,5 @@
 
-<div class='bodyWithMargin'>
+<div class='bodyWithPadding'>
 
   <!--日付-->
   <span class="marginedElement">
@@ -34,8 +34,9 @@
     <my-waiting-spinner *ngIf="!httpGetDone"></my-waiting-spinner>
 
     <div *ngIf="httpGetDone">
-      <ng-container *ngFor="let player of Players" >
-        <md-checkbox class="playerChbox" [(ngModel)]="player.selected" >
+      <ng-container *ngFor="let player of gameResultOfPlayers; let idx = index" >
+        <md-checkbox class="playerChbox" [(ngModel)]="player.selected"
+            (change)="uploadGameResultOfPlayer( idx, 'selected' )" >
           {{player.name}}
         </md-checkbox>
       </ng-container>
@@ -54,21 +55,26 @@
         </tr>
       </thead>
       <tbody>
-        <ng-container *ngFor="let player of Players">
-        <tr *ngIf="player.selected">
-          <td>
-            <md-radio-button [value]="player.name" ></md-radio-button>
-          </td>
-          <td>{{player.name}}</td>
-          <td>
-            <md-input-container >
-              <input mdInput type="number" [(ngModel)]="player.VP" >
-            </md-input-container>
-          </td>
-          <td>
-            <md-checkbox [(ngModel)]="player.lessTurns"></md-checkbox>
-          </td>
-        </tr>
+        <ng-container *ngFor="let player of gameResultOfPlayers; let idx = index">
+          <tr *ngIf="player.selected">
+            <td>
+              <md-radio-button [value]="player.name" ></md-radio-button>
+            </td>
+            <td>{{player.name}}</td>
+            <td>
+              <md-input-container>
+                <input mdInput type="number"
+                  onclick="this.select(0,this.value.length)"
+                  (input)="uploadGameResultOfPlayer( idx, 'VP' )"
+                  [(ngModel)]="player.VP" >
+              </md-input-container>
+            </td>
+            <td>
+              <md-checkbox [(ngModel)]="player.lessTurns"
+                (change)="uploadGameResultOfPlayer( idx, 'lessTurns' )" >
+              </md-checkbox>
+            </td>
+          </tr>
         </ng-container>
       </tbody>
     </table>

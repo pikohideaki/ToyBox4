@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 import { MyUtilitiesService } from '../../my-utilities.service';
@@ -16,7 +16,9 @@ import { MyFirebaseSubscribeService } from "../my-firebase-subscribe.service";
         './players.component.css'
     ]
 })
-export class PlayersComponent implements OnInit {
+export class PlayersComponent implements OnInit, OnDestroy {
+
+  subscriptions = [];
 
   PlayersNameList: { name: string, name_yomi: string }[] = [];
   httpGetDone: boolean = false;
@@ -33,13 +35,19 @@ export class PlayersComponent implements OnInit {
     afDatabase: AngularFireDatabase,
     private afDatabaseService: MyFirebaseSubscribeService
   ) {
+    this.subscriptions.push(
       afDatabase.list( '/data/PlayersNameList' ).subscribe( val => {
         this.PlayersNameList = this.afDatabaseService.convertAs( val, "PlayersNameList" );
         this.httpGetDone = true;
-      } );
+      } )
+    );
   }
 
   ngOnInit() {
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach( e => e.unsubscribe() );
   }
 
 }

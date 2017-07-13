@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 import { MdDialogRef } from '@angular/material';
@@ -19,9 +19,10 @@ import { SelectedCards } from "../selected-cards";
     './submit-game-result-dialog.component.css'
   ]
 })
-export class SubmitGameResultDialogComponent implements OnInit {
+export class SubmitGameResultDialogComponent implements OnInit, OnDestroy {
 
   @Input() newGameResult: GameResult;
+  subscriptions = [];
 
   constructor(
     public dialogRef: MdDialogRef<SubmitGameResultDialogComponent>,
@@ -32,11 +33,17 @@ export class SubmitGameResultDialogComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.afDatabase.list( '/data/ScoringList' ).subscribe( val => {
-      let defaultScores = this.afDatabaseService.convertAs( val, "ScoringList" );
-      this.newGameResult.rankPlayers();
-      this.newGameResult.setScores( defaultScores );
-    } );
+    this.subscriptions.push(
+      this.afDatabase.list( '/data/ScoringList' ).subscribe( val => {
+        let defaultScores = this.afDatabaseService.convertAs( val, "ScoringList" );
+        this.newGameResult.rankPlayers();
+        this.newGameResult.setScores( defaultScores );
+      } )
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach( e => e.unsubscribe() );
   }
 
 

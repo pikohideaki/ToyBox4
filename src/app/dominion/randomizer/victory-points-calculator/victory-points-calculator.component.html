@@ -1,6 +1,6 @@
 <div class="bodyWithPadding">
 
-  <ng-container>
+  <ng-container *ngIf="CardPropertyList.length > 0">
 
     <div class="result">
       <span> 合計点 = <b>{{VPtotal}}</b> </span>
@@ -22,12 +22,54 @@
       </span>
     </div>
 
-
     <hr>
 
     <table>
-      <tr *ngFor="let setting of OtherSettings">
-        <ng-container *ngIf="setting.display">
+      <tr *ngFor="let victoryPoint of OtherVictoryPoints">
+        <td> {{victoryPoint.title}} </td>
+        <td>
+          <button md-raised-button class="miniButton"
+              [disabled]="numberOfVictoryCards[ victoryPoint.id ] <= 0"
+              (click)="decrement( victoryPoint.id, 2 )">
+              <md-icon>exposure_neg_2</md-icon>
+          </button>
+        </td>
+        <td>
+          <button md-raised-button class="miniButton"
+              [disabled]="numberOfVictoryCards[ victoryPoint.id ] <= 0"
+              (click)="decrement( victoryPoint.id, 1 )">
+            <md-icon>exposure_neg_1</md-icon>
+          </button>
+        </td>
+        <td>
+          <md-input-container>
+            <input mdInput type="number"
+              min="0"
+              [(ngModel)]="numberOfVictoryCards[ victoryPoint.id ]"
+              onclick="this.select(0,this.value.length)"
+              (input)="setValue( victoryPoint.id, $event )">
+          </md-input-container>
+        </td>
+        <td>
+          <button md-raised-button class="miniButton"
+              (click)="increment( victoryPoint.id, 1 )">
+            <md-icon>exposure_plus_1</md-icon>
+          </button>
+        </td>
+        <td>
+          <button md-raised-button class="miniButton"
+              (click)="increment( victoryPoint.id, 2 )">
+            <md-icon>exposure_plus_2</md-icon>
+          </button>
+        </td>
+      </tr>
+    </table>
+    
+    <hr>
+
+    <table>
+      <ng-container *ngFor="let setting of OtherSettings">
+        <tr *ngIf="setting.display">
 
           <td> {{setting.title}} </td>
           <td>
@@ -66,59 +108,24 @@
             </button>
           </td>
 
-        </ng-container>
-      </tr>
+        </tr>
+      </ng-container>
     </table>
 
-    <hr>
-
-    <table>
-      <tr *ngFor="let victoryPoint of OtherVictoryPoints">
-        <td> {{victoryPoint.title}} </td>
-        <td>
-          <button md-raised-button class="miniButton"
-              [disabled]="numberOfVictoryCards[ victoryPoint.id ] <= 0"
-              (click)="decrement( victoryPoint.id, 2 )">
-            <md-icon>exposure_neg_2</md-icon>
-          </button>
-        </td>
-        <td>
-          <button md-raised-button class="miniButton"
-              [disabled]="numberOfVictoryCards[ victoryPoint.id ] <= 0"
-              (click)="decrement( victoryPoint.id, 1 )">
-            <md-icon>exposure_neg_1</md-icon>
-          </button>
-        </td>
-        <td>
-          <md-input-container>
-            <input mdInput type="number"
-              min="0"
-              [(ngModel)]="numberOfVictoryCards[ victoryPoint.id ]"
-              onclick="this.select(0,this.value.length)"
-              (input)="setValue( victoryPoint.id, $event )">
-          </md-input-container>
-        </td>
-        <td>
-          <button md-raised-button class="miniButton"
-              (click)="increment( victoryPoint.id, 1 )">
-            <md-icon>exposure_plus_1</md-icon>
-          </button>
-        </td>
-        <td>
-          <button md-raised-button class="miniButton"
-              (click)="increment( victoryPoint.id, 2 )">
-            <md-icon>exposure_plus_2</md-icon>
-          </button>
-        </td>
-      </tr>
-    </table>
-    
     <hr>
 
     <div>
-      <span *ngFor="let victoryCard of VictoryCards" class="VictoryCard">
-        <ng-container *ngIf="victoryCard.display">
-          <div class="box" [style.width.px]="cardLongSideLength" [style.height.px]="cardLongSideLength" > </div>
+      <ng-container *ngFor="let victoryCard of VictoryCards">
+        <span *ngIf="victoryCard.display" class="VictoryCard">
+
+          <dominion-card-image
+            class="cardImage"
+            [height]="cardLongSideLength"
+            [isButton]="false"
+            [faceUp]="true"
+            [description]=""
+            [card]="card( victoryCard.id )">
+          </dominion-card-image>
           <span class="setNumberOfCards">
             <button md-raised-button class="miniButton" *ngIf="victoryCard.maxNumber >= 12"
                 [disabled]="numberOfVictoryCards[ victoryCard.id ] <= 0"
@@ -162,9 +169,10 @@
             </button>
           </span>
 
-        </ng-container>
-      </span>
+        </span>
+      </ng-container>
     </div>
+
   </ng-container>
 
 </div>

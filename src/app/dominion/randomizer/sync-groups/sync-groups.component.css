@@ -9,3 +9,7 @@
 .groupListItem:hover {
   cursor: pointer;
 }
+
+.sideBarBody {
+  height: calc(100vh - 64px - 40px);
+}

@@ -1,7 +1,5 @@
 
 <div>
-
-
   <md-sidenav-container class="sidenavContainer">
     <md-sidenav #sidenav class="sidenav" ><!--*ngIf="httpGetDone">-->
       <button md-button color="primary" id="closeSideNavBtn" (click)="sidenav.close()">
@@ -10,7 +8,8 @@
       <div class="clear"></div>
       <app-sync-groups
           [DominionSetList]="DominionSetList"
-          [SelectedCards]="SelectedCards">
+          [SelectedCards]="SelectedCards"
+          [sidenav]="sidenav">
       </app-sync-groups>
     </md-sidenav>
 
@@ -25,14 +24,14 @@
 
       <md-tab-group>
         <md-tab label="Randomizer">
-          <div class="bodyWithMargin">
+          <div class="bodyWithPadding">
 
             <my-waiting-spinner *ngIf="!httpGetDone"></my-waiting-spinner>
 
             <!--使用する拡張セットにチェック-->
             <app-randomizer-select-cards *ngIf="httpGetDone"
                 [CardPropertyList]="CardPropertyList"
-                [(DominionSetList)]="DominionSetList"
+                (DominionSetListToggleChange)="DominionSetListToggleChange($event)"
                 [(SelectedCards)]="SelectedCards">
             </app-randomizer-select-cards>
           </div>
@@ -48,9 +47,14 @@
         </md-tab>
 
         <md-tab *ngIf="SelectedCards.BlackMarketPile.length > 0" label="闇市場デッキ">
-          <app-black-market-pile>
+          <app-black-market-pile
+            *ngIf="httpGetDone"
+            longSideLength="140"
+            [BlackMarketPile]="SelectedCards.BlackMarketPile"
+            [CardPropertyList]="CardPropertyList">
           </app-black-market-pile>
         </md-tab>
+
         <md-tab label="結果入力">
           <app-add-game-result
             [SelectedCards]="SelectedCards"
@@ -58,6 +62,14 @@
             [CardPropertyList]="CardPropertyList">
           </app-add-game-result>
         </md-tab>
+
+        <md-tab label="勝利点計算機">
+          <app-victory-points-calculator
+            [SelectedCards]="SelectedCards"
+            [CardPropertyList]="CardPropertyList">
+          </app-victory-points-calculator>
+        </md-tab>
+
       </md-tab-group>
 
     </div>

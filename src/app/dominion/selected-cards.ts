@@ -1,14 +1,12 @@
 export class SelectedCards {
   Prosperity      : boolean;
   DarkAges        : boolean;
-  // Prosperity      : { enabled: boolean, checked: boolean },
-  // DarkAges        : { enabled: boolean, checked: boolean },
-  KingdomCards10  : { index: number, checked: boolean }[];
-  BaneCard        : { index: number, checked: boolean }[];
-  EventCards      : { index: number, checked: boolean }[];
-  LandmarkCards   : { index: number, checked: boolean }[];
-  Obelisk         : { index: number, checked: boolean }[];
-  BlackMarketPile : { index: number, checked: boolean }[];
+  KingdomCards10  : number[];
+  BaneCard        : number[];
+  EventCards      : number[];
+  LandmarkCards   : number[];
+  Obelisk         : number[];
+  BlackMarketPile : number[];
   // SelectedDominionSets: boolean[];
 
 
@@ -33,4 +31,41 @@ export class SelectedCards {
       this.BlackMarketPile = ( scObj.BlackMarketPile || [] );
     }
   }
+
+
+
+  set( scObj ) {
+    this.Prosperity      = ( scObj.Prosperity      || false );
+    this.DarkAges        = ( scObj.DarkAges        || false );
+    this.KingdomCards10  = ( scObj.KingdomCards10  || [] );
+    this.BaneCard        = ( scObj.BaneCard        || [] );
+    this.EventCards      = ( scObj.EventCards      || [] );
+    this.LandmarkCards   = ( scObj.LandmarkCards   || [] );
+    this.Obelisk         = ( scObj.Obelisk         || [] );
+    this.BlackMarketPile = ( scObj.BlackMarketPile || [] );
+  }
+
+
+  reset() {
+    this.Prosperity      = false;
+    this.DarkAges        = false;
+    this.KingdomCards10  = [];
+    this.BaneCard        = [];
+    this.EventCards      = [];
+    this.LandmarkCards   = [];
+    this.Obelisk         = [];
+    this.BlackMarketPile = [];
+  }
+
+  concatAll(): number[] {
+    return [].concat(
+      this.KingdomCards10 ,
+      this.BaneCard       ,
+      this.EventCards     ,
+      this.LandmarkCards  ,
+      this.Obelisk        ,
+      this.BlackMarketPile,
+    );
+  }
+
 }

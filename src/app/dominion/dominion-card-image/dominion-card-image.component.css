@@ -3,10 +3,12 @@
   margin: 5px;
 }
 
-.buttonCard {
-  margin: 0;
-  padding: 0;
-}
-.buttonCard:hover {
+.pointer {
   cursor: pointer;
+}
+
+.description {
+  display: block;
+  justify-content: center;
+  text-align: center;
 }

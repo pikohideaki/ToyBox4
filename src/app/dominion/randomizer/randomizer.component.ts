@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 
 import 'rxjs/add/operator/toPromise';
 import { Observable } from 'rxjs/Observable';
@@ -25,7 +25,9 @@ import { UserInfo } from "../../user-info";
   templateUrl: './randomizer.component.html',
   styleUrls: ['./randomizer.component.css']
 })
-export class RandomizerComponent implements OnInit {
+export class RandomizerComponent implements OnInit, OnDestroy {
+
+  subscriptions = [];
 
   httpGetDone: boolean = false;
 
@@ -53,9 +55,27 @@ export class RandomizerComponent implements OnInit {
   ) {
 
     this.user$ = afAuth.authState;
-    this.user$.subscribe( () => 
-      this.getMySyncGroupName().then( val => this.mySyncGroupName = val ) );
 
+    this.subscriptions.push(
+      this.user$.subscribe( me => {
+        this.signedIn = !!me;
+        if ( !this.signedIn ) return;
+
+        const myID = me.uid;
+        this.subscriptions.push(
+          this.afDatabase.object(`/userInfo/${myID}/dominionGroupID`).subscribe( val => {
+            const mySyncGroupID = val.$value;
+            if ( !mySyncGroupID ) return;
+
+            this.subscriptions.push(
+              this.afDatabase.object(`/syncGroups/${mySyncGroupID}/name`).first().subscribe( name => {
+                this.mySyncGroupName = name.$value;
+              })
+            );
+          })
+        );
+      })
+    );
 
     const afDB_DominionSetNameList$ = afDatabase.list( '/data/DominionSetNameList' );
     const afDB_CardPropertyList$ = afDatabase.list( '/data/CardPropertyList' );
@@ -66,47 +86,58 @@ export class RandomizerComponent implements OnInit {
     ]).then( () => this.httpGetDone = true );
 
 
-    afDB_DominionSetNameList$.subscribe( val => {
-      this.DominionSetList
-        = this.afDatabaseService.convertAs( val, "DominionSetNameList" )
-                .map( e => { return { name: e, selected: true } } );
-    });
+    this.subscriptions.push(
+      afDB_DominionSetNameList$.subscribe( val => {
+        this.DominionSetList
+          = this.afDatabaseService.convertAs( val, "DominionSetNameList" )
+                  .map( e => { return { name: e, selected: false } } );
+      })
+    );
 
-    afDB_CardPropertyList$.subscribe( val => {
-      this.CardPropertyList = this.afDatabaseService.convertAs( val, "CardPropertyList" );
-    });
+    this.subscriptions.push(
+      afDB_CardPropertyList$.subscribe( val => {
+        this.CardPropertyList = this.afDatabaseService.convertAs( val, "CardPropertyList" );
+      })
+    );
 
   }
 
   ngOnInit() {
   }
 
-
-  private getMySyncGroupName(): Promise<string> {
-    console.log('getMySyncGroupName')
-    return ( async () => {
-      const me = await this.user$.first().toPromise();
-      this.signedIn = !!me;
-
-      if ( !me ) return "";
-
-
-      if ( me.uid === "" ) return "";
-
-      const myUserInfo
-        = await this.afDatabase.object(`/userInfo/${me.uid}`)
-                  .first().toPromise();
-
-      const myDominionGroupID = new UserInfo( myUserInfo ).dominionGroupID;
-
-      if ( myDominionGroupID === "" ) return "";
-
-      const myDominionGroup
-        = await this.afDatabase.object(`/syncGroups/${myDominionGroupID}`)
-                  .first().toPromise();
-      
-      return myDominionGroup.name;
-    })();
+  ngOnDestroy() {
+    this.subscriptions.forEach( e => e.unsubscribe() );
   }
+
+
+  DominionSetListToggleChange( event ) {
+    this.DominionSetList[ event.index ].selected = event.selected;
+  }
+
+
+  // private getMySyncGroupName(): Promise<string> {
+  //   console.log('getMySyncGroupName')
+  //   return ( async () => {
+  //     const me = await this.user$.first().toPromise();
+      
+
+
+  //     if ( me.uid === "" ) return "";
+
+  //     const myUserInfo
+  //       = await this.afDatabase.object(`/userInfo/${me.uid}`)
+  //                 .first().toPromise();
+
+  //     const myDominionGroupID = new UserInfo( myUserInfo ).dominionGroupID;
+
+  //     if ( myDominionGroupID === "" ) return "";
+
+  //     const myDominionGroup
+  //       = await this.afDatabase.object(`/syncGroups/${myDominionGroupID}`)
+  //                 .first().toPromise();
+      
+  //     return myDominionGroup.name;
+  //   })();
+  // }
 
 }

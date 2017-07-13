@@ -60,6 +60,8 @@ import { UserAdminComponent              } from './user-admin/user-admin.compone
 import { LoginComponent                  } from './user-admin/login/login.component';
 import { SignUpComponent                 } from './user-admin/sign-up/sign-up.component';
 import { ConvertDatabaseComponent        } from './convert-database/convert-database.component';
+import { AlertDialogComponent } from './alert-dialog/alert-dialog.component';
+import { VictoryPointsCalculatorComponent } from './dominion/randomizer/victory-points-calculator/victory-points-calculator.component';
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,6 +99,8 @@ import { ConvertDatabaseComponent        } from './convert-database/convert-data
     LoginComponent,
     SignUpComponent,
     ConvertDatabaseComponent,
+    AlertDialogComponent,
+    VictoryPointsCalculatorComponent,
   ],
   imports: [
     BrowserModule,
@@ -134,6 +138,7 @@ import { ConvertDatabaseComponent        } from './convert-database/convert-data
   entryComponents: [
       CardPropertyDialogComponent,
       SubmitGameResultDialogComponent,
+      AlertDialogComponent,
       ConfirmDialogComponent
   ],
   bootstrap: [AppComponent]

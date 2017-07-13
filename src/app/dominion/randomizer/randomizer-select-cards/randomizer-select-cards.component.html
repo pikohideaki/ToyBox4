@@ -1,11 +1,9 @@
 <div id="randomizerOptions">
-  <div>
-    <md-slide-toggle [(ngModel)]="AllSetsSelected"  (change)="selectAllToggle()">
-      <b>全選択</b>
-    </md-slide-toggle>
-  </div>
-  <div *ngFor="let DominionSet of DominionSetList" >
-    <md-slide-toggle [(ngModel)]="DominionSet.selected" (change)="DominionSetListOnChange()">
+
+  <div *ngFor="let DominionSet of DominionSetList; let idx = index" >
+    <md-slide-toggle color="primary"
+          [(ngModel)]="DominionSet.selected"
+          (change)="toggleDominionSetList( $event, idx )">
       {{DominionSet.name}}
     </md-slide-toggle>
   </div>
@@ -16,11 +14,12 @@
         [disabled]="randomizerButtonDisabled">
       Randomizer
     </button>
-    <button md-raised-button color='primary'
-        *ngIf="randomizerButtonDisabled"
-        (click)='disableRandomizerButton(false)'>
-      Unlock
+
+    <button md-raised-button [color]="(randomizerButtonDisabled ? 'warn' : 'primary' )"
+          (click)='toggleRandomizerButton( randomizerButtonDisabled )'>
+      {{(randomizerButtonDisabled ? "Unlock" : "Lock" )}}
     </button>
+
   </div>
 </div>
 
@@ -28,15 +27,13 @@
 <div id="supplyTable">
   <div class="Prosperity_DarkAges">
     <span id="Prosperity" *ngIf="SelectedCards.KingdomCards10.length > 0">
-      <md-slide-toggle [(ngModel)]="SelectedCards.Prosperity"
-          (change)="SelectedCardsOnChange()">
+      <md-slide-toggle [checked]="SelectedCards.Prosperity">
         植民地場
       </md-slide-toggle>
     </span>
 
     <span id="DarkAges"   *ngIf="SelectedCards.KingdomCards10.length > 0">
-      <md-slide-toggle [(ngModel)]="SelectedCards.DarkAges"
-          (change)="SelectedCardsOnChange()">
+      <md-slide-toggle [checked]="SelectedCards.DarkAges">
         避難所場
       </md-slide-toggle>
     </span>
@@ -52,19 +49,22 @@
         <th>コスト</th>
       </tr>
     </thead>
-
     <tbody>
-      <tr *ngFor="let card of SelectedCards.KingdomCards10">
+      <tr *ngFor="let cardIndex of SelectedCards.KingdomCards10; let idx = index ">
         <td>
           <md-checkbox
-              [(ngModel)]="card.selected"
-              (change)="SelectedCardsOnChange()">
+              [(ngModel)]="SelectedCardsCheckboxValues.KingdomCards10[idx]"
+              (change)="SelectedCardsCheckboxOnChange( 'KingdomCards10', idx )">
           </md-checkbox>
         </td>
-        <td> {{ CardPropertyList[card.index].set_name }} </td>
-        <td> {{ CardPropertyList[card.index].name_jp  }} </td>
-        <td> {{ CardPropertyList[card.index].name_eng }} </td>
-        <td> {{ CardPropertyList[card.index].costStr() }} </td>
+        <td> {{ CardPropertyList[cardIndex].set_name  }} </td>
+        <td>
+          <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
+            {{ CardPropertyList[cardIndex].name_jp }}
+          </button>
+        </td>
+        <td> {{ CardPropertyList[cardIndex].name_eng  }} </td>
+        <td> {{ CardPropertyList[cardIndex].costStr() }} </td>
       </tr>
     </tbody>
 
@@ -74,17 +74,21 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let card of SelectedCards.BaneCard">
+      <tr *ngFor="let cardIndex of SelectedCards.BaneCard; let idx = index ">
         <td>
           <md-checkbox
-              [(ngModel)]="card.selected"
-              (change)="SelectedCardsOnChange()">
+              [(ngModel)]="SelectedCardsCheckboxValues.BaneCard[idx]"
+              (change)="SelectedCardsCheckboxOnChange( 'BaneCard', idx )">
           </md-checkbox>
         </td>
-        <td> {{ CardPropertyList[card.index].set_name }} </td>
-        <td> {{ CardPropertyList[card.index].name_jp  }} </td>
-        <td> {{ CardPropertyList[card.index].name_eng }} </td>
-        <td> {{ CardPropertyList[card.index].costStr() }} </td>
+        <td> {{ CardPropertyList[cardIndex].set_name  }} </td>
+        <td>
+          <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
+            {{ CardPropertyList[cardIndex].name_jp }}
+          </button>
+        </td>
+        <td> {{ CardPropertyList[cardIndex].name_eng  }} </td>
+        <td> {{ CardPropertyList[cardIndex].costStr() }} </td>
       </tr>
     </tbody>
 
@@ -94,17 +98,21 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let card of SelectedCards.EventCards">
+      <tr *ngFor="let cardIndex of SelectedCards.EventCards; let idx = index ">
         <td>
           <md-checkbox
-              [(ngModel)]="card.selected"
-              (change)="SelectedCardsOnChange()">
+              [(ngModel)]="SelectedCardsCheckboxValues.EventCards[idx]"
+              (change)="SelectedCardsCheckboxOnChange( 'EventCards', idx )">
           </md-checkbox>
         </td>
-        <td> {{ CardPropertyList[card.index].set_name }} </td>
-        <td> {{ CardPropertyList[card.index].name_jp  }} </td>
-        <td> {{ CardPropertyList[card.index].name_eng }} </td>
-        <td> {{ CardPropertyList[card.index].costStr() }} </td>
+        <td> {{ CardPropertyList[cardIndex].set_name  }} </td>
+        <td>
+          <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
+            {{ CardPropertyList[cardIndex].name_jp }}
+          </button>
+        </td>
+        <td> {{ CardPropertyList[cardIndex].name_eng  }} </td>
+        <td> {{ CardPropertyList[cardIndex].costStr() }} </td>
       </tr>
     </tbody>
 
@@ -114,17 +122,21 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let card of SelectedCards.LandmarkCards">
+      <tr *ngFor="let cardIndex of SelectedCards.LandmarkCards; let idx = index ">
         <td>
           <md-checkbox
-              [(ngModel)]="card.selected"
-              (change)="SelectedCardsOnChange()">
+              [(ngModel)]="SelectedCardsCheckboxValues.LandmarkCards[idx]"
+              (change)="SelectedCardsCheckboxOnChange( 'LandmarkCards', idx )">
           </md-checkbox>
         </td>
-        <td> {{ CardPropertyList[card.index].set_name }} </td>
-        <td> {{ CardPropertyList[card.index].name_jp  }} </td>
-        <td> {{ CardPropertyList[card.index].name_eng }} </td>
-        <td> {{ CardPropertyList[card.index].costStr() }} </td>
+        <td> {{ CardPropertyList[cardIndex].set_name  }} </td>
+        <td>
+          <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
+            {{ CardPropertyList[cardIndex].name_jp }}
+          </button>
+        </td>
+        <td> {{ CardPropertyList[cardIndex].name_eng  }} </td>
+        <td> {{ CardPropertyList[cardIndex].costStr() }} </td>
       </tr>
     </tbody>
 
@@ -134,17 +146,21 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let card of SelectedCards.Obelisk">
+      <tr *ngFor="let cardIndex of SelectedCards.Obelisk; let idx = index ">
         <td>
           <md-checkbox
-              [(ngModel)]="card.selected"
-              (change)="SelectedCardsOnChange()">
+              [(ngModel)]="SelectedCardsCheckboxValues.Obelisk[idx]"
+              (change)="SelectedCardsCheckboxOnChange( 'Obelisk', idx )">
           </md-checkbox>
         </td>
-        <td> {{ CardPropertyList[card.index].set_name }} </td>
-        <td> {{ CardPropertyList[card.index].name_jp  }} </td>
-        <td> {{ CardPropertyList[card.index].name_eng }} </td>
-        <td> {{ CardPropertyList[card.index].costStr() }} </td>
+        <td> {{ CardPropertyList[cardIndex].set_name  }} </td>
+        <td>
+          <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
+            {{ CardPropertyList[cardIndex].name_jp }}
+          </button>
+        </td>
+        <td> {{ CardPropertyList[cardIndex].name_eng  }} </td>
+        <td> {{ CardPropertyList[cardIndex].costStr() }} </td>
       </tr>
     </tbody>
 
@@ -154,17 +170,21 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let card of SelectedCards.BlackMarketPile">
+      <tr *ngFor="let cardIndex of SelectedCards.BlackMarketPile; let idx = index ">
         <td>
           <md-checkbox
-              [(ngModel)]="card.selected"
-              (change)="SelectedCardsOnChange()">
+              [(ngModel)]="SelectedCardsCheckboxValues.BlackMarketPile[idx]"
+              (change)="SelectedCardsCheckboxOnChange( 'BlackMarketPile', idx )">
           </md-checkbox>
         </td>
-        <td> {{ CardPropertyList[card.index].set_name }} </td>
-        <td> {{ CardPropertyList[card.index].name_jp  }} </td>
-        <td> {{ CardPropertyList[card.index].name_eng }} </td>
-        <td> {{ CardPropertyList[card.index].costStr() }} </td>
+        <td> {{ CardPropertyList[cardIndex].set_name  }} </td>
+        <td>
+          <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
+            {{ CardPropertyList[cardIndex].name_jp }}
+          </button>
+        </td>
+        <td> {{ CardPropertyList[cardIndex].name_eng  }} </td>
+        <td> {{ CardPropertyList[cardIndex].costStr() }} </td>
       </tr>
     </tbody>
   </table>

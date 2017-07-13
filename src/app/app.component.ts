@@ -17,7 +17,7 @@ import * as firebase from 'firebase/app';
 })
 export class AppComponent {
 
-  user: Observable<firebase.User>;
+  user$: Observable<firebase.User>;
   signedIn: boolean;
 
   constructor(
@@ -25,8 +25,8 @@ export class AppComponent {
     public afAuth: AngularFireAuth,
     private router: Router
   ) {
-    this.user = afAuth.authState;
-    this.user.subscribe( () => this.signedIn = !!this.afAuth.auth.currentUser );
+    this.user$ = afAuth.authState;
+    this.user$.subscribe( () => this.signedIn = !!this.afAuth.auth.currentUser );
   }
 
   logout() {

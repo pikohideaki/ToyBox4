@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, Input } from '@angular/core';
+import { Component, OnInit, Inject, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 import { CardProperty } from '../card-property';
 
@@ -7,36 +7,49 @@ import { CardProperty } from '../card-property';
   templateUrl: './dominion-card-image.component.html',
   styleUrls: ['./dominion-card-image.component.css']
 })
-export class DominionCardImageComponent implements OnInit {
+export class DominionCardImageComponent implements OnInit, OnChanges {
 
   private CARD_IMAGE_DIR = `${this.DOMINION_DATA_DIR}/img/card`;
+
+
+  @Input() card: CardProperty;
+  @Input() faceUp: boolean;
+  @Input() width: number;
+  @Input() height: number;
+  @Input() isButton: boolean;
+  @Input() description: string;
+
+
+  wideCardTypes = [ 'イベント', 'ランドマーク' ];
+
+  sourceDir: string;
 
   constructor(
     @Inject('DOMINION_DATA_DIR') private DOMINION_DATA_DIR: string
   ) { }
 
   ngOnInit() {
-      if ( this.width  === undefined ) this.setWidth();
-      if ( this.height === undefined ) this.setHeight();
+    this.setWidth();
+    this.setHeight();
+    this.setSourceDir();
+  }
+
+  ngOnChanges( changes ) {
+    if ( changes.width || changes.height ) {
+      if ( this.height !== undefined ) this.setWidth();
+      if ( this.width  !== undefined ) this.setHeight();
+    }
+    if ( changes.faceUp || changes.card ) {
+      this.setSourceDir();
+    }
   }
 
 
-  @Input() card: CardProperty;
-  @Input() faceUp: boolean;
-  @Input() fileSize: string;
-  @Input() width: number;
-  @Input() height: number;
-  @Input() isButton: boolean;
-
-
-  wideCardTypes = [ 'イベント', 'ランドマーク' ];
-
-
-  sourceDir() {
-    if ( !this.faceUp ) {
-      return `${this.DOMINION_DATA_DIR}/s_Card_back.png`;
+  private setSourceDir() {
+    if ( this.faceUp ) {
+      this.sourceDir = `${this.CARD_IMAGE_DIR}/${this.card.name_eng.replace( / /g , '_' ).replace( /'/g , '' )}@2x.png`;
     } else {
-      return `${this.CARD_IMAGE_DIR}/${this.card.name_eng.replace( / /g , '_' ).replace( /'/g , '' )}@2x.png`;
+      this.sourceDir = `${this.CARD_IMAGE_DIR}/BlankCard.png`;
     }
   }
 

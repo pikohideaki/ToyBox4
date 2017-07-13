@@ -1,4 +1,4 @@
-import { Component, OnInit, Input  } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 import { MdDialog } from '@angular/material';
@@ -7,9 +7,9 @@ import { MdDialog } from '@angular/material';
 import { MyUtilitiesService } from '../../my-utilities.service';
 import { MyDataTableComponent } from '../../my-data-table/my-data-table.component';
 
-import { MyFirebaseSubscribeService } from "../my-firebase-subscribe.service";
+import { MyFirebaseSubscribeService } from '../my-firebase-subscribe.service';
 
-import { CardProperty } from "../card-property";
+import { CardProperty } from '../card-property';
 import { CardPropertyDialogComponent } from '../card-property-dialog/card-property-dialog.component';
 
 
@@ -20,15 +20,18 @@ import { CardPropertyDialogComponent } from '../card-property-dialog/card-proper
   templateUrl: './card-property-list.component.html',
   styleUrls: [ './card-property-list.component.css' ]
 })
-export class CardPropertyListComponent implements OnInit {
+export class CardPropertyListComponent implements OnInit, OnDestroy {
+
+  subscriptions = [];
 
   CardPropertyList: CardProperty[] = [];
+  // CardPropertyList$: FirebaseListObservable< CardProperty[] >;
   CardPropertyListForView: any[] = [];
-  httpGetDone: boolean = false;
+  httpGetDone = false;
 
   // pagenation settings
   itemsPerPageOptions: number[] = [ 25, 50, 100, 200 ];
-  itemsPerPageDefault: number = 50;
+  itemsPerPageDefault = 50;
 
 
   columnSettings = [
@@ -58,23 +61,26 @@ export class CardPropertyListComponent implements OnInit {
     afDatabase: AngularFireDatabase,
     private afDatabaseService: MyFirebaseSubscribeService
   ) {
-    afDatabase.list( '/data/CardPropertyList' ).subscribe( val => {
-      this.CardPropertyList = this.afDatabaseService.convertAs( val, "CardPropertyList" );
-      this.httpGetDone = true;
-      this.CardPropertyListForView = this.CardPropertyList.map( x => x.transform() );
-    } );
+    this.subscriptions.push(
+      afDatabase.list( '/data/CardPropertyList' ).subscribe( val => {
+        this.CardPropertyList = this.afDatabaseService.convertAs( val, 'CardPropertyList' );
+        this.httpGetDone = true;
+        this.CardPropertyListForView = this.CardPropertyList.map( x => x.transform() );
+      } )
+    );
   }
 
   ngOnInit() {
   }
 
+  ngOnDestroy() {
+    this.subscriptions.forEach( e => e.unsubscribe() );
+  }
+
+
   showDetail( rowIndex: number ) {
-    const selectedCardForView = this.CardPropertyList[rowIndex].transform();
-    
-    let dialogRef = this.dialog.open( CardPropertyDialogComponent, {
-            height: '80%',
-            width : '80%',
-        });
+    const selectedCardForView = this.CardPropertyListForView[rowIndex];
+    const dialogRef = this.dialog.open( CardPropertyDialogComponent );
     dialogRef.componentInstance.card = selectedCardForView;
   }
 }

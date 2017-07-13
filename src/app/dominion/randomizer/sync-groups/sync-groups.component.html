@@ -1,4 +1,4 @@
-<div class="bodyWithMargin">
+<div class="bodyWithPadding sideBarBody"  (click)="backgroundClicked()">
 
   <div id="addGroup">
 
@@ -21,7 +21,7 @@
 
 
   <div *ngFor="let group of syncGroups; let idx = index">
-    <md-card class="groupListItem" (click)="groupClicked(idx)">
+    <md-card class="groupListItem" (click)="groupClicked($event, idx)">
 
       <md-card-header>
         <md-icon md-card-avatar>group</md-icon>
@@ -33,10 +33,10 @@
       </md-card-header>
 
       <md-card-content *ngIf="group.selected">
-        <md-input-container [color]="(signInPasswordIsValid( group.id ) ? 'primary' : 'warn')" >
+        <md-input-container [color]="(showWrongPasswordAlert ? 'primary' : 'warn')" >
           <input mdInput placeholder="password" required
               name="signInPassword" [(ngModel)]="signInPassword" >
-          <md-hint *ngIf="!signInPasswordIsValid( group.id )" class="alert">
+          <md-hint *ngIf="showWrongPasswordAlert" class="alert">
             Password does not match
           </md-hint>
         </md-input-container>

@@ -1,19 +1,22 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import 'rxjs/add/operator/startWith';
 import 'rxjs/add/operator/map';
 import { MdDialog, MdSnackBar } from '@angular/material';
 
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { Observable } from 'rxjs/Observable';
+import { AngularFireAuth } from 'angularfire2/auth';
+import * as firebase from 'firebase/app';
 
-import { MyFirebaseSubscribeService } from "../../my-firebase-subscribe.service";
+import { MyFirebaseSubscribeService } from '../../my-firebase-subscribe.service';
 
 import { MyUtilitiesService } from '../../../my-utilities.service';
-import { PlayerName } from "../../player-name";
-import { GameResult } from "../../game-result";
-import { SelectedCards } from "../../selected-cards";
+import { PlayerName } from '../../player-name';
+import { GameResult } from '../../game-result';
+import { SelectedCards } from '../../selected-cards';
 import { SubmitGameResultDialogComponent } from '../../submit-game-result-dialog/submit-game-result-dialog.component';
-import { CardProperty } from "../../card-property";
+import { CardProperty } from '../../card-property';
 
 
 @Component({
@@ -25,22 +28,24 @@ import { CardProperty } from "../../card-property";
     './add-game-result.component.css'
   ]
 })
-export class AddGameResultComponent implements OnInit {
+export class AddGameResultComponent implements OnInit, OnDestroy {
 
-  httpGetDone: boolean = false;
+  subscriptions = [];
+
+  httpGetDone = false;
 
 
   date: Date;
 
-  place:string = "";
+  place = '';
   places: string[] = [];
   stateCtrl: FormControl;
   filteredPlaces: any;
 
   GameResultList: GameResult[] = [];
 
-  startPlayerName: string = "";
-  memo: string = "";
+  startPlayerName = '';
+  memo = '';
 
 
   @Input() DominionSetList: { name: string, selected: boolean }[] = [];
@@ -48,24 +53,57 @@ export class AddGameResultComponent implements OnInit {
   @Input() SelectedCards: SelectedCards = new SelectedCards();
 
   PlayersNameList: PlayerName[] = [];
-  Players: {
-      name      : string,
-      selected  : boolean,
-      VP        : number,
-      lessTurns : boolean,
+  gameResultOfPlayers: {
+      name: string,
+      selected: boolean,
+      VP: number,
+      lessTurns: boolean,
     }[] = [];
 
 
   newGameResult: GameResult;
 
 
+  signedIn: boolean;
+  mySyncGroupID;
+
   constructor(
     private utils: MyUtilitiesService,
     public dialog: MdDialog,
     public snackBar: MdSnackBar,
-    afDatabase: AngularFireDatabase,
-    private afDatabaseService: MyFirebaseSubscribeService
+    private afDatabaseService: MyFirebaseSubscribeService,
+    private afDatabase: AngularFireDatabase,
+    public afAuth: AngularFireAuth
   ) {
+
+    const me$ = this.afAuth.authState;
+
+    this.subscriptions.push(
+      me$.subscribe( me => {
+        this.signedIn = !!me;
+        if ( !this.signedIn ) { return; }
+
+        const myID = me.uid;
+        this.subscriptions.push(
+          this.afDatabase.object(`/userInfo/${myID}/dominionGroupID`).subscribe( val => {
+            this.mySyncGroupID = val.$value;
+            if ( !this.mySyncGroupID ) { return; }
+
+            this.subscriptions.push(
+              afdb_PlayersNameList.subscribe( val => {
+                this.PlayersNameList = this.afDatabaseService.convertAs( val, 'PlayersNameList' );
+                this.initializePlayers();
+                this.setSubscribers();
+              } )
+            );
+
+          })
+        );
+      } )
+    );
+
+
+
     this.date = new Date( Date.now() );
 
     this.stateCtrl = new FormControl();
@@ -82,52 +120,80 @@ export class AddGameResultComponent implements OnInit {
     .then( () => this.httpGetDone = true );
 
 
-    afdb_PlayersNameList.subscribe( val => {
-      this.PlayersNameList = this.afDatabaseService.convertAs( val, "PlayersNameList" );
-      this.initializePlayers();
-    } );
+    this.subscriptions.push(
+      afdb_ScoringList.subscribe( val => {
+        const ScoringList = this.afDatabaseService.convertAs( val, 'ScoringList' );
+        this.subscriptions.push(
+          afdb_GameResultList.subscribe( value => {
+            this.GameResultList = this.afDatabaseService.convertAs( value, 'GameResultList', ScoringList );
+            this.places = this.utils.uniq( this.GameResultList.map( e => e.place ) )
+                                    .filter( e => e !== '' );
 
-    afdb_ScoringList.subscribe( val => {
-      let ScoringList = this.afDatabaseService.convertAs( val, "ScoringList" );
-      afdb_GameResultList.subscribe( val => {
-        this.GameResultList = this.afDatabaseService.convertAs( val, "GameResultList", ScoringList );
-        this.places = this.utils.uniq( this.GameResultList.map( e => e.place ) )
-                                .filter( e => e != "" );
-
-        this.filteredPlaces = this.stateCtrl.valueChanges
-              .startWith(null)
-              .map( name => this.filterPlaces(name) );
-      } );
-    } );
+            this.filteredPlaces = this.stateCtrl.valueChanges
+                  .startWith(null)
+                  .map( name => this.filterPlaces(name) );
+          } )
+        );
+      } )
+    );
 
   }
 
   ngOnInit() {
   }
 
+  ngOnDestroy() {
+    this.subscriptions.forEach( e => e.unsubscribe() );
+  }
+
+
   filterPlaces( val: string ): string[] {
     return val ? this.places.filter( s => this.utils.submatch( s, val, true ) )
            : this.places;
   }
 
+  private setSubscribers() {
+    for ( let i = 0; i < this.gameResultOfPlayers.length; ++i ) {
+      Object.keys( this.gameResultOfPlayers[i] ).forEach( property => {
+
+        this.subscriptions.push(
+          this.afDatabase.object(`/syncGroups/${this.mySyncGroupID}/gameResultOfPlayers/${i}/${property}`)
+          .subscribe( val => this.gameResultOfPlayers[i][property] = val.$value )
+        );
+      })
+    }
+
+    this.subscriptions.push(
+      this.afDatabase.object(`/syncGroups/${this.mySyncGroupID}/gameResultOfPlayers/startPlayerName`)
+      .subscribe( val => this.startPlayerName = val.$value )
+    );
+  }
+
+
   private initializePlayers(): void {
-    this.Players = this.PlayersNameList.map( player => {
+    this.gameResultOfPlayers = this.PlayersNameList.map( player => {
       return {
         name      : player.name,
         selected  : false,
         VP        : 0,
         lessTurns : false,
       } } );
+
+    if ( this.signedIn && this.mySyncGroupID !== '' ) {
+      this.afDatabase.object( `/syncGroups/${this.mySyncGroupID}/gameResultOfPlayers`)
+        .set( this.gameResultOfPlayers );
+    }
   }
 
   selectedPlayers(): any[] {
-    return this.Players.filter( player => player.selected );
+    return this.gameResultOfPlayers.filter( player => player.selected );
   }
-  
+
 
   selectStartPlayer(): void {
-    if ( this.selectedPlayers().length < 1 ) return;
+    if ( this.selectedPlayers().length < 1 ) { return; }
     this.startPlayerName = this.utils.getRandomValue( this.selectedPlayers() ).name;
+    this.afDatabase.object(`/syncGroups/${this.mySyncGroupID}/gameResultOfPlayers/startPlayerName`).set( this.startPlayerName );
   }
 
 
@@ -137,11 +203,8 @@ export class AddGameResultComponent implements OnInit {
 
 
   submitGameResult(): void {
-    if ( !this.playerNumOK() ) return;
-    let dialogRef = this.dialog.open( SubmitGameResultDialogComponent, {
-        height: '80%',
-        width : '80%',
-      });
+    if ( !this.playerNumOK() ) { return; }
+    const dialogRef = this.dialog.open( SubmitGameResultDialogComponent );
 
     this.newGameResult = new GameResult({
       no     : this.GameResultList.length + 1,
@@ -152,12 +215,12 @@ export class AddGameResultComponent implements OnInit {
       SelectedCardsID      : {
         Prosperity      : this.SelectedCards.Prosperity,
         DarkAges        : this.SelectedCards.DarkAges,
-        KingdomCards10  : this.SelectedCards.KingdomCards10 .map( card => this.CardPropertyList[card.index].card_ID ),
-        BaneCard        : this.SelectedCards.BaneCard       .map( card => this.CardPropertyList[card.index].card_ID ),
-        EventCards      : this.SelectedCards.EventCards     .map( card => this.CardPropertyList[card.index].card_ID ),
-        Obelisk         : this.SelectedCards.Obelisk        .map( card => this.CardPropertyList[card.index].card_ID ),
-        LandmarkCards   : this.SelectedCards.LandmarkCards  .map( card => this.CardPropertyList[card.index].card_ID ),
-        BlackMarketPile : this.SelectedCards.BlackMarketPile.map( card => this.CardPropertyList[card.index].card_ID ),
+        KingdomCards10  : this.SelectedCards.KingdomCards10 .map( cardIndex => this.CardPropertyList[cardIndex].card_ID ),
+        BaneCard        : this.SelectedCards.BaneCard       .map( cardIndex => this.CardPropertyList[cardIndex].card_ID ),
+        EventCards      : this.SelectedCards.EventCards     .map( cardIndex => this.CardPropertyList[cardIndex].card_ID ),
+        Obelisk         : this.SelectedCards.Obelisk        .map( cardIndex => this.CardPropertyList[cardIndex].card_ID ),
+        LandmarkCards   : this.SelectedCards.LandmarkCards  .map( cardIndex => this.CardPropertyList[cardIndex].card_ID ),
+        BlackMarketPile : this.SelectedCards.BlackMarketPile.map( cardIndex => this.CardPropertyList[cardIndex].card_ID ),
       },
       players : this.selectedPlayers().map( pl => {
               return {
@@ -170,16 +233,21 @@ export class AddGameResultComponent implements OnInit {
             }),
     });
 
-    dialogRef.componentInstance.newGameResult    = this.newGameResult;
+    dialogRef.componentInstance.newGameResult = this.newGameResult;
 
     dialogRef.afterClosed().subscribe( result => {
-      if ( result == "OK Clicked" ) {
-        this.Players.forEach( pl => {
+      if ( result === 'OK Clicked' ) {
+        this.gameResultOfPlayers.forEach( pl => {
           pl.lessTurns = false;
           pl.VP = 0;
         });
-        this.memo = "";
-        this.startPlayerName = "";
+
+        if ( this.signedIn && this.mySyncGroupID !== '' ) {
+          this.afDatabase.object( `/syncGroups/${this.mySyncGroupID}/gameResultOfPlayers`)
+            .set( this.gameResultOfPlayers );
+        }
+        this.memo = '';
+        this.startPlayerName = '';
         this.openSnackBar();
       }
     });
@@ -187,7 +255,17 @@ export class AddGameResultComponent implements OnInit {
 
 
   private openSnackBar() {
-    this.snackBar.open( "Successfully Submitted!", undefined, { duration: 3000 } );
+    this.snackBar.open( 'Successfully Submitted!', undefined, { duration: 3000 } );
   }
+
+
+  uploadGameResultOfPlayer( playerIndex: number, property: string ) {
+    console.log(playerIndex)
+    if ( this.signedIn && this.mySyncGroupID !== '' ) {
+      this.afDatabase.object( `/syncGroups/${this.mySyncGroupID}/gameResultOfPlayers/${playerIndex}/${property}`)
+        .set( this.gameResultOfPlayers[ playerIndex ][ property ] );
+    }
+  }
+
 
 }
