@@ -1,32 +1,37 @@
 <div class="bodyWithPadding">
+  <app-my-waiting-spinner [done]="getDataDone"></app-my-waiting-spinner>
 
-  <ng-container *ngIf="CardPropertyList.length > 0">
+  <ng-container *ngIf="getDataDone">
 
     <div class="result">
-      <span> 合計点 = <b>{{VPtotal}}</b> </span>
+      <span>合計点＝<b>{{VPtotal}}</b></span>
       <span class="marginedElement">
         <button md-raised-button (click)="resetNumbers()">reset</button>
+      </span>
+
+      <span>
+        <md-select placeholder="自分の名前" [(ngModel)]="myName" (change)="changeMyName( $event.value )" >
+          <md-option *ngFor="let player of playersNameList" [value]="player.name">
+            {{ player.name }}
+          </md-option>
+        </md-select>
       </span>
 
       <span class="spacer"></span>
 
       <span>
-        カード画像のサイズ
-        <md-slider
-          (input)="changeCardSize( $event )"
-          [min]="cardLongSideLengthMin"
-          [max]="cardLongSideLengthMax"
-          [value]="cardLongSideLength" >
-        </md-slider>
-        <button md-raised-button (click)="resetCardLongSideLength()">reset</button>
+        <app-card-image-size-slider
+          min="70" max="280" default="180" [(value)]="cardLongSideLength" >
+        </app-card-image-size-slider>
       </span>
+
     </div>
 
     <hr>
 
-    <table>
+    <table class="OtherVictoryPoints">
       <tr *ngFor="let victoryPoint of OtherVictoryPoints">
-        <td> {{victoryPoint.title}} </td>
+        <td nowrap> {{victoryPoint.title}} </td>
         <td>
           <button md-raised-button class="miniButton"
               [disabled]="numberOfVictoryCards[ victoryPoint.id ] <= 0"
@@ -46,7 +51,7 @@
             <input mdInput type="number"
               min="0"
               [(ngModel)]="numberOfVictoryCards[ victoryPoint.id ]"
-              onclick="this.select(0,this.value.length)"
+              onclick="this.select(0, this.value.length)"
               (input)="setValue( victoryPoint.id, $event )">
           </md-input-container>
         </td>
@@ -64,14 +69,14 @@
         </td>
       </tr>
     </table>
-    
+
     <hr>
 
-    <table>
+    <table class="OtherSettings">
       <ng-container *ngFor="let setting of OtherSettings">
         <tr *ngIf="setting.display">
 
-          <td> {{setting.title}} </td>
+          <td nowrap> {{setting.title}} </td>
           <td>
             <button md-raised-button class="miniButton"
                 [disabled]="numberOfVictoryCards[ setting.id ] <= 0"
@@ -91,7 +96,7 @@
               <input mdInput type="number"
                 min="0"
                 [(ngModel)]="numberOfVictoryCards[ setting.id ]"
-                onclick="this.select(0,this.value.length)"
+                onclick="this.select(0, this.value.length)"
                 (input)="setValue( setting.id, $event )">
             </md-input-container>
           </td>
@@ -118,14 +123,17 @@
       <ng-container *ngFor="let victoryCard of VictoryCards">
         <span *ngIf="victoryCard.display" class="VictoryCard">
 
-          <dominion-card-image
+          <app-dominion-card-image
             class="cardImage"
             [height]="cardLongSideLength"
             [isButton]="false"
             [faceUp]="true"
             [description]=""
             [card]="card( victoryCard.id )">
-          </dominion-card-image>
+          </app-dominion-card-image>
+          <span class="VPPerCard">
+            {{VPPerCard( victoryCard.id )}} VP
+          </span>
           <span class="setNumberOfCards">
             <button md-raised-button class="miniButton" *ngIf="victoryCard.maxNumber >= 12"
                 [disabled]="numberOfVictoryCards[ victoryCard.id ] <= 0"

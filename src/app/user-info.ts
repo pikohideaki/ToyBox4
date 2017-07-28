@@ -3,7 +3,7 @@ export class UserInfo {
   id: string;
   name: string;
 
-  dominionGroupID: string;
+  DominionGroupID: string;
   settings: any = {};
 
   // randomizerGroupID
@@ -14,7 +14,7 @@ export class UserInfo {
     this.databaseKey     = userInfoObj.databaseKey;
     this.id              = userInfoObj.id;
     this.name            = userInfoObj.name;
-    this.dominionGroupID = userInfoObj.dominionGroupID;
+    this.DominionGroupID = userInfoObj.DominionGroupID;
     if ( userInfoObj.settings ) {
       this.settings = userInfoObj.settings;
     }

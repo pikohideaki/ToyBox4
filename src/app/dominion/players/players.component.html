@@ -1,9 +1,9 @@
 
 <div class="bodyWithPadding">
-  <my-data-table
-      [data]='PlayersNameList'
+  <app-my-data-table *ngIf="getDataDone"
+      [data]='playersNameList$ | async'
       [columnSettings]='columnSettings' >
-  </my-data-table>
+  </app-my-data-table>
 
-  <my-waiting-spinner [done]="httpGetDone"></my-waiting-spinner>
+  <app-my-waiting-spinner [done]="getDataDone"></app-my-waiting-spinner>
 </div>

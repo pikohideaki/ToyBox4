@@ -45,3 +45,4 @@ Thumbs.db
 
 # large data
 /src/assets/pdf/*.pdf
+*.rar

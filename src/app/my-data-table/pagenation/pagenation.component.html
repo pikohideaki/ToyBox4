@@ -13,7 +13,7 @@
   </button>
 
   <md-button-toggle-group #group="mdButtonToggleGroup" > <!--[(ngModel)]="selectedPageIndex">-->
-    <md-button-toggle *ngFor='let page of getPages(); let pageIndex = index'
+    <md-button-toggle *ngFor='let pageIndex of generatePageIndices()'
         [value]="pageIndex"
         [class.md-button-toggle-normal]="selectedPageIndex != pageIndex"
         [class.md-button-toggle-selected]="selectedPageIndex == pageIndex"

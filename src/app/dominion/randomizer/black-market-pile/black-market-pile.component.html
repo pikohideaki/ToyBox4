@@ -20,6 +20,7 @@
     </span>
     <button *ngIf="BlackMarketOperationPhase === 3"
         md-raised-button color="primary"
+        [disabled]="!putOnTheBottomDone()"
         (click)="onClick('putOnTheBottom', -1)">
       OK
     </button>
@@ -27,40 +28,40 @@
   </div>
 
 
-  <div class="CardArea BlackMarketPile" *ngIf="BlackMarketPileShuffled.length > 0">
+  <div class="CardArea BlackMarketPile" *ngIf="getDataDone">
     <ng-container *ngIf="BlackMarketOperationPhase === 1">
       <span *ngFor="let card of BlackMarketPileShuffled; let idx = index" >
-        <dominion-card-image
-          [width]="longSideLength"
+        <app-dominion-card-image
+          [height]="longSideLength"
           [isButton]="false"
-          [faceUp]="card.revealed"
+          [faceUp]="card.faceUp"
           [description]="idx + 1"
-          [card]="CardPropertyList[card.cardIndex]">
-        </dominion-card-image>
+          [card]="cardPropertyList[card.cardIndex]">
+        </app-dominion-card-image>
       </span>
     </ng-container>
     <ng-container *ngIf="BlackMarketOperationPhase === 2">
       <span *ngFor="let card of BlackMarketPileShuffled; let idx = index" >
-        <dominion-card-image
-          [width]="longSideLength"
-          [isButton]="card.revealed"
-          [faceUp]="card.revealed"
+        <app-dominion-card-image
+          [height]="longSideLength"
+          [isButton]="card.faceUp"
+          [faceUp]="card.faceUp"
           [description]="idx + 1"
-          [card]="CardPropertyList[card.cardIndex]"
+          [card]="cardPropertyList[card.cardIndex]"
           (click)="onClick('buy', idx)">
-        </dominion-card-image>
+        </app-dominion-card-image>
       </span>
     </ng-container>
     <ng-container *ngIf="BlackMarketOperationPhase === 3">
       <span *ngFor="let card of BlackMarketPileShuffled; let idx = index" >
-        <dominion-card-image
-          [width]="longSideLength"
-          [isButton]="card.revealed"
-          [faceUp]="card.revealed"
+        <app-dominion-card-image
+          [height]="longSideLength"
+          [isButton]="card.faceUp"
+          [faceUp]="card.faceUp"
           [description]="idx + 1"
-          [card]="CardPropertyList[card.cardIndex]"
+          [card]="cardPropertyList[card.cardIndex]"
           (click)="onClick('putOnTheBottom', idx)">
-        </dominion-card-image>
+        </app-dominion-card-image>
       </span>
     </ng-container>
   </div>

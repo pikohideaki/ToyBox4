@@ -2,22 +2,22 @@
 <div>
 
   <div *ngIf="itemsPerPageOptions != undefined" class="pagerWrapper">
-    <my-data-table--items-per-page
+    <app-my-data-table--items-per-page
         [itemsPerPageDefault]='itemsPerPageDefault'
         [itemsPerPageOptions]='itemsPerPageOptions'
         [(itemsPerPage)]='itemsPerPage'
         [(selectedPageIndex)]='selectedPageIndex' >
-    </my-data-table--items-per-page>
+    </app-my-data-table--items-per-page>
 
-    <my-data-table--pagenation
+    <app-my-data-table--pagenation
         [itemsPerPage]='itemsPerPage'
         [dataSize]='filteredData.length'
         [(selectedPageIndex)]='selectedPageIndex' >
-    </my-data-table--pagenation>
+    </app-my-data-table--pagenation>
 
 
-    <my-data-table--reset-buttons (click)='reset()' >
-    </my-data-table--reset-buttons>
+    <app-my-data-table--reset-buttons (click)='reset()' >
+    </app-my-data-table--reset-buttons>
 
     <span>{{filteredData.length}} items</span>
     <div class='clear'></div>
@@ -63,11 +63,14 @@
 
           <ng-container *ngIf="column.manip == 'incrementalSearch'" >
             <md-input-container>
-                <input mdInput
-                    id="filteringInputBox"
-                    [placeholder]="column.headerTitle"
-                    [(ngModel)]="column.manipState"
-                    (keyup)="updateView()" >
+              <input mdInput
+                  id="filteringInputBox"
+                  [placeholder]="column.headerTitle"
+                  [(ngModel)]="column.manipState"
+                  (keyup)="updateView()" >
+              <button mdSuffix md-icon-button (click)="reset( column.name )">
+                <md-icon class='clearSelectIcon'>clear</md-icon>
+              </button>
             </md-input-container>
             <!--<button md-icon-button (click)="reset( column.name )">
               <md-icon class='clearSelectIcon'>clear</md-icon>
@@ -113,22 +116,22 @@
 
 
   <div *ngIf="itemsPerPageOptions != undefined" class="pagerWrapper">
-    <my-data-table--items-per-page
+    <app-my-data-table--items-per-page
         [itemsPerPageDefault]='itemsPerPageDefault'
         [itemsPerPageOptions]='itemsPerPageOptions'
         [(itemsPerPage)]='itemsPerPage'
         [(selectedPageIndex)]='selectedPageIndex' >
-    </my-data-table--items-per-page>
+    </app-my-data-table--items-per-page>
 
-    <my-data-table--pagenation
+    <app-my-data-table--pagenation
         [(selectedPageIndex)]='selectedPageIndex'
         [itemsPerPage]='itemsPerPage'
         [dataSize]='filteredData.length' >
-    </my-data-table--pagenation>
+    </app-my-data-table--pagenation>
 
 
-    <my-data-table--reset-buttons (click)='reset()' >
-    </my-data-table--reset-buttons>
+    <app-my-data-table--reset-buttons (click)='reset()' >
+    </app-my-data-table--reset-buttons>
 
     <span>{{filteredData.length}} items</span>
     <div class='clear'></div>

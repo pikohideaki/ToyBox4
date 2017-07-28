@@ -1,5 +1,8 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/takeWhile';
 
 import { MdDialog } from '@angular/material';
 
@@ -7,7 +10,7 @@ import { MdDialog } from '@angular/material';
 import { MyUtilitiesService } from '../../my-utilities.service';
 import { MyDataTableComponent } from '../../my-data-table/my-data-table.component';
 
-import { MyFirebaseSubscribeService } from '../my-firebase-subscribe.service';
+import { DominionDatabaseService } from '../dominion-database.service';
 
 import { CardProperty } from '../card-property';
 import { CardPropertyDialogComponent } from '../card-property-dialog/card-property-dialog.component';
@@ -15,41 +18,34 @@ import { CardPropertyDialogComponent } from '../card-property-dialog/card-proper
 
 
 @Component({
-  providers: [MyUtilitiesService, MyFirebaseSubscribeService],
   selector: 'app-card-property-list',
   templateUrl: './card-property-list.component.html',
   styleUrls: [ './card-property-list.component.css' ]
 })
 export class CardPropertyListComponent implements OnInit, OnDestroy {
 
-  subscriptions = [];
+  getDataDone = false;
+  private alive: boolean = true;
 
-  CardPropertyList: CardProperty[] = [];
-  // CardPropertyList$: FirebaseListObservable< CardProperty[] >;
-  CardPropertyListForView: any[] = [];
-  httpGetDone = false;
+  private cardPropertyListForView: any[] = [];
+  public cardPropertyListForView$: Observable< any >;
 
-  // pagenation settings
-  itemsPerPageOptions: number[] = [ 25, 50, 100, 200 ];
-  itemsPerPageDefault = 50;
-
-
-  columnSettings = [
+  public columnSettings = [
     { name: 'no'                  , align: 'c', manip: 'none'             , button: false, headerTitle: 'No.' },
     { name: 'name_jp'             , align: 'c', manip: 'incrementalSearch', button: true , headerTitle: '名前' },
     { name: 'name_eng'            , align: 'c', manip: 'incrementalSearch', button: false, headerTitle: 'Name' },
-    { name: 'set_name'            , align: 'c', manip: 'filterBySelecter' , button: false, headerTitle: 'セット名' },
+    { name: 'DominionSetName'     , align: 'c', manip: 'filterBySelecter' , button: false, headerTitle: 'セット名' },
     { name: 'category'            , align: 'c', manip: 'filterBySelecter' , button: false, headerTitle: '分類' },
-    { name: 'card_type'           , align: 'c', manip: 'filterBySelecter' , button: false, headerTitle: '種別' },
+    { name: 'cardType'            , align: 'c', manip: 'filterBySelecter' , button: false, headerTitle: '種別' },
     { name: 'costStr'             , align: 'c', manip: 'none'             , button: false, headerTitle: 'コスト' },
     { name: 'VP'                  , align: 'c', manip: 'none'             , button: false, headerTitle: 'VP' },
-    { name: 'draw_card'           , align: 'c', manip: 'none'             , button: false, headerTitle: '+card' },
+    { name: 'drawCard'            , align: 'c', manip: 'none'             , button: false, headerTitle: '+card' },
     { name: 'action'              , align: 'c', manip: 'none'             , button: false, headerTitle: '+action' },
     { name: 'buy'                 , align: 'c', manip: 'none'             , button: false, headerTitle: '+buy' },
     { name: 'coin'                , align: 'c', manip: 'none'             , button: false, headerTitle: '+coin' },
     { name: 'VPtoken'             , align: 'c', manip: 'none'             , button: false, headerTitle: '+VPtoken' },
     { name: 'implemented'         , align: 'c', manip: 'filterBySelecter' , button: false, headerTitle: 'ゲーム実装状況' },
-    { name: 'randomizer_candidate', align: 'c', manip: 'filterBySelecter' , button: false, headerTitle: 'ランダマイザー対象' },
+    { name: 'randomizerCandidate' , align: 'c', manip: 'filterBySelecter' , button: false, headerTitle: 'ランダマイザー対象' },
   ];
 
 
@@ -58,30 +54,30 @@ export class CardPropertyListComponent implements OnInit, OnDestroy {
   constructor(
     private utils: MyUtilitiesService,
     public dialog: MdDialog,
-    afDatabase: AngularFireDatabase,
-    private afDatabaseService: MyFirebaseSubscribeService
+    private database: DominionDatabaseService,
   ) {
-    this.subscriptions.push(
-      afDatabase.list( '/data/CardPropertyList' ).subscribe( val => {
-        this.CardPropertyList = this.afDatabaseService.convertAs( val, 'CardPropertyList' );
-        this.httpGetDone = true;
-        this.CardPropertyListForView = this.CardPropertyList.map( x => x.transform() );
-      } )
-    );
+    this.cardPropertyListForView$
+      = this.database.cardPropertyList$
+          .map( list => list.map( cardProperty => cardProperty.transform() ) );
+
+    this.cardPropertyListForView$
+      .takeWhile( () => this.alive )
+      .subscribe( val => {
+        this.getDataDone = true;
+        this.cardPropertyListForView = val;
+      });
   }
 
   ngOnInit() {
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach( e => e.unsubscribe() );
+    this.alive = false;
   }
 
-
-  showDetail( rowIndex: number ) {
-    const selectedCardForView = this.CardPropertyListForView[rowIndex];
+  showDetail( dataIndex: number ) {
     const dialogRef = this.dialog.open( CardPropertyDialogComponent );
-    dialogRef.componentInstance.card = selectedCardForView;
+    dialogRef.componentInstance.card = this.cardPropertyListForView[dataIndex];
   }
 }
 

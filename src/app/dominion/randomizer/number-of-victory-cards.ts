@@ -1,80 +1,46 @@
 export class NumberOfVictoryCards {
-  VPtoken        : number;  // 
+  VPtoken:          number = 0;
+  others:           number = 0;
 
-  Curse          : number;  // -1
-  Estate         : number;  //  1
-  Duchy          : number;  //  3
-  Province       : number;  //  6
-  Colony         : number;  // 10
-  Great_Hall     : number;  //  1
-  Nobles         : number;  //  2
-  Harem          : number;  //  2
-  Farmland       : number;  //  2
-  Island         : number;  //  2
-  Tunnel         : number;  //  2
-  Dame_Josephine : number;  //  2
+  Curse:            number = 0;  // -1
+  Estate:           number = 0;  //  1
+  Duchy:            number = 0;  //  3
+  Province:         number = 0;  //  6
+  Colony:           number = 0;  // 10
+  Great_Hall:       number = 0;  //  1
+  Nobles:           number = 0;  //  2
+  Harem:            number = 0;  //  2
+  Farmland:         number = 0;  //  2
+  Island:           number = 0;  //  2
+  Tunnel:           number = 0;  //  2
+  Dame_Josephine:   number = 0;  //  2
+  Overgrown_Estate: number = 0;  // 0
 
-  Gardens        : number;
-  Duke           : number;  // 公爵
-  Vineyard       : number;
-  Fairgrounds    : number;  // 品評会
-  Silk_Road      : number;
-  Feodum         : number;  // 封土
-  Distant_Lands  : number;
+  Gardens:          number = 0;
+  Duke:             number = 0;  // 公爵
+  Vineyard:         number = 0;
+  Fairgrounds:      number = 0;  // 品評会
+  Silk_Road:        number = 0;
+  Feodum:           number = 0;  // 封土
+  Distant_Lands:    number = 0;
 
-  Humble_Castle    : number;
-  Crumbling_Castle : number;
-  Small_Castle     : number;
-  Haunted_Castle   : number;
-  Opulent_Castle   : number;
-  Sprawling_Castle : number;
-  Grand_Castle     : number;
-  Kings_Castle     : number;
+  Humble_Castle:    number = 0;
+  Crumbling_Castle: number = 0;
+  Small_Castle:     number = 0;
+  Haunted_Castle:   number = 0;
+  Opulent_Castle:   number = 0;
+  Sprawling_Castle: number = 0;
+  Grand_Castle:     number = 0;
+  Kings_Castle:     number = 0;
 
-  DeckSize                      : number;  // for Gardens
-  numberOfActionCards           : number;  // for Vineyard
-  numberOfDifferentlyNamedCards : number;  // for Fairgrounds
-  numberOfSilvers               : number;  // for Feodum
-  Distant_Lands_on_TavernMat    : number;  // for Distant_Lands
+  DeckSize:                       number = 0;  // for Gardens
+  numberOfActionCards:            number = 0;  // for Vineyard
+  numberOfDifferentlyNamedCards:  number = 0;  // for Fairgrounds
+  numberOfSilvers:                number = 0;  // for Feodum
+  Distant_Lands_on_TavernMat:     number = 0;  // for Distant_Lands
+  // numberOfVictoryCardsInDeck:     number = 0;  // for SilkRoad
 
-
-  constructor() {
-    this.VPtoken        = 0;
-    this.Curse          = 0;
-    this.Estate         = 0;
-    this.Duchy          = 0;
-    this.Province       = 0;
-    this.Colony         = 0;
-    this.Great_Hall     = 0;
-    this.Nobles         = 0;
-    this.Harem          = 0;
-    this.Farmland       = 0;
-    this.Island         = 0;
-    this.Tunnel         = 0;
-    this.Dame_Josephine = 0;
-    this.Gardens        = 0;
-    this.Duke           = 0;
-    this.Vineyard       = 0;
-    this.Fairgrounds    = 0;
-    this.Silk_Road      = 0;
-    this.Feodum         = 0;
-    this.Distant_Lands  = 0;
-
-    this.Humble_Castle    = 0;
-    this.Crumbling_Castle = 0;
-    this.Small_Castle     = 0;
-    this.Haunted_Castle   = 0;
-    this.Opulent_Castle   = 0;
-    this.Sprawling_Castle = 0;
-    this.Grand_Castle     = 0;
-    this.Kings_Castle     = 0;
-
-    this.DeckSize                      = 0;
-    this.numberOfActionCards           = 0;
-    this.numberOfDifferentlyNamedCards = 0;
-    this.numberOfSilvers               = 0;
-    this.Distant_Lands_on_TavernMat    = 0;
-  }
+  constructor() {}
 
 
   countVictoryCards(): number {
@@ -90,6 +56,7 @@ export class NumberOfVictoryCards {
       + this.Island
       + this.Tunnel
       + this.Dame_Josephine
+      + this.Overgrown_Estate
       + this.Gardens
       + this.Duke
       + this.Vineyard

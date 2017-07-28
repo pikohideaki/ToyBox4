@@ -14,7 +14,7 @@ import { PagenationComponent, getPagenatedData } from './pagenation/pagenation.c
 
 @Component({
   providers: [ResetButtonComponent],
-  selector: 'my-data-table',
+  selector: 'app-my-data-table',
   templateUrl: './my-data-table.component.html',
   styleUrls: ['./my-data-table.component.css']
 })
@@ -25,14 +25,14 @@ export class MyDataTableComponent implements OnInit, OnChanges  {
 
   @Input()
   columnSettings: {
-        name         : string,
-        align        : string,
-        manip        : string,
-        manipState   : any,
-        options      : string[],
-        asyncOptions : any,
-        button       : boolean,
-        headerTitle  : string,
+        name:         string,
+        align:        string,
+        manip:        string,
+        manipState:   any,
+        options:      string[],
+        asyncOptions: any,
+        button:       boolean,
+        headerTitle:  string,
     }[] = [];
 
   // pagenation
@@ -58,7 +58,7 @@ export class MyDataTableComponent implements OnInit, OnChanges  {
   }
 
   ngOnChanges( changes: SimpleChanges ) {
-    if ( changes.data != undefined ) {  // at http-get done
+    if ( changes.data !== undefined ) {  // at http-get done
       this.columnSettings.forEach( e => {
         e.asyncOptions = this.stateCtrl.valueChanges
                     .startWith(null)
@@ -69,7 +69,7 @@ export class MyDataTableComponent implements OnInit, OnChanges  {
   }
 
 
-  filterAsyncOptions( columnName: string, inputString: string ): string[]{
+  filterAsyncOptions( columnName: string, inputString: string ): string[] {
     const uniqValues = this.utils.uniq( this.filteredData.map( e => e[columnName] ) );
     return inputString ? uniqValues.filter( s => this.utils.submatch( s, inputString, true ) )
                        : uniqValues;
@@ -77,7 +77,7 @@ export class MyDataTableComponent implements OnInit, OnChanges  {
 
 
   updateView() {
-    this.filteredData = ( this.data === undefined ? [] : this.data.filter( x => this.filterFunction(x) ) );
+    this.filteredData = ( !this.data ? [] : this.data.filter( x => this.filterFunction(x) ) );
     this.setSelectorOptions( this.filteredData );
     this.selectedPageIndex = 0;
   }
@@ -89,18 +89,21 @@ export class MyDataTableComponent implements OnInit, OnChanges  {
 
 
   filterFunction( lineOfData: any ): boolean {
-    let validSettings = this.columnSettings.filter( column => column.manipState != undefined );
+    const validSettings = this.columnSettings.filter( column => column.manipState !== undefined );
 
-    for ( let column of validSettings ) switch ( column.manip ) {
-      case 'filterBySelecter' :
-        if ( lineOfData[ column.name ] != column.manipState ) return false;
+    for ( const column of validSettings ) {
+      switch ( column.manip ) {
+        case 'filterBySelecter' :
+          if ( lineOfData[ column.name ] !== column.manipState ) return false;
+          break;
 
-      case 'incrementalSearch' :
-        if ( !this.utils.submatch( lineOfData[ column.name ], column.manipState, true ) ) return false;
-        break;
+        case 'incrementalSearch' :
+          if ( !this.utils.submatch( lineOfData[ column.name ], column.manipState, true ) ) return false;
+          break;
 
-      default :
-        break;
+        default :
+          break;
+      }
     }
     return true;
   }
@@ -112,9 +115,9 @@ export class MyDataTableComponent implements OnInit, OnChanges  {
   }
 
   setSelectorOptions( data: any[] ): any {
-    let selectorOptions = {};
-    for ( let e of this.columnSettings ) {
-        if ( e.manip != 'filterBySelecter' ) continue;
+    const selectorOptions = {};
+    for ( const e of this.columnSettings ) {
+        if ( e.manip !== 'filterBySelecter' ) continue;
         e.options = this.utils.uniq( this.getColumn( data, e.name ) );
     }
     return selectorOptions;

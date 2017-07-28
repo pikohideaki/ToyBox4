@@ -3,7 +3,7 @@ import { Component, OnInit, Inject, Input, OnChanges, SimpleChanges } from '@ang
 import { CardProperty } from '../card-property';
 
 @Component({
-  selector: 'dominion-card-image',
+  selector: 'app-dominion-card-image',
   templateUrl: './dominion-card-image.component.html',
   styleUrls: ['./dominion-card-image.component.css']
 })
@@ -11,18 +11,18 @@ export class DominionCardImageComponent implements OnInit, OnChanges {
 
   private CARD_IMAGE_DIR = `${this.DOMINION_DATA_DIR}/img/card`;
 
-
-  @Input() card: CardProperty;
-  @Input() faceUp: boolean;
-  @Input() width: number;
-  @Input() height: number;
-  @Input() isButton: boolean;
-  @Input() description: string;
-
-
-  wideCardTypes = [ 'イベント', 'ランドマーク' ];
+  private wideCardTypes = [ 'イベント', 'ランドマーク' ];
 
   sourceDir: string;
+
+  @Input() private card: CardProperty;
+  @Input() public  faceUp: boolean;
+  @Input() public  width: number;
+  @Input() public  height: number;
+  @Input() public  isButton: boolean;
+  @Input() public  description: string;
+
+
 
   constructor(
     @Inject('DOMINION_DATA_DIR') private DOMINION_DATA_DIR: string
@@ -36,8 +36,8 @@ export class DominionCardImageComponent implements OnInit, OnChanges {
 
   ngOnChanges( changes ) {
     if ( changes.width || changes.height ) {
-      if ( this.height !== undefined ) this.setWidth();
-      if ( this.width  !== undefined ) this.setHeight();
+      if ( this.height !== undefined ) { this.setWidth(); }
+      if ( this.width  !== undefined ) { this.setHeight(); }
     }
     if ( changes.faceUp || changes.card ) {
       this.setSourceDir();
@@ -54,7 +54,7 @@ export class DominionCardImageComponent implements OnInit, OnChanges {
   }
 
   setHeight() {
-    if ( this.wideCardTypes.findIndex( e => e == this.card.card_type ) != -1 ) {
+    if ( this.wideCardTypes.findIndex( e => e === this.card.cardType ) !== -1 ) {
       this.height = this.width * 75 / 115;  // wide
     } else {
       this.height = this.width * 115 / 75;
@@ -62,7 +62,7 @@ export class DominionCardImageComponent implements OnInit, OnChanges {
   }
 
   setWidth() {
-    if ( this.wideCardTypes.findIndex( e => e == this.card.card_type ) != -1  ) {
+    if ( this.wideCardTypes.findIndex( e => e === this.card.cardType ) !== -1  ) {
       this.width = this.height * 115 / 75;  // wide
     } else {
       this.width = this.height * 75 / 115;

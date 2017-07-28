@@ -1,0 +1,24 @@
+/*to put button in the middle of dialog*/
+.actionButtons {
+  justify-content: center;
+}
+
+.container {
+  display: flex;
+}
+
+.selectedDominionSetString,
+.Prosperity_DarkAges {
+  margin: 10px;
+}
+
+
+#Prosperity,
+#DarkAges {
+  margin: 10px;
+}
+
+#randomizerOptions,
+#supplyTable {
+  margin: 20px;
+}

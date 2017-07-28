@@ -1,12 +1,18 @@
+
+<button md-button color="primary" id="closeSideNavBtn" (click)="closeSideNav()">
+  <md-icon>cancel</md-icon>
+</button>
+<div class="clear"></div>
+
 <div class="bodyWithPadding sideBarBody"  (click)="backgroundClicked()">
 
   <div id="addGroup">
 
     <md-input-container>
-      <input mdInput [(ngModel)]="newGroupName" placeholder="new group name" required>
+      <input mdInput [(ngModel)]="newGroupName" placeholder="new group name" [required]="newGroupName == '' ">
     </md-input-container>
     <md-input-container>
-      <input mdInput [(ngModel)]="newGroupPassword" placeholder="password" required>
+      <input mdInput [(ngModel)]="newGroupPassword" placeholder="password" [required]="newGroupPassword =='' ">
     </md-input-container>
 
     <button md-raised-button color="primary"
@@ -34,8 +40,8 @@
 
       <md-card-content *ngIf="group.selected">
         <md-input-container [color]="(showWrongPasswordAlert ? 'primary' : 'warn')" >
-          <input mdInput placeholder="password" required
-              name="signInPassword" [(ngModel)]="signInPassword" >
+          <input mdInput placeholder="password" [required]="signInPassword == '' "
+              name="signInPassword" [(ngModel)]="signInPassword">
           <md-hint *ngIf="showWrongPasswordAlert" class="alert">
             Password does not match
           </md-hint>
@@ -48,13 +54,13 @@
               [disabled]="!signInPassword">
           参加
         </button>
-        <button md-raised-button color="warn"   
+        <button md-raised-button color="warn"
               (click)="signOut(group.id)"
               [disabled]="!signInPassword">
           退出
         </button>
       </md-card-actions>
-      
+
     </md-card>
   </div>
 

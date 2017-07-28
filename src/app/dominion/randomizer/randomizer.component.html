@@ -1,73 +1,37 @@
 
-<div>
+  <div>
   <md-sidenav-container class="sidenavContainer">
-    <md-sidenav #sidenav class="sidenav" ><!--*ngIf="httpGetDone">-->
-      <button md-button color="primary" id="closeSideNavBtn" (click)="sidenav.close()">
-        <md-icon>cancel</md-icon>
-      </button>
-      <div class="clear"></div>
-      <app-sync-groups
-          [DominionSetList]="DominionSetList"
-          [SelectedCards]="SelectedCards"
-          [sidenav]="sidenav">
-      </app-sync-groups>
+    <md-sidenav #sidenav class="sidenav">
+      <app-sync-groups [sidenav]="sidenav"> </app-sync-groups>
     </md-sidenav>
 
 
     <div class="sidenavMain">
-      <div class="marginedElement" *ngIf="signedIn" >
+      <div class="marginedElement" *ngIf="signedIn$ | async" >
         <button md-raised-button color="primary" (click)="sidenav.open()">
           <md-icon>group</md-icon>
         </button>
-        <span> Group : {{mySyncGroupName}} </span>
+        <span> Group : {{mySyncGroupName$ | async}} </span>
       </div>
 
       <md-tab-group>
         <md-tab label="Randomizer">
-          <div class="bodyWithPadding">
-
-            <my-waiting-spinner *ngIf="!httpGetDone"></my-waiting-spinner>
-
-            <!--使用する拡張セットにチェック-->
-            <app-randomizer-select-cards *ngIf="httpGetDone"
-                [CardPropertyList]="CardPropertyList"
-                (DominionSetListToggleChange)="DominionSetListToggleChange($event)"
-                [(SelectedCards)]="SelectedCards">
-            </app-randomizer-select-cards>
-          </div>
-
+          <ng-container data-comment="使用する拡張セットにチェック"></ng-container>
+          <app-randomizer-select-cards></app-randomizer-select-cards>
           <hr>
-
-          <app-randomizer-card-image
-            *ngIf="httpGetDone"
-            longSideLength="140"
-            [SelectedCards]="SelectedCards"
-            [CardPropertyList]="CardPropertyList">
-          </app-randomizer-card-image>
+          <app-randomizer-card-image [longSideLength]="180"> </app-randomizer-card-image>
         </md-tab>
 
-        <md-tab *ngIf="SelectedCards.BlackMarketPile.length > 0" label="闇市場デッキ">
-          <app-black-market-pile
-            *ngIf="httpGetDone"
-            longSideLength="140"
-            [BlackMarketPile]="SelectedCards.BlackMarketPile"
-            [CardPropertyList]="CardPropertyList">
-          </app-black-market-pile>
+        <md-tab *ngIf="(selectedCards$ | async)?.BlackMarketPile.length > 0" label="闇市場デッキ">
+          <app-black-market-pile [longSideLength]="180"> </app-black-market-pile>
         </md-tab>
 
         <md-tab label="結果入力">
-          <app-add-game-result
-            [SelectedCards]="SelectedCards"
-            [DominionSetList]="DominionSetList"
-            [CardPropertyList]="CardPropertyList">
-          </app-add-game-result>
+          <app-add-game-result></app-add-game-result>
         </md-tab>
 
         <md-tab label="勝利点計算機">
-          <app-victory-points-calculator
-            [SelectedCards]="SelectedCards"
-            [CardPropertyList]="CardPropertyList">
-          </app-victory-points-calculator>
+          <app-victory-points-calculator></app-victory-points-calculator>
         </md-tab>
 
       </md-tab-group>

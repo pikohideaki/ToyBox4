@@ -1,50 +1,53 @@
 
 <div class='bodyWithPadding'>
 
-  <!--日付-->
+  <ng-container data-comment="日付"></ng-container>
   <span class="marginedElement">
     <md-input-container>
-      <input mdInput [mdDatepicker]="myDatepicker" [(ngModel)]="date" placeholder="日付" >
-      <button mdSuffix [mdDatepickerToggle]="myDatepicker"></button>
+      <input mdInput
+        [value]="date | date:'yyyy/MM/dd'"
+        placeholder="日付"
+        disabled>
     </md-input-container>
-    <md-datepicker #myDatepicker></md-datepicker>
   </span>
 
-  <!--場所-->
+  <ng-container data-comment="場所"></ng-container>
   <span class="marginedElement">
     <md-input-container>
       <input mdInput
         placeholder="場所"
-        [(ngModel)]="place"
-        [mdAutocomplete]="auto"
-        [formControl]="stateCtrl">
+        [value]="place"
+        (change)="changePlace( $event.target.value )"
+        [mdAutocomplete]="auto">
     </md-input-container>
-    <md-autocomplete #auto="mdAutocomplete">
-      <md-option *ngFor="let place of filteredPlaces | async" [value]="place">
-        {{ place }}
+     <md-autocomplete #auto="mdAutocomplete">
+      <md-option *ngFor="let placeOption of places"
+          [value]="placeOption"
+          (onSelectionChange)="changePlace( placeOption )" >
+        {{ placeOption }}
       </md-option>
     </md-autocomplete>
   </span>
 
 
 
-  <!--プレイヤー-->
+  <ng-container data-comment="プレイヤー"></ng-container>
   <div class="marginedElement">
-    <p>参加者を選択（2~4人）：</p>
-    <my-waiting-spinner *ngIf="!httpGetDone"></my-waiting-spinner>
+    <app-my-waiting-spinner [done]="getDataDone"></app-my-waiting-spinner>
 
-    <div *ngIf="httpGetDone">
-      <ng-container *ngFor="let player of gameResultOfPlayers; let idx = index" >
-        <md-checkbox class="playerChbox" [(ngModel)]="player.selected"
-            (change)="uploadGameResultOfPlayer( idx, 'selected' )" >
+    <div *ngIf="getDataDone">
+      <p>参加者を選択（2~6人）：</p>
+      <ng-container *ngFor="let player of playersGameResult; let idx = index" >
+        <md-checkbox class="playerChbox" [checked]="player.selected"
+            (change)="changePlayersResultSelected( player.name, $event.checked )" >
           {{player.name}}
         </md-checkbox>
       </ng-container>
     </div>
   </div>
 
-  <div class="marginedElement">
-    <md-radio-group [(ngModel)]="startPlayerName" >
+  <div class="marginedElement" *ngIf="getDataDone">
+    <md-radio-group [value]="startPlayerName">
     <table class='my-data-table my-data-table--shadow3px my-data-table--vertical-line'>
       <thead>
         <tr>
@@ -55,23 +58,24 @@
         </tr>
       </thead>
       <tbody>
-        <ng-container *ngFor="let player of gameResultOfPlayers; let idx = index">
+        <ng-container *ngFor="let player of playersGameResult; let idx = index">
           <tr *ngIf="player.selected">
             <td>
-              <md-radio-button [value]="player.name" ></md-radio-button>
+              <md-radio-button [value]="player.name" (change)="changeStartPlayerName( $event.value )"></md-radio-button>
             </td>
             <td>{{player.name}}</td>
             <td>
               <md-input-container>
                 <input mdInput type="number"
-                  onclick="this.select(0,this.value.length)"
-                  (input)="uploadGameResultOfPlayer( idx, 'VP' )"
-                  [(ngModel)]="player.VP" >
+                  onclick="this.select(0, this.value.length)"
+                  [value]="player.VP"
+                  (input)="changePlayersResultVP( player.name, $event.target.valueAsNumber )" >
               </md-input-container>
             </td>
             <td>
-              <md-checkbox [(ngModel)]="player.lessTurns"
-                (change)="uploadGameResultOfPlayer( idx, 'lessTurns' )" >
+              <md-checkbox
+                [checked]="player.lessTurns"
+                (change)="changePlayersResultLessTurns( player.name, $event.checked )" >
               </md-checkbox>
             </td>
           </tr>
@@ -82,16 +86,23 @@
   </div>
 
 
-  <!--メモ-->
+  <ng-container data-comment="メモ"></ng-container>
   <md-input-container>
-    <textarea  mdInput placeholder="Memo"  [(ngModel)]="memo" ></textarea>
+    <textarea  mdInput placeholder="Memo"
+      [value]="memo"
+      (change)="changeMemo( $event.target.value )" >
+    </textarea>
   </md-input-container>
 
 
-  <!--登録ボタン-->
+  <ng-container data-comment="登録ボタン"></ng-container>
   <div class="marginedElement">
-    <button md-raised-button color='primary' (click)='submitGameResult()'>Submit</button>
-    <span *ngIf="!playerNumOK()">プレイヤーを2~4人選択してください！</span>
+    <button md-raised-button color='primary'
+        [disabled]="newGameResultSubmitted$ | async"
+        (click)='submitGameResult()' >
+      Submit
+    </button>
+    <span *ngIf="!numberOfPlayersOK()">プレイヤーを2~6人選択してください！</span>
   </div>
 
 </div>

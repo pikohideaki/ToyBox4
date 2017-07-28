@@ -1,100 +1,146 @@
-import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { Component, OnInit, Inject, OnDestroy, EventEmitter } from '@angular/core';
+// import { FormControl } from '@angular/forms';
+
 import { Observable } from 'rxjs/Rx';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+
+import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 import { MyUtilitiesService } from '../../my-utilities.service';
-import { MyFirebaseSubscribeService } from "../my-firebase-subscribe.service";
-import { GameResult } from "../game-result";
+
+import { DominionDatabaseService } from '../dominion-database.service';
+import { GameResult } from '../game-result';
 
 
 @Component({
-  providers: [MyFirebaseSubscribeService],
   selector: 'app-game-result',
   templateUrl: './game-result.component.html',
   styleUrls: ['./game-result.component.css']
 })
 export class GameResultComponent implements OnInit, OnDestroy {
 
-  subscriptions = [];
+  private alive = true;
+  getDataDone = false;
 
-  httpGetDone: boolean = false;
-  GameResultList: GameResult[] = [];
-  GameResultListFiltered: GameResult[] = [];
+  private gameResultList: GameResult[];
+  gameResultListFiltered$: Observable<GameResult[]>;
 
-  playerNumOptions: { playerNum: number, selected: boolean }[] = [];
 
-  dateBegin: Date;
-  dateEnd  : Date;
+  // Observable source
+  private dateBeginSource = new BehaviorSubject<Date>( new Date() );
+  private dateEndSource   = new BehaviorSubject<Date>( new Date() );
+  private numberOfPlayersCheckedSource
+    = new BehaviorSubject<{ numberOfPlayers: number, checked: boolean }[]>(
+      this.utils.numberSequence( 2, 5 ).map( i => ({ numberOfPlayers: i, checked: (i <= 4) }))
+    );  // [2:true, 3:true, 4:true, 5:true, 6:true]
+
+  // Observable stream
+  dateBegin$ = this.dateBeginSource.asObservable();
+  dateEnd$   = this.dateEndSource.asObservable();
+  numberOfPlayersChecked$ = this.numberOfPlayersCheckedSource.asObservable();
 
 
   constructor(
     private utils: MyUtilitiesService,
-    afDatabase: AngularFireDatabase,
-    private afDatabaseService: MyFirebaseSubscribeService
+    private database: DominionDatabaseService
   ) {
-    this.dateBegin = new Date();
-    this.dateEnd   = new Date();
+    this.database.gameResultList$
+      .takeWhile( () => this.alive )
+      .subscribe( gameResultList => {
+        this.getDataDone = true;
+        this.gameResultList = gameResultList;  // extract current value
+        this.resetFormControls( gameResultList );
+      });
 
-    const ScoringList$ = afDatabase.list( '/data/ScoringList' );
-    const GameResultList$ = afDatabase.list( '/data/GameResultList', { preserveSnapshot: true } );
 
-    Promise.all([
-      ScoringList$.first().toPromise(),
-      GameResultList$.first().toPromise(),
-    ]).then( () => this.httpGetDone = true );
+    this.gameResultListFiltered$
+      = Observable.combineLatest(
+          this.database.gameResultList$,
+          this.dateBegin$,
+          this.dateEnd$,
+          this.numberOfPlayersChecked$,
+          ( gameResultList: GameResult[],
+            dateBegin: Date,
+            dateEnd: Date,
+            numberOfPlayersChecked ) =>
+                this.filterGameResultList( gameResultList,
+                  {
+                    dateBegin: dateBegin,
+                    dateEnd: dateEnd,
+                    numberOfPlayersChecked: numberOfPlayersChecked
+                  }) );
 
-    this.subscriptions.push(
-      ScoringList$.subscribe( val => {
-        let ScoringList = this.afDatabaseService.convertAs( val, "ScoringList" );
-
-        this.subscriptions.push(
-          GameResultList$.subscribe( val => {
-            this.GameResultList = this.afDatabaseService.convertAs( val, "GameResultList", ScoringList );
-
-            this.playerNumOptions
-              = this.utils.uniq( this.GameResultList.map( e => e.players.length ).sort() )
-                          .map( v => { return { playerNum: v, selected: true }; } );
-            this.resetFilter();
-          } )
-        );
-      })
-    );
   }
-
 
 
   ngOnInit() {
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach( e => e.unsubscribe() );
+    this.alive = false;
   }
 
 
 
-  filterGameResultList() {
-    let playerNumIsSelected = {};
-    this.playerNumOptions.forEach( e => playerNumIsSelected[e.playerNum] = e.selected );
-
-    this.GameResultListFiltered = this.GameResultList.filter(
-      gr => (    this.utils.getMidnightOfDate( gr.date ) >= this.dateBegin
-              && this.utils.getMidnightOfDate( gr.date ) <= this.dateEnd
-              && playerNumIsSelected[gr.players.length] )
-    );
+  private filterFunction( gameResult: GameResult, filterBy ): boolean {
+    const mDate = this.utils.getMidnightOfDate( gameResult.date );
+    return (    mDate >= filterBy.dateBegin
+             && mDate <= filterBy.dateEnd
+             && filterBy.numberOfPlayersChecked
+                 .find( e => e.numberOfPlayers === gameResult.players.length )
+                 .checked );
   }
 
-  latestResult() {
-    let latestDate = new Date( this.utils.back( this.GameResultList.map( e => e.date ) ) );
-    this.dateEnd   = this.utils.getMidnightOfDate( latestDate );
-    this.dateBegin = this.utils.getMidnightOfDate( latestDate );
-    this.filterGameResultList();
+  private filterGameResultList( gameResultList: GameResult[], filterBy ) {
+    return ( gameResultList ? gameResultList.filter( gr => this.filterFunction( gr, filterBy ) )
+                            : gameResultList );
   }
 
-  resetFilter() {
-    // set default values (don't use setDate() to avoid letting ngModel sleep)
-    this.dateBegin = this.utils.getMidnightOfDate( this.utils.front( this.GameResultList.map( e => e.date ) ) );
-    this.dateEnd   = this.utils.getMidnightOfDate( this.utils.back ( this.GameResultList.map( e => e.date ) ) );
-    this.playerNumOptions.forEach( e => e.selected = true );
-    this.filterGameResultList();
+
+
+  // service command
+  changeDateBegin( date: Date ) { this.dateBeginSource.next(date); }
+  changeDateEnd( date: Date ) { this.dateEndSource.next(date); }
+  changeNumberOfPlayersChecked( numberOfPlayersChecked ) {
+    this.numberOfPlayersCheckedSource.next( numberOfPlayersChecked );
   }
+
+
+  private setDateToLatest( gameResultList: GameResult[] ) {
+    if ( gameResultList.length === 0 ) return;
+    const latestDate = this.utils.getMidnightOfDate( this.utils.back( gameResultList ).date );
+    this.changeDateBegin( latestDate );
+    this.changeDateEnd( latestDate );
+  }
+
+  latestResultClicked() {
+    this.setDateToLatest( this.gameResultList );
+  }
+
+
+
+  private resetFormControls( gameResultList: GameResult[] ) {
+    if ( gameResultList.length === 0 ) return;
+    const dateBegin = this.utils.getMidnightOfDate( this.utils.front( gameResultList ).date );
+    const dateEnd   = this.utils.getMidnightOfDate( this.utils.back ( gameResultList ).date );
+    const numberOfPlayersOptions
+      = this.utils.uniq( gameResultList.map( e => e.players.length ) )
+                  .sort( (a, b) => a - b )
+                  .map( num => ({ numberOfPlayers: num, checked: true }) )
+    this.changeDateBegin( dateBegin );
+    this.changeDateEnd( dateEnd );
+    this.changeNumberOfPlayersChecked( numberOfPlayersOptions );
+  }
+
+  resetAllClicked() {
+    this.resetFormControls( this.gameResultList );
+  }
+
+
+  numberOfPlayersOnCheck( checked, numberOfPlayers ) {
+    const numberOfPlayersChecked = this.numberOfPlayersCheckedSource.value;
+    numberOfPlayersChecked.find( e => e.numberOfPlayers === numberOfPlayers ).checked = checked;
+    this.changeNumberOfPlayersChecked( numberOfPlayersChecked )
+  }
+
 }

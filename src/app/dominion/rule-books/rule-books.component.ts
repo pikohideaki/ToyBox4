@@ -12,13 +12,6 @@ export class RuleBooksComponent implements OnInit {
   private COVER_IMAGE_DIR = `${this.DOMINION_DIR}/img/cover`;
   private PDF_DIR = `${this.DOMINION_DIR}/pdf`;
 
-  constructor(
-    @Inject('DOMINION_DATA_DIR') private DOMINION_DIR: string
-  ) {}
-
-  ngOnInit() {
-  }
-
 
   RuleBooks: {
       imgsrc: string;
@@ -81,6 +74,13 @@ export class RuleBooksComponent implements OnInit {
       title: '11 - ドミニオン「帝国」',
     },
   ];
+
+  constructor(
+    @Inject('DOMINION_DATA_DIR') private DOMINION_DIR: string
+  ) {}
+
+  ngOnInit() {
+  }
 
 }
 

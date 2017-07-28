@@ -5,13 +5,13 @@ import { MdDialogRef } from '@angular/material';
 
 import { MyUtilitiesService } from '../../my-utilities.service';
 
-import { MyFirebaseSubscribeService } from "../my-firebase-subscribe.service";
-import { GameResult } from "../game-result";
-import { CardProperty } from "../card-property";
-import { SelectedCards } from "../selected-cards";
+import { DominionDatabaseService } from '../dominion-database.service';
+
+import { GameResult } from '../game-result';
+import { CardProperty } from '../card-property';
+import { SelectedCards } from '../selected-cards';
 
 @Component({
-  providers: [ MyUtilitiesService, MyFirebaseSubscribeService ],
   selector: 'app-submit-game-result-dialog',
   templateUrl: './submit-game-result-dialog.component.html',
   styleUrls: [
@@ -21,56 +21,53 @@ import { SelectedCards } from "../selected-cards";
 })
 export class SubmitGameResultDialogComponent implements OnInit, OnDestroy {
 
+  private alive: boolean = true;
   @Input() newGameResult: GameResult;
-  subscriptions = [];
 
   constructor(
     public dialogRef: MdDialogRef<SubmitGameResultDialogComponent>,
     private utils: MyUtilitiesService,
-    private afDatabase: AngularFireDatabase,
-    private afDatabaseService: MyFirebaseSubscribeService
+    private database: DominionDatabaseService
   ) {
   }
 
   ngOnInit() {
-    this.subscriptions.push(
-      this.afDatabase.list( '/data/ScoringList' ).subscribe( val => {
-        let defaultScores = this.afDatabaseService.convertAs( val, "ScoringList" );
+    this.database.scoringList$
+      .takeWhile( () => this.alive )
+      .subscribe( defaultScores => {
         this.newGameResult.rankPlayers();
         this.newGameResult.setScores( defaultScores );
-      } )
-    );
+      });
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach( e => e.unsubscribe() );
+    this.alive = false;
   }
 
 
   submitGameResult() {
-    let grObj = {
+    const grObj = {
       date    : this.newGameResult.date.toString(),
       place   : this.newGameResult.place,
-      players : this.newGameResult.players.map( pl => {
-        return {
+      players : this.newGameResult.players.map( pl => ({
           name      : pl.name,
           VP        : pl.VP,
           lessTurns : pl.lessTurns,
-        }; } ),
-      memo                 : this.newGameResult.memo,
-      DominionSetsSelected : this.newGameResult.DominionSetsSelected,
-      SelectedCardsID      : {
-        Prosperity      : this.newGameResult.SelectedCardsID.Prosperity,
-        DarkAges        : this.newGameResult.SelectedCardsID.DarkAges,
-        KingdomCards10  : this.newGameResult.SelectedCardsID.KingdomCards10,
-        BaneCard        : this.newGameResult.SelectedCardsID.BaneCard,
-        EventCards      : this.newGameResult.SelectedCardsID.EventCards,
-        Obelisk         : this.newGameResult.SelectedCardsID.Obelisk,
-        LandmarkCards   : this.newGameResult.SelectedCardsID.LandmarkCards,
-        BlackMarketPile : this.newGameResult.SelectedCardsID.BlackMarketPile,
+        }) ),
+      memo                : this.newGameResult.memo,
+      selectedDominionSet : this.newGameResult.selectedDominionSet,
+      selectedCardsID     : {
+        Prosperity      : this.newGameResult.selectedCardsID.Prosperity,
+        DarkAges        : this.newGameResult.selectedCardsID.DarkAges,
+        KingdomCards10  : this.newGameResult.selectedCardsID.KingdomCards10,
+        BaneCard        : this.newGameResult.selectedCardsID.BaneCard,
+        EventCards      : this.newGameResult.selectedCardsID.EventCards,
+        Obelisk         : this.newGameResult.selectedCardsID.Obelisk,
+        LandmarkCards   : this.newGameResult.selectedCardsID.LandmarkCards,
+        BlackMarketPile : this.newGameResult.selectedCardsID.BlackMarketPile,
       }
     };
 
-    this.afDatabase.list('/data/GameResultList').push( grObj );
+    this.database.addGameResult( grObj );
   }
 }

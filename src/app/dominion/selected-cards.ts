@@ -1,12 +1,12 @@
 export class SelectedCards {
-  Prosperity      : boolean;
-  DarkAges        : boolean;
-  KingdomCards10  : number[];
-  BaneCard        : number[];
-  EventCards      : number[];
-  LandmarkCards   : number[];
-  Obelisk         : number[];
-  BlackMarketPile : number[];
+  Prosperity:       boolean;
+  DarkAges:         boolean;
+  KingdomCards10:   number[];
+  BaneCard:         number[];
+  EventCards:       number[];
+  LandmarkCards:    number[];
+  Obelisk:          number[];
+  BlackMarketPile:  number[];
   // SelectedDominionSets: boolean[];
 
 

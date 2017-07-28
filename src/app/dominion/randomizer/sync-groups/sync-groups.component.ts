@@ -10,145 +10,165 @@ import * as firebase from 'firebase/app';
 
 
 import { MyUtilitiesService } from '../../../my-utilities.service';
-import { MyFirebaseSubscribeService } from "../../my-firebase-subscribe.service";
-// import { GameResult } from "../../game-result";
-import { SelectedCards } from "../../selected-cards";
-import { SyncGroup } from "../sync-group";
-// import { PlayerName } from "../../player-name";
-import { UserInfo } from "../../../user-info";
+import { DominionDatabaseService } from '../../dominion-database.service';
+
+import { MySyncGroupService } from '../my-sync-group.service';
+import { SelectedDominionSetService } from '../selected-dominion-set.service';
+
+import { SelectedCards } from '../../selected-cards';
+import { SyncGroup } from '../sync-group';
+import { UserInfo } from '../../../user-info';
 
 
 @Component({
-  providers: [ MyUtilitiesService, MyFirebaseSubscribeService ],
   selector: 'app-sync-groups',
   templateUrl: './sync-groups.component.html',
   styleUrls: ['./sync-groups.component.css']
 })
 export class SyncGroupsComponent implements OnInit, OnDestroy {
 
-  @Input() DominionSetList: { name: string, selected: boolean }[] = [];
-  @Input() SelectedCards: SelectedCards = new SelectedCards(); 
-  @Input() sidenav;
+  private alive = true;
+
+  @Input() private sidenav;
+
+  private DominionSetToggleValues: boolean[] = [];
+
+  private selectedCards: SelectedCards = new SelectedCards();
 
   syncGroups: { id: string, selected: boolean, data: SyncGroup }[] = [];
-  users: UserInfo[] = [];
 
-  me: Observable<firebase.User>;
-  myID: string;
-  signedIn: boolean = false;
+  private users: UserInfo[] = [];
 
-  // bind to form element
+  private myID: string;
+
   newGroupName: string;
   newGroupPassword: string;
   signInPassword: string;
-  showWrongPasswordAlert: boolean = false;
+  showWrongPasswordAlert = false;
 
-  subscriptions = [];
 
   constructor(
     public snackBar: MdSnackBar,
+    public afAuth: AngularFireAuth,
     public utils: MyUtilitiesService,
-    private afDatabase: AngularFireDatabase,
-    private afDatabaseService: MyFirebaseSubscribeService,
-    public afAuth: AngularFireAuth
+    private database: DominionDatabaseService,
+    private mySyncGroup: MySyncGroupService,
+    private selectedDominionSetService: SelectedDominionSetService
   ) {
-    this.me = afAuth.authState;
-    this.subscriptions.push(
-      this.me.subscribe( val => {
-        this.signedIn = !!val;
-        this.myID = ( this.signedIn ? val.uid : "" );
-      })
-    );
+    afAuth.authState
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.myID = ( val ? val.uid : '' ) );
 
-    this.subscriptions.push(
-      this.afDatabase.list("/userInfo").subscribe( val => {
-        this.users = val.map( e => new UserInfo(e) );
-      })
-    );
+    this.database.syncGroups$
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.syncGroups = val )
 
-    this.subscriptions.push(
-      this.afDatabase.list("/syncGroups", { preserveSnapshot: true }).subscribe( snapshots => {
-        this.syncGroups = this.afDatabaseService.convertAs( snapshots, "syncGroups" );
-      })
-    );
+    this.database.userInfo$
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.users = val );
+
+    this.mySyncGroup.selectedCards$()
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.selectedCards = val );
+
+    this.selectedDominionSetService.selectedDominionSetMerged$
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.DominionSetToggleValues[ val.index ] = val.checked );
+
   }
 
   ngOnInit() {
   }
 
-
   ngOnDestroy() {
-    this.subscriptions.forEach( e => e.unsubscribe() );
+    this.alive = false;
   }
 
 
-  getUserNamesInGroup( groupID ) {
-    return this.users.filter( user => user.dominionGroupID === groupID ).map( user => user.name );
-  }
-
-  updateMyGroupID( groupID ) {
-    const me = this.users.find( user => user.id === this.myID );
-    me.dominionGroupID = groupID;
-    this.afDatabase.list("/userInfo").update( this.myID, me )
-  }
-
-  addSyncGroup() {
-    const newGroup = new SyncGroup({
-      name                 : this.newGroupName,
-      password             : this.newGroupPassword,
-      timeStamp            : Date.now(),
-      SelectedCards        : this.SelectedCards,
-      DominionSetsSelected : this.DominionSetList.map( e => e.selected ),
-    });
-    const groupID = this.afDatabase.list("/syncGroups").push( newGroup ).key;
-    this.updateMyGroupID( groupID );
-    this.removeMemberEmptyGroup();
-  }
-
-  groupClicked( $event, index: number ) {
-    this.syncGroups.forEach( g => g.selected = false );
-    this.syncGroups[index].selected = true;
-    $event.stopPropagation();
-  }
-
-  backgroundClicked() {
-    this.syncGroups.forEach( g => g.selected = false );
-  }
-
-  signInPasswordIsValid( groupID ): boolean {
-    let isValid = ( this.signInPassword === this.syncGroups.find( g => g.id === groupID ).data.password );
+  private signInPasswordIsValid( groupID ): boolean {
+    const isValid = ( this.signInPassword === this.syncGroups.find( g => g.id === groupID ).data.password );
     this.showWrongPasswordAlert = !isValid;
     return isValid;
   }
 
-  signIn( groupID ) {
-    if ( !this.signInPasswordIsValid( groupID ) ) return;
-    this.updateMyGroupID( groupID );
-    this.openSnackBar("Successfully signed in!");
-    this.removeMemberEmptyGroup();
+  private updateMyGroupID( groupID ) {
+    return this.database.updateUserGroupID( groupID, this.myID );
+  }
+
+  private removeMemberEmptyGroup() {
+    const promises = this.syncGroups
+            .filter( g => this.users.findIndex( user => user.DominionGroupID === g.id ) === -1 )
+            .map( g => this.database.removeSyncGroup( g.id ) )
+    return Promise.all( promises );
+  }
+
+  private resetAddGroupForm() {
+    this.newGroupName = undefined;
+    this.newGroupPassword = undefined;
+  }
+
+  private resetSignInForm() {
     this.signInPassword = undefined;
+  }
+
+  addSyncGroup = async () => {
+    const ref = await this.database.addSyncGroup( new SyncGroup({
+        name                : this.newGroupName,
+        password            : this.newGroupPassword,
+        timeStamp           : Date.now(),
+        selectedCards       : this.selectedCards,
+        selectedDominionSet : this.DominionSetToggleValues,
+      }) );
+    const groupID = ref.key;
+    await this.updateMyGroupID( groupID );
+    await this.removeMemberEmptyGroup();
+    this.resetAddGroupForm();
+  };
+
+
+  signIn = async ( groupID ) => {
+    if ( !this.signInPasswordIsValid( groupID ) ) return;
+    await this.updateMyGroupID( groupID );
+    await this.removeMemberEmptyGroup();
+    this.resetSignInForm();
+    this.openSnackBar('Successfully signed in!');
     this.sidenav.close();
   }
 
-  signOut( groupID ) {
+  signOut = async ( groupID ) => {
     if ( !this.signInPasswordIsValid( groupID ) ) return;
-    this.updateMyGroupID( "" );
-    this.openSnackBar("Successfully signed out!");
-    this.removeMemberEmptyGroup();
-    this.signInPassword = undefined;
+    await this.updateMyGroupID('');
+    await this.removeMemberEmptyGroup();
+    this.resetSignInForm();
+    this.openSnackBar('Successfully signed out!');
     this.sidenav.close();
-  }
-
-  removeMemberEmptyGroup() {
-    setTimeout(
-      () => this.syncGroups
-              .filter( g => this.users.findIndex( user => user.dominionGroupID === g.id ) === -1 )
-              .forEach( g => this.afDatabase.list("/syncGroups").remove( g.id ) )
-      , 3000 );
   }
 
   private openSnackBar( message: string ) {
     this.snackBar.open( message, undefined, { duration: 3000 } );
   }
 
+
+  // view
+  getUserNamesInGroup( groupID ) {
+    return this.users.filter( user => user.DominionGroupID === groupID ).map( user => user.name );
+  }
+
+  groupClicked( $event, index: number ) {
+    this.resetSignInForm();
+    this.syncGroups.forEach( g => g.selected = false );
+    this.syncGroups[index].selected = true;
+    $event.stopPropagation();
+  }
+
+  backgroundClicked() {
+    this.resetSignInForm();
+    this.syncGroups.forEach( g => g.selected = false );
+  }
+
+  closeSideNav() {
+    this.resetSignInForm();
+    this.resetAddGroupForm();
+    this.sidenav.close()
+  }
 }

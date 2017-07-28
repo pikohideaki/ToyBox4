@@ -1,20 +1,24 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 
 import { MdDialog, MdDialogRef } from '@angular/material';
 
 import 'rxjs/add/operator/toPromise';
 import { Observable } from 'rxjs/Observable';
 
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
-import { AngularFireAuth } from 'angularfire2/auth';
-import * as firebase from 'firebase/app';
-
 import { MyUtilitiesService } from '../../../my-utilities.service';
-import { ConfirmDialogComponent } from "../../../confirm-dialog/confirm-dialog.component";
+import { DominionDatabaseService } from '../../dominion-database.service';
 
-import { CardProperty } from "../../card-property";
-import { DominionCardImageComponent } from "../../dominion-card-image/dominion-card-image.component";
+import { MySyncGroupService } from '../my-sync-group.service';
+import { SelectedCardsService } from '../selected-cards.service';
+import { BlackMarketPileShuffledService } from '../black-market-pile-shuffled.service';
+
+import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.component';
+
+import { DominionCardImageComponent } from '../../dominion-card-image/dominion-card-image.component';
 import { CardPropertyDialogComponent } from '../../card-property-dialog/card-property-dialog.component';
+
+import { CardProperty } from '../../card-property';
+import { SelectedCards } from '../../selected-cards';
 
 
 @Component({
@@ -22,84 +26,55 @@ import { CardPropertyDialogComponent } from '../../card-property-dialog/card-pro
   templateUrl: './black-market-pile.component.html',
   styleUrls: ['./black-market-pile.component.css']
 })
-export class BlackMarketPileComponent implements OnInit, OnChanges, OnDestroy {
+export class BlackMarketPileComponent implements OnInit, OnDestroy {
 
-  faceUp: boolean = false;
+  private alive = true;
+  getDataDone = false;
 
-  @Input() longSideLength: number = 140;
+  faceUp = false;
+  @Input() longSideLength = 180;
 
-  @Input() CardPropertyList: CardProperty[];
+  cardPropertyList: CardProperty[];
 
-  @Input() BlackMarketPile: number[] = [];
-  BlackMarketPileShuffled: { cardIndex: number, revealed: boolean }[] = [];
-
-  BlackMarketOperationPhase: number = 1;
+  BlackMarketPileShuffled: { cardIndex: number, faceUp: boolean }[] = [];
+  BlackMarketOperationPhase = 1;
 
   promiseResolver = {};
 
-
-  signedIn: boolean = false;
-  mySyncGroup$;
-  mySyncGroupID: string;
-  subscriptions = [];
 
 
   constructor(
     public dialog: MdDialog,
     private utils: MyUtilitiesService,
-    private afDatabase: AngularFireDatabase,
-    public afAuth: AngularFireAuth
-  ) { }
+    private database: DominionDatabaseService,
+    private selectedCardsService: SelectedCardsService,
+    private mySyncGroup: MySyncGroupService,
+    private BlackMarketService: BlackMarketPileShuffledService
+  ) {
+    this.mySyncGroup.BlackMarketOperationPhase$()
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.BlackMarketOperationPhase = val );
 
-  ngOnInit() {
-    const me$ = this.afAuth.authState;
-
-
-    this.subscriptions.push(
-      me$.subscribe( me => {
-        this.signedIn = !!me;
-        if ( !this.signedIn ) return;
-
-        const myID = me.uid;
-        this.subscriptions.push(
-          this.afDatabase.object(`/userInfo/${myID}/dominionGroupID`).subscribe( val => {
-            this.mySyncGroupID = val.$value;
-            if ( !this.mySyncGroupID ) return;
-
-            this.subscriptions.push(
-              this.afDatabase.object(`/syncGroups/${this.mySyncGroupID}/BlackMarketOperationPhase`)
-              .subscribe( val => {
-                this.BlackMarketOperationPhase = val.$value;
-              })
-            );
-
-            this.subscriptions.push(
-              this.afDatabase.list(`/syncGroups/${this.mySyncGroupID}/BlackMarketPileShuffled`)
-              .subscribe( val => {
-                this.BlackMarketPileShuffled = val;
-              })
-            );
-
-          })
-        );
-      } )
-    );
-
+    Observable.combineLatest(
+        this.database.cardPropertyList$,
+        this.BlackMarketService.BlackMarketPileShuffled$,
+        ( cardPropertyList, BlackMarketPileShuffled ) => ({
+          cardPropertyList        : cardPropertyList,
+          BlackMarketPileShuffled : BlackMarketPileShuffled
+        }) )
+      .takeWhile( () => this.alive )
+      .subscribe( value => {
+        this.cardPropertyList = value.cardPropertyList;
+        this.BlackMarketPileShuffled = value.BlackMarketPileShuffled;
+        this.getDataDone = true;
+      } );
   }
 
-
-  ngOnChanges( changes: SimpleChanges ) {
-    if ( changes.BlackMarketPile != undefined ) {
-      this.BlackMarketOperationPhase = 1;
-      this.BlackMarketPileShuffled
-        = this.utils.shuffle( this.BlackMarketPile )
-                    .map( e => Object({ cardIndex: e, revealed: false }) );
-      this.updateServerValue();
-    }
+  ngOnInit() {
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach( e => e.unsubscribe() );
+    this.alive = false;
   }
 
 
@@ -109,59 +84,64 @@ export class BlackMarketPileComponent implements OnInit, OnChanges, OnDestroy {
    * ※「闇市場」の効果による購入でカード1枚を獲得したときに、リアクションとして「交易人」を手札から公開した場合、そのカード1枚は獲得されず、闇市場デッキの一番上に戻す。
    */
 
-  updateServerValue() {
-    if ( this.signedIn && this.mySyncGroupID !== "" ) {
-      this.afDatabase.object( `/syncGroups/${this.mySyncGroupID}/BlackMarketOperationPhase`)
-        .set( this.BlackMarketOperationPhase );
-      this.afDatabase.object( `/syncGroups/${this.mySyncGroupID}`)
-        .update( { "BlackMarketPileShuffled": this.BlackMarketPileShuffled} );
-    }
+  onClick( operation: string, value: number ) {
+    this.promiseResolver[operation]( value );
+  }
+
+  putOnTheBottomDone(): boolean {
+    const numberOfFaceDownCards = this.BlackMarketPileShuffled.filter( e => !e.faceUp ).length;
+    const firstIndexOfFaceUpCard = this.BlackMarketPileShuffled.findIndex( e => e.faceUp );
+    return numberOfFaceDownCards === firstIndexOfFaceUpCard;
   }
 
   revealTop3Cards = async () => {
     // 上から3枚をめくる
-    this.BlackMarketOperationPhase = 1;
-    this.BlackMarketPileShuffled.forEach( (e, i) => e.revealed = ( i < 3) );
-    this.updateServerValue();
+    this.mySyncGroup.setBlackMarketOperationPhase(1);
+
+    this.BlackMarketPileShuffled.forEach( (e, i) => e.faceUp = (i < 3) );
+    this.mySyncGroup.setBlackMarketPileShuffled( this.BlackMarketPileShuffled );
+
 
     // 3枚のうち1枚を購入するか，1枚も購入しない
-    this.BlackMarketOperationPhase++;
-    this.updateServerValue();
-    const clickedElementValue
-      = await new Promise<number>( resolve => this.promiseResolver['buy'] = resolve );
-    
-    if ( 0 <= clickedElementValue && clickedElementValue < 3 ) {  // buy a card
-      const cardIndex = this.BlackMarketPileShuffled[ clickedElementValue ].cardIndex;
-      let dialogRef = this.dialog.open( ConfirmDialogComponent );
-      dialogRef.componentInstance.message = `「${this.CardPropertyList[cardIndex].name_jp}」を購入しますか？`;
-      const yn = await dialogRef.afterClosed().toPromise();
-      if ( yn === "yes" ) {
-        this.utils.removeAt( this.BlackMarketPileShuffled, clickedElementValue );
-        this.updateServerValue();
+    this.mySyncGroup.setBlackMarketOperationPhase(2);
+
+    while (true) {
+      const clickedElementValue
+        = await new Promise<number>( resolve => this.promiseResolver['buy'] = resolve );
+
+      if ( clickedElementValue === -1 ) break;  // don't buy
+
+      if ( 0 <= clickedElementValue && clickedElementValue < 3 ) {  // buy a card
+        const cardIndex = this.BlackMarketPileShuffled[ clickedElementValue ].cardIndex;
+        const dialogRef = this.dialog.open( ConfirmDialogComponent );
+        dialogRef.componentInstance.message = `「${this.cardPropertyList[cardIndex].name_jp}」を購入しますか？`;
+        const yn = await dialogRef.afterClosed().toPromise();
+        if ( yn === 'yes' ) {
+          this.utils.removeAt( this.BlackMarketPileShuffled, clickedElementValue );
+          this.mySyncGroup.setBlackMarketPileShuffled( this.BlackMarketPileShuffled );
+          break;
+        }
       }
     }
 
     // 残りは好きな順に闇市場デッキの下に置く
-    this.BlackMarketOperationPhase++;
-    this.updateServerValue();
+    this.mySyncGroup.setBlackMarketOperationPhase(3);
+
     while (true) {
       const clickedElementValue2
         = await new Promise<number>( resolve => this.promiseResolver['putOnTheBottom'] = resolve );
-      if ( clickedElementValue2 == -1 ) break;
+      if ( clickedElementValue2 === -1 ) break;
 
-      const removedElement = this.utils.removeAt( this.BlackMarketPileShuffled, clickedElementValue2 );
-      this.BlackMarketPileShuffled.push(removedElement);
-      this.updateServerValue();
+      const selectedElement = this.utils.removeAt( this.BlackMarketPileShuffled, clickedElementValue2 );
+      this.BlackMarketPileShuffled.push(selectedElement);
+      this.mySyncGroup.setBlackMarketPileShuffled( this.BlackMarketPileShuffled );
     }
 
     // 確認
-    this.BlackMarketPileShuffled.forEach( e => e.revealed = false );  // reset
-    this.BlackMarketOperationPhase = 1;
-    this.updateServerValue();
-  }
+    this.BlackMarketPileShuffled.forEach( e => e.faceUp = false );  // reset
+    this.mySyncGroup.setBlackMarketPileShuffled( this.BlackMarketPileShuffled );
 
-  onClick( operation: string, value: number ) {
-    this.promiseResolver[operation]( value );
+    this.mySyncGroup.setBlackMarketOperationPhase(1);
   }
 
 }

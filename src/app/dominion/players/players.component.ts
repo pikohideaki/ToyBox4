@@ -1,14 +1,15 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Observable } from 'rxjs/Rx';
+
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 import { MyUtilitiesService } from '../../my-utilities.service';
 import { MyDataTableComponent } from '../../my-data-table/my-data-table.component';
-import { PlayerName } from "../player-name";
-import { MyFirebaseSubscribeService } from "../my-firebase-subscribe.service";
+import { PlayerName } from '../player-name';
+import { DominionDatabaseService } from '../dominion-database.service';
 
 
 @Component({
-  providers: [MyFirebaseSubscribeService],
   selector: 'app-players',
   templateUrl: './players.component.html',
   styleUrls: [
@@ -18,10 +19,11 @@ import { MyFirebaseSubscribeService } from "../my-firebase-subscribe.service";
 })
 export class PlayersComponent implements OnInit, OnDestroy {
 
-  subscriptions = [];
+  private alive = true;
 
-  PlayersNameList: { name: string, name_yomi: string }[] = [];
-  httpGetDone: boolean = false;
+  getDataDone = false;
+
+  playersNameList$: Observable<{ name: string, name_yomi: string }[]>;
 
   columnSettings = [
     { name: 'name'     , align: 'l', manip: 'none', button: false, headerTitle: '名前' },
@@ -32,22 +34,20 @@ export class PlayersComponent implements OnInit, OnDestroy {
 
   constructor(
     private utils: MyUtilitiesService,
-    afDatabase: AngularFireDatabase,
-    private afDatabaseService: MyFirebaseSubscribeService
+    private database: DominionDatabaseService
   ) {
-    this.subscriptions.push(
-      afDatabase.list( '/data/PlayersNameList' ).subscribe( val => {
-        this.PlayersNameList = this.afDatabaseService.convertAs( val, "PlayersNameList" );
-        this.httpGetDone = true;
-      } )
-    );
+      this.playersNameList$ = this.database.playersNameList$;
+
+      this.playersNameList$
+        .first()
+        .subscribe( () => this.getDataDone = true );
   }
 
   ngOnInit() {
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach( e => e.unsubscribe() );
+    this.alive = false;
   }
 
 }

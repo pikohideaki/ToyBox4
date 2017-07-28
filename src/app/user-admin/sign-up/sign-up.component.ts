@@ -3,11 +3,10 @@ import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { MdSnackBar } from '@angular/material';
 
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
-
 import { Observable } from 'rxjs/Observable';
 import { AngularFireAuth } from 'angularfire2/auth';
-import * as firebase from 'firebase/app';
+
+import { DominionDatabaseService } from '../../dominion/dominion-database.service';
 
 import { UserInfo } from '../../user-info';
 
@@ -18,7 +17,7 @@ import { UserInfo } from '../../user-info';
 })
 export class SignUpComponent implements OnInit {
 
-  waitingForResponse: boolean = false;
+  waitingForResponse = false;
 
   email: string;
   password: string;
@@ -32,8 +31,8 @@ export class SignUpComponent implements OnInit {
     public snackBar: MdSnackBar,
     public afAuth: AngularFireAuth,
     private router: Router,
-    private afDatabase: AngularFireDatabase,
-    private location: Location
+    private location: Location,
+    private database: DominionDatabaseService
   ) {
   }
 
@@ -41,8 +40,8 @@ export class SignUpComponent implements OnInit {
   }
 
   signUp() {
-    this.errorMessageForEmail = "";
-    this.errorMessageForPassword = "";
+    this.errorMessageForEmail = '';
+    this.errorMessageForPassword = '';
 
     this.waitingForResponse = true;
     this.afAuth.auth.createUserWithEmailAndPassword( this.email, this.password )
@@ -50,41 +49,41 @@ export class SignUpComponent implements OnInit {
       this.waitingForResponse = false;
       this.setDisplayName();
 
-      let newUser = new UserInfo({
-        databaseKey     : afUser.uid,
-        id              : afUser.uid,
-        name            : this.displayName,
-        dominionGroupID : "",
-      });
-      this.afDatabase.list("/userInfo").update( afUser.uid, newUser );
+      this.database.updateUserInfo( afUser.uid, new UserInfo({
+          databaseKey     : afUser.uid,
+          id              : afUser.uid,
+          name            : this.displayName,
+          DominionGroupID : '',
+        }) );
 
       this.location.back();
-      this.openSnackBar("Successfully logged in!");
+      this.openSnackBar('Successfully logged in!');
     } )
     .catch( (error: any ) => {
       this.waitingForResponse = false;
 
       switch ( error.code ) {
-        case "auth/email-already-in-use" :
+        case 'auth/email-already-in-use' :
           this.errorMessageForEmail = error.message;
           break;
-        case "auth/invalid-email" :
+        case 'auth/invalid-email' :
           this.errorMessageForEmail = error.message;
           break;
-        case "auth/operation-not-allowed" :
-          console.log( error.message );
+        case 'auth/operation-not-allowed' :
+          this.errorMessageForEmail = error.message;
           break;
-        case "auth/weak-password" :
+        case 'auth/weak-password' :
           this.errorMessageForPassword = error.message;
           break;
         default :
+          this.errorMessageForEmail = error.message;
           break;
       }
     } );
   }
 
   private setDisplayName() {
-    this.afAuth.auth.currentUser.updateProfile( { displayName: this.displayName, photoURL: "" } );
+    this.afAuth.auth.currentUser.updateProfile( { displayName: this.displayName, photoURL: '' } );
   }
 
 

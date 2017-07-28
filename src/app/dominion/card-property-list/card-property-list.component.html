@@ -1,12 +1,15 @@
 
 <div class="bodyWithPadding">
-    <my-data-table
-        [data]='CardPropertyListForView'
-        [columnSettings]='columnSettings'
-        [itemsPerPageOptions]='itemsPerPageOptions'
-        [itemsPerPageDefault]='itemsPerPageDefault'
-        (onClick)='showDetail( $event.rowIndex )' >
-    </my-data-table>
 
-    <my-waiting-spinner [done]="httpGetDone"></my-waiting-spinner>
+  <app-my-data-table
+    *ngIf="getDataDone"
+    [data]='cardPropertyListForView$ | async'
+    [columnSettings]='columnSettings'
+    [itemsPerPageOptions]='[ 25, 50, 100, 200 ]'
+    [itemsPerPageDefault]='50'
+    (onClick)='showDetail( $event.rowIndex )' >
+  </app-my-data-table>
+
+  <app-my-waiting-spinner [done]="getDataDone"></app-my-waiting-spinner>
+
 </div>

@@ -1,7 +1,6 @@
 
 <div class="bodyWithPadding">
 
-
   <!--<a class='floatButton'  [href]='GetGameResultListUrl' download="GameResultList.json">
     <button md-raised-button>
       <md-icon>file_download</md-icon>
@@ -12,47 +11,65 @@
   <p>
     <span class="filterTitle"> 期間： </span>
     <md-input-container>
-      <input mdInput [mdDatepicker]="myDatepickerBegin" placeholder="日付" [(ngModel)]="dateBegin">
-      <button mdSuffix [mdDatepickerToggle]="myDatepickerBegin"></button>
+      <input mdInput
+          placeholder="日付"
+          [mdDatepicker]="datepickerBegin"
+          [value]="dateBegin$ | async">
+      <button mdSuffix [mdDatepickerToggle]="datepickerBegin"></button>
     </md-input-container>
-    <md-datepicker #myDatepickerBegin (selectedChanged)="filterGameResultList()"></md-datepicker>
+    <md-datepicker #datepickerBegin
+        (selectedChanged)="changeDateBegin( $event )">
+    </md-datepicker>
     ～
     <md-input-container>
-      <input mdInput [mdDatepicker]="myDatepickerEnd" placeholder="日付" [(ngModel)]="dateEnd">
-      <button mdSuffix [mdDatepickerToggle]="myDatepickerEnd"></button>
+      <input mdInput
+          placeholder="日付"
+          [mdDatepicker]="datepickerEnd"
+          [value]="dateEnd$ | async">
+      <button mdSuffix [mdDatepickerToggle]="datepickerEnd"></button>
     </md-input-container>
-    <md-datepicker #myDatepickerEnd (selectedChanged)="filterGameResultList()"></md-datepicker>
+    <md-datepicker #datepickerEnd
+        (selectedChanged)="changeDateEnd( $event )">
+    </md-datepicker>
 
-    <button md-raised-button (click)="filterGameResultList()"> OK </button>
-    <button md-raised-button class="latestResultButton" (click)="latestResult()"> 最新の結果 </button>
+    <!-- <button md-raised-button (click)="okClicked()"> OK </button>  -->
+    <button md-raised-button class="latestResultButton"
+        (click)="latestResultClicked()">
+      最新の結果
+    </button>
+
+    <button class='floatButton' md-raised-button
+        (click)="resetAllClicked()">
+      Reset All
+    </button>
   </p>
-
-
-  <button class='floatButton' md-raised-button (click)="resetFilter()">Reset All</button>
-
 
   <p>
     <span class="filterTitle">プレイヤー数：</span>
-    <ng-container *ngFor="let option of playerNumOptions">
-      <md-checkbox [(ngModel)]="option.selected" (change)="filterGameResultList()">
-          {{option.playerNum}}人
+    <ng-container *ngFor="let option of (numberOfPlayersChecked$ | async)">
+       <md-checkbox
+           [checked]="option.checked"
+          (change)="numberOfPlayersOnCheck( $event.checked, option.numberOfPlayers )" >
+        {{option.numberOfPlayers}}人
       </md-checkbox>
     </ng-container>
   </p>
 
-  <md-tab-group *ngIf="httpGetDone">
-    <md-tab label="個人成績">
-      <game-result-of-player
-          [GameResultListFiltered]="GameResultListFiltered"
-          [playerNumOptions]="playerNumOptions">
-      </game-result-of-player>
+
+
+  <md-tab-group *ngIf="getDataDone">
+     <md-tab label="総合成績">
+      <app-game-result-list
+          [gameResultListFiltered$]="gameResultListFiltered$">
+      </app-game-result-list>
     </md-tab>
-    <md-tab label="総合成績">
-      <game-result-list [GameResultListFiltered]="GameResultListFiltered">
-      </game-result-list>
+    <md-tab label="個人成績">
+      <app-game-result-of-player
+          [gameResultListFiltered$]="gameResultListFiltered$">
+      </app-game-result-of-player>
     </md-tab>
   </md-tab-group>
 
-  <my-waiting-spinner [done]="httpGetDone"></my-waiting-spinner>
+  <app-my-waiting-spinner [done]="getDataDone"></app-my-waiting-spinner>
 </div>
 

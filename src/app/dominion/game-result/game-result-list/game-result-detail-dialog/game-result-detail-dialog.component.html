@@ -1,0 +1,183 @@
+
+<div  class="bodyWithPadding" >
+
+  <!--title-->
+  <h1 md-dialog-title>結果</h1>
+
+  <div md-dialog-content class="container">
+    <div>
+      <p>日付：
+          {{gameResult.date.getFullYear()}}年
+          {{gameResult.date.getMonth() + 1}}月
+          {{gameResult.date.getDate()}}日</p>
+      <p>場所：{{gameResult.place}}</p>
+      <div>
+        <table class='my-data-table my-data-table--shadow3px my-data-table--vertical-line'>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Name</th>
+              <th>VP</th>
+              <th>Score</th>
+              <th>同点手番勝ち</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let player of gameResult.players">
+            <tr>
+              <td> {{player.rank}} </td>
+              <td> {{player.name}} </td>
+              <td> {{player.VP}} </td>
+              <td> {{player.score}} </td>
+              <td> <md-icon *ngIf="player.lessTurns">check</md-icon> </td>
+            </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+      <p> Memo : {{gameResult.memo}} </p>
+    </div>
+
+    <div id="supplyTable">
+      <div class="Prosperity_DarkAges">
+        <span id="Prosperity" *ngIf="selectedCards.KingdomCards10.length > 0">
+          <span *ngIf="selectedCards.Prosperity">植民地場</span>
+          <span *ngIf="selectedCards.DarkAges">避難所場</span>
+        </span>
+      </div>
+
+      <div class="selectedDominionSetString">
+        {{selectedDominionSetString}}
+      </div>
+
+      <table class='my-data-table my-data-table--shadow3px my-data-table--vertical-line'>
+        <thead>
+          <tr *ngIf="selectedCards.KingdomCards10.length > 0">
+            <th>セット</th>
+            <th>名前</th>
+            <th>name</th>
+            <th>コスト</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cardIndex of selectedCards.KingdomCards10; let idx = index ">
+            <td> {{ cardPropertyList[cardIndex].DominionSetName  }} </td>
+            <td>
+              <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
+                {{ cardPropertyList[cardIndex].name_jp }}
+              </button>
+            </td>
+            <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
+            <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
+          </tr>
+        </tbody>
+
+        <thead>
+          <tr *ngIf="selectedCards.BaneCard.length > 0">
+            <th colspan="5">災いカード（魔女娘用）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cardIndex of selectedCards.BaneCard; let idx = index ">
+            <td> {{ cardPropertyList[cardIndex].DominionSetName  }} </td>
+            <td>
+              <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
+                {{ cardPropertyList[cardIndex].name_jp }}
+              </button>
+            </td>
+            <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
+            <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
+          </tr>
+        </tbody>
+
+        <thead>
+          <tr *ngIf="selectedCards.EventCards.length > 0">
+            <th colspan="5">Event</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cardIndex of selectedCards.EventCards; let idx = index ">
+            <td> {{ cardPropertyList[cardIndex].DominionSetName  }} </td>
+            <td>
+              <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
+                {{ cardPropertyList[cardIndex].name_jp }}
+              </button>
+            </td>
+            <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
+            <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
+          </tr>
+        </tbody>
+
+        <thead>
+          <tr *ngIf="selectedCards.LandmarkCards.length > 0">
+            <th colspan="5">LandmarkCards</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cardIndex of selectedCards.LandmarkCards; let idx = index ">
+            <td> {{ cardPropertyList[cardIndex].DominionSetName  }} </td>
+            <td>
+              <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
+                {{ cardPropertyList[cardIndex].name_jp }}
+              </button>
+            </td>
+            <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
+            <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
+          </tr>
+        </tbody>
+
+        <thead>
+          <tr *ngIf="selectedCards.Obelisk.length > 0">
+            <th colspan="5">Obelisk 指定カード</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cardIndex of selectedCards.Obelisk; let idx = index ">
+            <td> {{ cardPropertyList[cardIndex].DominionSetName  }} </td>
+            <td>
+              <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
+                {{ cardPropertyList[cardIndex].name_jp }}
+              </button>
+            </td>
+            <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
+            <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
+          </tr>
+        </tbody>
+
+        <thead>
+          <tr *ngIf="selectedCards.BlackMarketPile.length > 0">
+            <th colspan="5">闇市場デッキ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cardIndex of selectedCards.BlackMarketPile; let idx = index ">
+            <td> {{ cardPropertyList[cardIndex].DominionSetName  }} </td>
+            <td>
+              <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
+                {{ cardPropertyList[cardIndex].name_jp }}
+              </button>
+            </td>
+            <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
+            <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+
+
+
+  <!--OK button-->
+  <div md-dialog-actions class='actionButtons'>
+    <span class="marginedElement">
+      <button md-raised-button
+        md-dialog-close="OK Clicked"
+        color='primary'>
+        OK
+      </button>
+    </span>
+  </div>
+
+</div>

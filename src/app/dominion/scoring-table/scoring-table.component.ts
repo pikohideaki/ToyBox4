@@ -1,32 +1,29 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { Observable } from 'rxjs/Rx';
 
-import { MyFirebaseSubscribeService } from "../my-firebase-subscribe.service";
+import { DominionDatabaseService } from '../dominion-database.service';
 
 
 @Component({
-  providers: [MyFirebaseSubscribeService],
   selector: 'app-scoring-table',
   templateUrl: './scoring-table.component.html',
   styleUrls: ['./scoring-table.component.css']
 })
 export class ScoringTableComponent implements OnInit, OnDestroy {
 
-  subscriptions = [];
+  private alive = true;
 
-  httpGetDone: boolean = false;
-  ScoringList : number[][] = [];
+  getDataDone = false;
 
-  ScoringListForView: {
-    playerNum : number,
-    rank_1st : string,
-    rank_2nd : string,
-    rank_3rd : string,
-    rank_4th : string,
-    rank_5th : string,
-    rank_6th : string,
-  }[];
-
+  scoringListForView$: Observable<{
+    playerNum: number,
+    rank_1st: string,
+    rank_2nd: string,
+    rank_3rd: string,
+    rank_4th: string,
+    rank_5th: string,
+    rank_6th: string,
+  }[]>;
 
   columnSettings = [
     { name: 'playerNum', align: 'c', manip: 'none', button: false, headerTitle: 'プレイヤー数' },
@@ -40,20 +37,15 @@ export class ScoringTableComponent implements OnInit, OnDestroy {
 
 
   constructor(
-    afDatabase: AngularFireDatabase,
-    private afDatabaseService: MyFirebaseSubscribeService
+    private database: DominionDatabaseService
   ) {
-    this.subscriptions.push(
-      afDatabase.list( '/data/ScoringList' ).subscribe( val => {
-        this.httpGetDone = true;
-        this.ScoringList = this.afDatabaseService.convertAs( val, "ScoringList" );
-
-        this.ScoringListForView
-          = this.ScoringList
-              .map( (value,index,_) => { return { playerNum: index, score: value } } )
+    this.scoringListForView$
+      = this.database.scoringList$
+          .map( scoringList =>
+            scoringList
+              .map( (value, index) => ({ playerNum: index, score: value }) )
               .filter( e => e.score[1] > 0 )
-              .map( e => {
-                return {
+              .map( e => ({
                   playerNum : e.playerNum,
                   rank_1st : ( e.score[1] < 0 ? '' : e.score[1].toString() ),
                   rank_2nd : ( e.score[2] < 0 ? '' : e.score[2].toString() ),
@@ -61,16 +53,20 @@ export class ScoringTableComponent implements OnInit, OnDestroy {
                   rank_4th : ( e.score[4] < 0 ? '' : e.score[4].toString() ),
                   rank_5th : ( e.score[5] < 0 ? '' : e.score[5].toString() ),
                   rank_6th : ( e.score[6] < 0 ? '' : e.score[6].toString() ),
-                } } );
-      } )
-    );
+                }) )
+          );
+
+    this.scoringListForView$
+      .takeWhile( () => this.alive )
+      .subscribe( () => this.getDataDone = true );
+
   }
 
   ngOnInit() {
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach( e => e.unsubscribe() );
+    this.alive = false;
   }
 
 }

@@ -4,23 +4,29 @@ import 'rxjs/add/operator/startWith';
 import 'rxjs/add/operator/map';
 import { MdDialog, MdSnackBar } from '@angular/material';
 
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import { Observable } from 'rxjs/Observable';
-import { AngularFireAuth } from 'angularfire2/auth';
-import * as firebase from 'firebase/app';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
-import { MyFirebaseSubscribeService } from '../../my-firebase-subscribe.service';
+import { AngularFireAuth } from 'angularfire2/auth';
+
 
 import { MyUtilitiesService } from '../../../my-utilities.service';
-import { PlayerName } from '../../player-name';
+import { DominionDatabaseService } from '../../dominion-database.service';
+
+import { MySyncGroupService } from '../my-sync-group.service';
+import { SelectedDominionSetService } from '../selected-dominion-set.service';
+import { SelectedCardsService } from '../selected-cards.service';
+import { NewGameResultService } from '../new-game-result.service';
+
 import { GameResult } from '../../game-result';
 import { SelectedCards } from '../../selected-cards';
-import { SubmitGameResultDialogComponent } from '../../submit-game-result-dialog/submit-game-result-dialog.component';
+import { PlayerResult } from '../player-result';
 import { CardProperty } from '../../card-property';
+
+import { SubmitGameResultDialogComponent } from '../../submit-game-result-dialog/submit-game-result-dialog.component';
 
 
 @Component({
-  providers: [MyUtilitiesService, MyFirebaseSubscribeService],
   selector: 'app-add-game-result',
   templateUrl: './add-game-result.component.html',
   styleUrls: [
@@ -30,224 +36,194 @@ import { CardProperty } from '../../card-property';
 })
 export class AddGameResultComponent implements OnInit, OnDestroy {
 
-  subscriptions = [];
+  private alive = true;
+  getDataDone = false;
 
-  httpGetDone = false;
+  private DominionSetToggleValues: boolean[] = [];
+  private cardPropertyList: CardProperty[];
+  private selectedCards: SelectedCards = new SelectedCards();
 
-
-  date: Date;
-
+  date: Date = new Date( Date.now() );
   place = '';
-  places: string[] = [];
-  stateCtrl: FormControl;
-  filteredPlaces: any;
-
-  GameResultList: GameResult[] = [];
-
-  startPlayerName = '';
   memo = '';
+  startPlayerName = '';
+  playersGameResult: PlayerResult[] = [];
 
+  places: string[] = [];
 
-  @Input() DominionSetList: { name: string, selected: boolean }[] = [];
-  @Input() CardPropertyList: CardProperty[];
-  @Input() SelectedCards: SelectedCards = new SelectedCards();
+  newGameResultSubmitted$: Observable<boolean>;
 
-  PlayersNameList: PlayerName[] = [];
-  gameResultOfPlayers: {
-      name: string,
-      selected: boolean,
-      VP: number,
-      lessTurns: boolean,
-    }[] = [];
-
-
-  newGameResult: GameResult;
-
-
-  signedIn: boolean;
-  mySyncGroupID;
 
   constructor(
     private utils: MyUtilitiesService,
     public dialog: MdDialog,
     public snackBar: MdSnackBar,
-    private afDatabaseService: MyFirebaseSubscribeService,
-    private afDatabase: AngularFireDatabase,
-    public afAuth: AngularFireAuth
+    private database: DominionDatabaseService,
+    private mySyncGroup: MySyncGroupService,
+    private selectedCardsService: SelectedCardsService,
+    private selectedDominionSetService: SelectedDominionSetService,
+    private newGameResultService: NewGameResultService
   ) {
+    const playersGameResult$ = this.database.playersNameList$
+      .map( list => list.map( player => new PlayerResult(player.name) ) );
 
-    const me$ = this.afAuth.authState;
+    Observable.combineLatest(
+        this.selectedCardsService.selectedCards$,
+        this.database.cardPropertyList$,
+        this.database.gameResultList$,
+        playersGameResult$,
+        ( selectedCards,
+          cardPropertyList,
+          gameResultList,
+          playersGameResult ) => ({
+            selectedCards             : selectedCards,
+            cardPropertyList          : cardPropertyList,
+            gameResultList            : gameResultList,
+            playersGameResult         : playersGameResult,
+          }) )
+      .takeWhile( () => this.alive )
+      .subscribe( value => {
+        this.selectedCards = value.selectedCards;
+        this.cardPropertyList = value.cardPropertyList;
 
-    this.subscriptions.push(
-      me$.subscribe( me => {
-        this.signedIn = !!me;
-        if ( !this.signedIn ) { return; }
+        this.places = this.utils.uniq( value.gameResultList.map( e => e.place ) )
+                                .filter( e => e !== '' );
 
-        const myID = me.uid;
-        this.subscriptions.push(
-          this.afDatabase.object(`/userInfo/${myID}/dominionGroupID`).subscribe( val => {
-            this.mySyncGroupID = val.$value;
-            if ( !this.mySyncGroupID ) { return; }
+        this.playersGameResult = value.playersGameResult;
 
-            this.subscriptions.push(
-              afdb_PlayersNameList.subscribe( val => {
-                this.PlayersNameList = this.afDatabaseService.convertAs( val, 'PlayersNameList' );
-                this.initializePlayers();
-                this.setSubscribers();
-              } )
-            );
+        this.newGameResultService.playerResultsSelectedMerged$
+          .takeWhile( () => this.alive )
+          .subscribe( val => this.playersGameResult[ val.playerIndex ].selected = val.value );
 
-          })
-        );
-      } )
-    );
+        this.newGameResultService.playerResultsVPMerged$
+          .takeWhile( () => this.alive )
+          .subscribe( val => this.playersGameResult[ val.playerIndex ].VP = val.value );
 
+        this.newGameResultService.playerResultsLessTurnsMerged$
+          .takeWhile( () => this.alive )
+          .subscribe( val => this.playersGameResult[ val.playerIndex ].lessTurns = val.value );
 
-
-    this.date = new Date( Date.now() );
-
-    this.stateCtrl = new FormControl();
-
-    const afdb_PlayersNameList = afDatabase.list( '/data/PlayersNameList' );
-    const afdb_ScoringList     = afDatabase.list( '/data/ScoringList' );
-    const afdb_GameResultList  = afDatabase.list( '/data/GameResultList', { preserveSnapshot: true } );
-
-    Promise.all([
-      afdb_PlayersNameList.first().toPromise(),
-      afdb_ScoringList.first().toPromise(),
-      afdb_GameResultList.first().toPromise(),
-    ])
-    .then( () => this.httpGetDone = true );
+        this.getDataDone = true;
+      });
 
 
-    this.subscriptions.push(
-      afdb_ScoringList.subscribe( val => {
-        const ScoringList = this.afDatabaseService.convertAs( val, 'ScoringList' );
-        this.subscriptions.push(
-          afdb_GameResultList.subscribe( value => {
-            this.GameResultList = this.afDatabaseService.convertAs( value, 'GameResultList', ScoringList );
-            this.places = this.utils.uniq( this.GameResultList.map( e => e.place ) )
-                                    .filter( e => e !== '' );
+    this.selectedDominionSetService.selectedDominionSetMerged$
+      .takeWhile( () => this.alive )
+      .subscribe( value => this.DominionSetToggleValues[ value.index ] = value.checked );
 
-            this.filteredPlaces = this.stateCtrl.valueChanges
-                  .startWith(null)
-                  .map( name => this.filterPlaces(name) );
-          } )
-        );
-      } )
-    );
+    this.newGameResultService.place$
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.place = val );
 
+    this.newGameResultService.memo$
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.memo = val );
+
+    this.newGameResultService.startPlayerName$
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.startPlayerName = val );
+
+    this.newGameResultSubmitted$ = this.mySyncGroup.newGameResultSubmitted$();
   }
+
 
   ngOnInit() {
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach( e => e.unsubscribe() );
+    this.alive = false;
+  }
+
+  private selectedPlayers(): any[] {
+    return this.playersGameResult.filter( player => player.selected );
   }
 
 
-  filterPlaces( val: string ): string[] {
-    return val ? this.places.filter( s => this.utils.submatch( s, val, true ) )
-           : this.places;
+  changePlace( place: string ) {
+    this.newGameResultService.changePlace( place );
   }
 
-  private setSubscribers() {
-    for ( let i = 0; i < this.gameResultOfPlayers.length; ++i ) {
-      Object.keys( this.gameResultOfPlayers[i] ).forEach( property => {
+  changeMemo( memo: string ) {
+    this.newGameResultService.changeMemo( memo );
+  }
 
-        this.subscriptions.push(
-          this.afDatabase.object(`/syncGroups/${this.mySyncGroupID}/gameResultOfPlayers/${i}/${property}`)
-          .subscribe( val => this.gameResultOfPlayers[i][property] = val.$value )
-        );
-      })
-    }
+  changeStartPlayerName( playerName: string ) {
+    this.newGameResultService.changeStartPlayerName( playerName );
+  }
 
-    this.subscriptions.push(
-      this.afDatabase.object(`/syncGroups/${this.mySyncGroupID}/gameResultOfPlayers/startPlayerName`)
-      .subscribe( val => this.startPlayerName = val.$value )
-    );
+  changePlayersResultSelected( playerName: string, value: boolean ) {
+    this.changeStartPlayerName( '' );
+    const playerIndex = this.playersGameResult.findIndex( e => e.name === playerName );
+    this.newGameResultService.changePlayerResultSelected( playerIndex, value )
+  }
+
+  changePlayersResultVP( playerName: string, value: number ) {
+    const playerIndex = this.playersGameResult.findIndex( e => e.name === playerName );
+    this.newGameResultService.changePlayerResultVP( playerIndex, value )
+  }
+
+  changePlayersResultLessTurns( playerName: string, value: boolean ) {
+    const playerIndex = this.playersGameResult.findIndex( e => e.name === playerName );
+    this.newGameResultService.changePlayerResultLessTurns( playerIndex, value )
   }
 
 
-  private initializePlayers(): void {
-    this.gameResultOfPlayers = this.PlayersNameList.map( player => {
-      return {
-        name      : player.name,
-        selected  : false,
-        VP        : 0,
-        lessTurns : false,
-      } } );
-
-    if ( this.signedIn && this.mySyncGroupID !== '' ) {
-      this.afDatabase.object( `/syncGroups/${this.mySyncGroupID}/gameResultOfPlayers`)
-        .set( this.gameResultOfPlayers );
-    }
-  }
-
-  selectedPlayers(): any[] {
-    return this.gameResultOfPlayers.filter( player => player.selected );
-  }
 
 
   selectStartPlayer(): void {
-    if ( this.selectedPlayers().length < 1 ) { return; }
+    if ( this.selectedPlayers().length === 0 ) return;
     this.startPlayerName = this.utils.getRandomValue( this.selectedPlayers() ).name;
-    this.afDatabase.object(`/syncGroups/${this.mySyncGroupID}/gameResultOfPlayers/startPlayerName`).set( this.startPlayerName );
+    this.changeStartPlayerName( this.startPlayerName );
   }
 
 
-  playerNumOK(): boolean {
+  numberOfPlayersOK(): boolean {
     return ( 2 <= this.selectedPlayers().length && this.selectedPlayers().length <= 6 );
   }
 
 
   submitGameResult(): void {
-    if ( !this.playerNumOK() ) { return; }
+    if ( !this.numberOfPlayersOK() ) return;
+    this.mySyncGroup.setNewGameResultSubmitted(true);
+
     const dialogRef = this.dialog.open( SubmitGameResultDialogComponent );
 
-    this.newGameResult = new GameResult({
-      no     : this.GameResultList.length + 1,
+    const newGameResult = new GameResult({
       date   : this.date,
       place  : this.place,
       memo   : this.memo,
-      DominionSetsSelected : this.DominionSetList.map( e => e.selected ),
-      SelectedCardsID      : {
-        Prosperity      : this.SelectedCards.Prosperity,
-        DarkAges        : this.SelectedCards.DarkAges,
-        KingdomCards10  : this.SelectedCards.KingdomCards10 .map( cardIndex => this.CardPropertyList[cardIndex].card_ID ),
-        BaneCard        : this.SelectedCards.BaneCard       .map( cardIndex => this.CardPropertyList[cardIndex].card_ID ),
-        EventCards      : this.SelectedCards.EventCards     .map( cardIndex => this.CardPropertyList[cardIndex].card_ID ),
-        Obelisk         : this.SelectedCards.Obelisk        .map( cardIndex => this.CardPropertyList[cardIndex].card_ID ),
-        LandmarkCards   : this.SelectedCards.LandmarkCards  .map( cardIndex => this.CardPropertyList[cardIndex].card_ID ),
-        BlackMarketPile : this.SelectedCards.BlackMarketPile.map( cardIndex => this.CardPropertyList[cardIndex].card_ID ),
+      selectedDominionSet : this.DominionSetToggleValues,
+      selectedCardsID      : {
+        Prosperity      : this.selectedCards.Prosperity,
+        DarkAges        : this.selectedCards.DarkAges,
+        KingdomCards10  : this.selectedCards.KingdomCards10 .map( cardIndex => this.cardPropertyList[cardIndex].cardID ),
+        BaneCard        : this.selectedCards.BaneCard       .map( cardIndex => this.cardPropertyList[cardIndex].cardID ),
+        EventCards      : this.selectedCards.EventCards     .map( cardIndex => this.cardPropertyList[cardIndex].cardID ),
+        Obelisk         : this.selectedCards.Obelisk        .map( cardIndex => this.cardPropertyList[cardIndex].cardID ),
+        LandmarkCards   : this.selectedCards.LandmarkCards  .map( cardIndex => this.cardPropertyList[cardIndex].cardID ),
+        BlackMarketPile : this.selectedCards.BlackMarketPile.map( cardIndex => this.cardPropertyList[cardIndex].cardID ),
       },
-      players : this.selectedPlayers().map( pl => {
-              return {
+      players : this.selectedPlayers().map( pl => ({
                 name      : pl.name,
                 VP        : pl.VP,
                 lessTurns : pl.lessTurns,
                 rank      : 1,
                 score     : 0,
-              }
-            }),
+              }) ),
     });
 
-    dialogRef.componentInstance.newGameResult = this.newGameResult;
+    dialogRef.componentInstance.newGameResult = newGameResult;
 
     dialogRef.afterClosed().subscribe( result => {
+      this.mySyncGroup.setNewGameResultSubmitted(false);
       if ( result === 'OK Clicked' ) {
-        this.gameResultOfPlayers.forEach( pl => {
-          pl.lessTurns = false;
-          pl.VP = 0;
+        this.playersGameResult.forEach( player => {
+          this.changePlayersResultVP( player.name, 0 );
+          this.changePlayersResultLessTurns( player.name, false );
         });
 
-        if ( this.signedIn && this.mySyncGroupID !== '' ) {
-          this.afDatabase.object( `/syncGroups/${this.mySyncGroupID}/gameResultOfPlayers`)
-            .set( this.gameResultOfPlayers );
-        }
-        this.memo = '';
-        this.startPlayerName = '';
+        this.changeMemo('');
+        this.changeStartPlayerName('')
         this.openSnackBar();
       }
     });
@@ -256,15 +232,6 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
 
   private openSnackBar() {
     this.snackBar.open( 'Successfully Submitted!', undefined, { duration: 3000 } );
-  }
-
-
-  uploadGameResultOfPlayer( playerIndex: number, property: string ) {
-    console.log(playerIndex)
-    if ( this.signedIn && this.mySyncGroupID !== '' ) {
-      this.afDatabase.object( `/syncGroups/${this.mySyncGroupID}/gameResultOfPlayers/${playerIndex}/${property}`)
-        .set( this.gameResultOfPlayers[ playerIndex ][ property ] );
-    }
   }
 
 

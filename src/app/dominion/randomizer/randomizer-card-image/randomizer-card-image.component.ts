@@ -1,52 +1,82 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
 
 import { MdDialog } from '@angular/material';
 
 import { MyUtilitiesService } from '../../../my-utilities.service';
+import { DominionDatabaseService } from '../../dominion-database.service';
 
-import { CardProperty } from "../../card-property";
-import { SelectedCards } from "../../selected-cards";
-import { DominionCardImageComponent } from "../../dominion-card-image/dominion-card-image.component";
+import { SelectedCardsService } from '../selected-cards.service';
+
+import { CardProperty } from '../../card-property';
+import { SelectedCards } from '../../selected-cards';
+import { DominionCardImageComponent } from '../../dominion-card-image/dominion-card-image.component';
 import { CardPropertyDialogComponent } from '../../card-property-dialog/card-property-dialog.component';
 
 
 @Component({
+  providers: [SelectedCardsService],
   selector: 'app-randomizer-card-image',
   templateUrl: './randomizer-card-image.component.html',
   styleUrls: ['./randomizer-card-image.component.css']
 })
-export class RandomizerCardImageComponent implements OnInit {
+export class RandomizerCardImageComponent implements OnInit, OnDestroy {
 
-  @Input() longSideLength: number = 140;
+  private alive = true;
+  getDataDone: boolean = false;
 
-  @Input() CardPropertyList: CardProperty[];
+  @Input() longSideLength = 180;
 
-  @Input() SelectedCards: SelectedCards = new SelectedCards(); 
+  cardPropertyList: CardProperty[];
 
-  Platinum: { data: CardProperty, checked: boolean };
-  Colony  : { data: CardProperty, checked: boolean };
+  selectedCards: SelectedCards = new SelectedCards();
+
+  // Platinum: { data: CardProperty, checked: boolean };
+  // Colony:   { data: CardProperty, checked: boolean };
 
 
 
   constructor(
     private utils: MyUtilitiesService,
     public dialog: MdDialog,
+    private database: DominionDatabaseService,
+    private selectedCardsService: SelectedCardsService
   ) { }
 
+
   ngOnInit() {
-    this.Platinum = {
-      checked : false,
-      data  : this.CardPropertyList.find( e => e.card_ID === "Platinum" )
-    }
-    this.Colony = {
-      checked : false,
-      data  : this.CardPropertyList.find( e => e.card_ID === "Colony" )
-    }
+    Observable.combineLatest(
+        this.database.cardPropertyList$,
+        this.selectedCardsService.selectedCards$,
+        (cardPropertyList, selectedCards) => ({
+          cardPropertyList : cardPropertyList,
+          selectedCards    : selectedCards
+        }) )
+      .takeWhile( () => this.alive )
+      .subscribe( val => {
+        this.cardPropertyList = val.cardPropertyList;
+        this.selectedCards    = val.selectedCards;
+        this.getDataDone = true;
+      });
+
+    // this.Platinum = {
+    //   checked : false,
+    //   data  : this.cardPropertyList.find( e => e.cardID === 'Platinum' )
+    // }
+    // this.Colony = {
+    //   checked : false,
+    //   data  : this.cardPropertyList.find( e => e.cardID === 'Colony' )
+    // }
+  }
+
+  ngOnDestroy() {
+    this.alive = false;
   }
 
 
   cardInfoButtonClicked( cardIndex ) {
-    const selectedCardForView = this.CardPropertyList[cardIndex].transform();
+    const selectedCardForView = this.cardPropertyList[cardIndex].transform();
     const dialogRef = this.dialog.open( CardPropertyDialogComponent );
     dialogRef.componentInstance.card = selectedCardForView;
   }

@@ -4,13 +4,13 @@
 // The list of which env maps to which file can be found in `.angular-cli.json`.
 
 export const environment = {
-    production: true,
-    firebase: {
-        apiKey: "AIzaSyBGFhmydRA7hmBMjTqe9pfa80lNEjb7G-0",
-        authDomain: "dominionapps.firebaseapp.com",
-        databaseURL: "https://dominionapps.firebaseio.com",
-        projectId: "dominionapps",
-        storageBucket: "dominionapps.appspot.com",
-        messagingSenderId: "830879011229"
-    }
+  production: true,
+  firebase: {
+    apiKey: 'AIzaSyATahReMsoYLsgo60MsBGXXOBHKDB1kcPQ',
+    authDomain: 'dominionappstest.firebaseapp.com',
+    databaseURL: 'https://dominionappstest.firebaseio.com',
+    projectId: 'dominionappstest',
+    storageBucket: '',
+    messagingSenderId: '901667738014'
+  }
 };

@@ -1,34 +1,35 @@
 
 export class GameResult {
   databaseKey: string;  // key of this game-result in fire-database
-  no      : number;   // <- calculate locally
+  no:       number;   // <- calculate locally
 
-  date    : Date;
-  place   : string;
-  players : {
-      name      : string;
-      VP        : number;
-      lessTurns : boolean;
-      rank      : number;   // <- calculate locally
-      score     : number;   // <- calculate locally
+  date:     Date;
+  place:    string;
+  players:  {
+      name:       string;
+      VP:         number;
+      lessTurns:  boolean;
+      rank:       number;   // <- calculate locally
+      score:      number;   // <- calculate locally
     }[];
-  memo                 : string;
-  DominionSetsSelected : boolean[];
-  SelectedCardsID      : {
-    Prosperity      : boolean;
-    DarkAges        : boolean;
-    KingdomCards10  : string[];
-    BaneCard        : string[];
-    EventCards      : string[];
-    Obelisk         : string[];
-    LandmarkCards   : string[];
-    BlackMarketPile : string[];
+  memo:                string;
+  selectedDominionSet: boolean[];
+  selectedCardsID:       {
+    Prosperity:       boolean;
+    DarkAges:         boolean;
+    KingdomCards10:   string[];
+    BaneCard:         string[];
+    EventCards:       string[];
+    Obelisk:          string[];
+    LandmarkCards:    string[];
+    BlackMarketPile:  string[];
   }
 
-  constructor( grObj, databaseKey? ) {
+  constructor( grObj?, databaseKey? ) {
+    if ( grObj === undefined ) return;
     this.players = [];
     Object.keys( grObj )
-          .filter( key => key !== "date" )
+          .filter( key => key !== 'date' )
           .forEach( key => this[key] = grObj[key] );
     this.databaseKey = databaseKey;
     // this.players.forEach( pl => { pl.score = 0; pl.rank = 0; } );  // initialize
@@ -50,7 +51,7 @@ export class GameResult {
       }
     }}
 
-    this.players.sort( (a,b) => (a.rank - b.rank) );
+    this.players.sort( (a, b) => (a.rank - b.rank) );
   }
 
 
@@ -59,11 +60,11 @@ export class GameResult {
     // GetScoreListは1度だけ行いたいのでここでhttp.getはしない
 
     // 同着に対応
-    let scoringTemp: number[] = Array.from( scoreTable[this.players.length] )
+    const scoringTemp: number[] = Array.from( scoreTable[this.players.length] )
     {
-      let pl = this.players;  // alias; players is sorted by rank
-      let count: number = 0;
-      let sum: number = 0.0;
+      const pl = this.players;  // alias; players is sorted by rank
+      let count = 0;
+      let sum = 0.0;
       let rank = 1;
       for ( let i = 0; i < pl.length; ++i ) {
         count++;

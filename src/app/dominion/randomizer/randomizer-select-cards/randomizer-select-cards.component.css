@@ -10,10 +10,9 @@
 
 #randomizerOptions,
 #supplyTable {
-  float: left;
   margin: 20px;
 }
 
-.clear {
-  clear: left;
+.container {
+  display: flex;
 }

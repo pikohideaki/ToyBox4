@@ -29,7 +29,13 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  flex-wrap: wrap;
 }
 .spacer {
   flex: 1 1 auto;
+}
+
+.OtherSettings,
+.OtherVictoryPoints {
+  table-layout: fixed;
 }

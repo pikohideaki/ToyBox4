@@ -1,10 +1,10 @@
 export class SelectedCardsCheckboxValues {
-  KingdomCards10  : boolean[];
-  BaneCard        : boolean[];
-  EventCards      : boolean[];
-  LandmarkCards   : boolean[];
-  Obelisk         : boolean[];
-  BlackMarketPile : boolean[];
+  KingdomCards10:  boolean[];
+  BaneCard:        boolean[];
+  EventCards:      boolean[];
+  LandmarkCards:   boolean[];
+  Obelisk:         boolean[];
+  BlackMarketPile: boolean[];
 
 
   constructor( scchkObj? ) {
@@ -36,7 +36,7 @@ export class SelectedCardsCheckboxValues {
   }
 
 
-  reset() {
+  clear() {
     this.KingdomCards10  = Array(10).fill(false);
     this.BaneCard        = Array( 1).fill(false);
     this.EventCards      = Array( 2).fill(false);
