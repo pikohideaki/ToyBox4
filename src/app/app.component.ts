@@ -33,7 +33,7 @@ export class AppComponent {
     if ( !this.afAuth.auth.currentUser ) return;
     this.afAuth.auth.signOut()
     .then( () => {
-      this.openSnackBar("Successfully signed out!");
+      this.openSnackBar('Successfully signed out!');
     } );
   }
 

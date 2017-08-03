@@ -24,7 +24,8 @@ export class VictoryPointsCalculatorService {
     switch (name) {
       case 'VPtoken'          : return  1;
       case 'others'           : return  1;
-      case 'Curse'            : return (-1);
+      case 'othersMinus'      : return -1;
+      case 'Curse'            : return -1;
       case 'Estate'           : return  1;
       case 'Duchy'            : return  3;
       case 'Province'         : return  6;

@@ -72,8 +72,9 @@ export class VictoryPointsCalculatorComponent implements OnInit, OnDestroy {
   ];
 
   OtherVictoryPoints = [
-    { id: 'VPtoken', maxNumber: 99999, title: '勝利点トークン' },
-    { id: 'others' , maxNumber: 99999, title: 'その他' },
+    { id: 'VPtoken'     , maxNumber: 99999, title: '勝利点トークン' },
+    { id: 'others'      , maxNumber: 99999, title: 'その他' },
+    { id: 'othersMinus' , maxNumber: 99999, title: 'その他（マイナス得点）' },
   ];
 
   OtherSettings = [

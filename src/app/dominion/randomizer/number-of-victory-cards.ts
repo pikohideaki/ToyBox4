@@ -1,6 +1,7 @@
 export class NumberOfVictoryCards {
   VPtoken:          number = 0;
   others:           number = 0;
+  othersMinus:      number = 0;
 
   Curse:            number = 0;  // -1
   Estate:           number = 0;  //  1

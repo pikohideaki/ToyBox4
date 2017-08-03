@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { AppListComponent } from "../app-list/app-list.component";
+import { AppListComponent } from '../app-list/app-list.component';
 
 @Component({
   selector: 'app-home',
@@ -11,10 +11,10 @@ export class HomeComponent implements OnInit {
 
   Apps = [
     {
-      routerLink : "/dominion",
+      routerLink : '/dominion',
       inService  : true,
-      title      : "Dominion Apps",
-      subtitle   : "サプライ生成＆ゲーム結果追加，成績表，プレイヤー一覧，カード一覧表，ルールブック",
+      title      : 'Dominion Apps',
+      subtitle   : 'サプライ生成＆ゲーム結果追加，成績表，プレイヤー一覧，カード一覧表，ルールブック',
     },
   ];
 
