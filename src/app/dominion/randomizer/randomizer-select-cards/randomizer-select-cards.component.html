@@ -19,7 +19,8 @@
             [disabled]="randomizerButtonLocked">
           Randomizer
         </button>
-
+      </div>
+      <div class="marginedElement">
         <button md-raised-button [color]="(randomizerButtonLocked ? 'warn' : 'primary' )"
               (click)='toggleRandomizerButton( !randomizerButtonLocked )'>
           {{(randomizerButtonLocked ? "Unlock" : "Lock" )}}

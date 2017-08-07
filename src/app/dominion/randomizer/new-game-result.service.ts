@@ -23,19 +23,28 @@ export class NewGameResultService {
   public memo$ = this.memoSource.asObservable();
 
   private startPlayerNameSource = new ReplaySubject<string>();
-  public startPlayerName$ = this.startPlayerNameSource.asObservable();
+  public startPlayerName$
+    = this.startPlayerNameSource.asObservable();
 
   private playerResultsSelectedMergedSource
     = new ReplaySubject<{ value: boolean, playerIndex: number }>();
-  public playerResultsSelectedMerged$ = this.playerResultsSelectedMergedSource.asObservable();
+  public playerResultsSelectedMerged$
+    = this.playerResultsSelectedMergedSource.asObservable();
 
   private playerResultsVPMergedSource
     = new ReplaySubject<{ value: number, playerIndex: number }>();
-  public playerResultsVPMerged$ = this.playerResultsVPMergedSource.asObservable();
+  public playerResultsVPMerged$
+    = this.playerResultsVPMergedSource.asObservable();
 
   private playerResultsLessTurnsMergedSource
     = new ReplaySubject<{ value: boolean, playerIndex: number }>();
-  public playerResultsLessTurnsMerged$ = this.playerResultsLessTurnsMergedSource.asObservable();
+  public playerResultsLessTurnsMerged$
+    = this.playerResultsLessTurnsMergedSource.asObservable();
+
+  private resetVictoryPointsCalculatorOfPlayerMergedSource
+    = new ReplaySubject<{ value: boolean, playerIndex: number }>();
+  public resetVictoryPointsCalculatorOfPlayerMerged$
+    = this.resetVictoryPointsCalculatorOfPlayerMergedSource.asObservable();
 
 
 
@@ -79,6 +88,10 @@ export class NewGameResultService {
             if ( val === undefined || val === null ) return;
             this.playerResultsLessTurnsMergedSource.next({ value: val, playerIndex: playerIndex });
           });
+          this.mySyncGroup.resetVictoryPointsCalculatorOfPlayer$( playerIndex ).subscribe( val => {
+            if ( val === undefined || val === null ) return;
+            this.resetVictoryPointsCalculatorOfPlayerMergedSource.next({ value: val, playerIndex: playerIndex });
+          });
         })
       );
   }
@@ -117,6 +130,11 @@ export class NewGameResultService {
   changePlayerResultLessTurns( playerIndex: number, value: boolean ) {
     this.playerResultsLessTurnsMergedSource.next({ value: value, playerIndex: playerIndex });
     this.mySyncGroup.setNewGameResultPlayerLessTurns( value, playerIndex );
+  }
+
+  changeResetVictoryPointsCalculatorOfPlayerMerged( playerIndex: number, value: boolean ) {
+    this.resetVictoryPointsCalculatorOfPlayerMergedSource.next({ value: value, playerIndex: playerIndex });
+    this.mySyncGroup.setResetVictoryPointsCalculatorOfPlayer( value, playerIndex );
   }
 
 }

@@ -202,7 +202,7 @@ export class MyUtilitiesService {
    * @description return maximum element of given Array<number>
    */
   maxOfArray( arr: Array<number> ): number {
-    let max = Infinity;
+    let max = -Infinity;
     const QUANTUM = 32768;
 
     for ( let i = 0, len = arr.length; i < len; i += QUANTUM ) {

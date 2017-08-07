@@ -110,11 +110,32 @@ export class VictoryPointsCalculatorComponent implements OnInit, OnDestroy {
         this.playersNameList  = val.playersNameList;
         this.getDataDone = true;
         this.displayOnlyThoseInSelectedCards();
-       });
+      });
+
+    const myIndex$ = Observable.combineLatest(
+        this.database.playersNameList$,
+        this.userInfo.getMyPlayerName$(),
+        (playersNameList, myName) => playersNameList.findIndex( e => e.name === this.myName ) );
 
     this.userInfo.getMyPlayerName$()
       .takeWhile( () => this.alive )
       .subscribe( val => this.myName = val );
+
+
+    Observable.combineLatest(
+      myIndex$,
+      this.newGameResultService.resetVictoryPointsCalculatorOfPlayerMerged$,
+      (myIndex, resetSignal) => ({
+        myIndex: myIndex,
+        resetSignal: resetSignal
+      }) )
+      .takeWhile( () => this.alive )
+      .subscribe( val => {
+        if ( val.resetSignal.playerIndex !== val.myIndex ) return;
+        if ( val.resetSignal.value === false ) return;
+        this.resetNumbers();
+        this.newGameResultService.changeResetVictoryPointsCalculatorOfPlayerMerged( val.myIndex, false );
+      });
   }
 
   ngOnInit() {
@@ -178,7 +199,7 @@ export class VictoryPointsCalculatorComponent implements OnInit, OnDestroy {
 
   updateVPtotal() {
     this.VPtotal = this.calc.total( this.numberOfVictoryCards );
-    if ( this.myName !== undefined && this.myName !== '' ) {
+    if ( this.myName ) {
       const myIndex = this.playersNameList.findIndex( e => e.name === this.myName );
       this.newGameResultService.changePlayerResultVP( myIndex, this.VPtotal );
     }

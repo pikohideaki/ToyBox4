@@ -51,7 +51,7 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
 
   places: string[] = [];
 
-  newGameResultSubmitted$: Observable<boolean>;
+  newGameResultDialogOpened$: Observable<boolean>;
 
 
   constructor(
@@ -123,7 +123,7 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
       .takeWhile( () => this.alive )
       .subscribe( val => this.startPlayerName = val );
 
-    this.newGameResultSubmitted$ = this.mySyncGroup.newGameResultSubmitted$();
+    this.newGameResultDialogOpened$ = this.mySyncGroup.newGameResultDialogOpened$();
   }
 
 
@@ -138,6 +138,9 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
     return this.playersGameResult.filter( player => player.selected );
   }
 
+  private playerIndexFromName( playerName: string ) {
+    return this.playersGameResult.findIndex( e => e.name === playerName );
+  }
 
   changePlace( place: string ) {
     this.newGameResultService.changePlace( place );
@@ -151,20 +154,18 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
     this.newGameResultService.changeStartPlayerName( playerName );
   }
 
+
   changePlayersResultSelected( playerName: string, value: boolean ) {
     this.changeStartPlayerName( '' );
-    const playerIndex = this.playersGameResult.findIndex( e => e.name === playerName );
-    this.newGameResultService.changePlayerResultSelected( playerIndex, value )
+    this.newGameResultService.changePlayerResultSelected( this.playerIndexFromName( playerName ), value )
   }
 
   changePlayersResultVP( playerName: string, value: number ) {
-    const playerIndex = this.playersGameResult.findIndex( e => e.name === playerName );
-    this.newGameResultService.changePlayerResultVP( playerIndex, value )
+    this.newGameResultService.changePlayerResultVP( this.playerIndexFromName( playerName ), value )
   }
 
   changePlayersResultLessTurns( playerName: string, value: boolean ) {
-    const playerIndex = this.playersGameResult.findIndex( e => e.name === playerName );
-    this.newGameResultService.changePlayerResultLessTurns( playerIndex, value )
+    this.newGameResultService.changePlayerResultLessTurns( this.playerIndexFromName( playerName ), value )
   }
 
 
@@ -184,8 +185,8 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
 
   submitGameResult(): void {
     if ( !this.numberOfPlayersOK() ) return;
-    this.mySyncGroup.setNewGameResultSubmitted(true);
 
+    this.mySyncGroup.setNewGameResultDialogOpened(true);
     const dialogRef = this.dialog.open( SubmitGameResultDialogComponent );
 
     const newGameResult = new GameResult({
@@ -215,7 +216,7 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
     dialogRef.componentInstance.newGameResult = newGameResult;
 
     dialogRef.afterClosed().subscribe( result => {
-      this.mySyncGroup.setNewGameResultSubmitted(false);
+      this.mySyncGroup.setNewGameResultDialogOpened(false);
       if ( result === 'OK Clicked' ) {
         this.playersGameResult.forEach( player => {
           this.changePlayersResultVP( player.name, 0 );
@@ -223,7 +224,9 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
         });
 
         this.changeMemo('');
-        this.changeStartPlayerName('')
+        this.changeStartPlayerName('');
+        this.playersGameResult.forEach( (_, playerIndex) =>
+          this.newGameResultService.changeResetVictoryPointsCalculatorOfPlayerMerged( playerIndex, true ) );
         this.openSnackBar();
       }
     });

@@ -20,7 +20,7 @@ export class GameResultOfPlayerComponent implements OnInit {
 
   @Input() private gameResultListFiltered$: Observable<GameResult[]>;
 
-  rankOptions: boolean[] = Array.from( new Array(7) ).fill(true).fill( false, 5 );
+  rankOptions: boolean[] = [true, true, true, true, true, false, false ];  // Array.from( new Array(7) ).fill(true).fill( false, 5 );
 
   GameResultOfEachPlayerForView$: Observable<any>;
 

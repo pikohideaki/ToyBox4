@@ -157,6 +157,14 @@ export class MySyncGroupService {
     return this.setValue<boolean>( `newGameResult/players/${playerIndex}/lessTurns`, value );
   }
 
+  resetVictoryPointsCalculatorOfPlayer$( playerIndex: number ): Observable<boolean> {
+    return this.getObservable( `resetVictoryPointsCalculator/${playerIndex}` ).map( v => v.$value );
+  }
+  setResetVictoryPointsCalculatorOfPlayer( value: boolean, playerIndex: number ) {
+    return this.setValue<boolean>( `resetVictoryPointsCalculator/${playerIndex}`, value );
+  }
+
+
   newGameResultDate$(): Observable<Date> {
     return this.getObservable( 'newGameResult/date' ).map( v => new Date( v.$value ) );
   }
@@ -185,11 +193,11 @@ export class MySyncGroupService {
     return this.setValue( 'newGameResult/startPlayerName', startPlayerName );
   }
 
-  newGameResultSubmitted$(): Observable<boolean> {
-    return this.getObservable( 'newGameResultSubmitted' ).map( v => v.$value );
+  newGameResultDialogOpened$(): Observable<boolean> {
+    return this.getObservable( 'newGameResultDialogOpened' ).map( v => v.$value );
   }
-  setNewGameResultSubmitted( newGameResultSubmitted ) {
-    return this.setValue( 'newGameResultSubmitted', newGameResultSubmitted );
+  setNewGameResultDialogOpened( newGameResultDialogOpened ) {
+    return this.setValue( 'newGameResultDialogOpened', newGameResultDialogOpened );
   }
 
 

@@ -98,7 +98,7 @@
   <ng-container data-comment="登録ボタン"></ng-container>
   <div class="marginedElement">
     <button md-raised-button color='primary'
-        [disabled]="newGameResultSubmitted$ | async"
+        [disabled]="newGameResultDialogOpened$ | async"
         (click)='submitGameResult()' >
       Submit
     </button>
