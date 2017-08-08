@@ -27,7 +27,9 @@
 
 
   <div *ngFor="let group of syncGroups; let idx = index">
-    <md-card class="groupListItem" (click)="groupClicked($event, idx)">
+    <md-card class="groupListItem"
+        *ngIf="!group.data.onlineGameRoom"
+        (click)="groupClicked($event, idx)">
 
       <md-card-header>
         <md-icon md-card-avatar>group</md-icon>

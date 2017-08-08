@@ -9,13 +9,8 @@
         <button md-raised-button (click)="resetNumbers()">reset</button>
       </span>
 
-      <span>
-        <md-select placeholder="自分の名前" [(ngModel)]="myName" (change)="changeMyName( $event.value )" required>
-          <md-option *ngFor="let player of playersNameList" [value]="player.name">
-            {{ player.name }}
-          </md-option>
-        </md-select>
-      </span>
+      <app-my-name-selector [(myName)]="myName" (myNameChange)="updateVPtotal()">
+      </app-my-name-selector>
 
       <span class="spacer"></span>
 

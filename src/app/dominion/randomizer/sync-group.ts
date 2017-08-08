@@ -4,9 +4,10 @@ import { GameResult } from '../game-result';
 import { SelectedCardsCheckboxValues } from '../selected-cards-checkbox-values';
 
 export class SyncGroup {
-  name:      string = '';          // written only when newly created
-  password:  string = '';          // written only when newly created
-  timeStamp: number = Date.now();  // written only when newly created
+  name:           string = '';          // written only when newly created
+  password:       string = '';          // written only when newly created
+  timeStamp:      number = Date.now();  // written only when newly created
+  onlineGameRoom: boolean = false;      // written only when newly created
 
   randomizerButtonLocked:     boolean = false;
   selectedDominionSet:        boolean[] = [];

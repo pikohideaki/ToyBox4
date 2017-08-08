@@ -140,6 +140,12 @@ export class MyUtilitiesService {
   };
 
 
+  swap( array: any[], index1: number, index2: number ): void {
+    const temp = array[index1];
+    array[index1] = array[index2];
+    array[index2] = temp;
+  }
+
   shuffle( array: any[] ): any[] {
     return array
         .map( (e) => [e, Math.random()] )

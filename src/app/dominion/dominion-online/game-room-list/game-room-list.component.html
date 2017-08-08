@@ -1,0 +1,27 @@
+<div class="bodyWithPadding" (click)="backgroundClicked()">
+  <div *ngFor="let room of gameRoomList; let idx = index">
+    <md-card class="roomListItem" (click)="roomClicked( $event, idx )">
+
+      <md-card-header>
+        <md-icon md-card-avatar>room</md-icon>
+        <md-card-title> {{room.name}} </md-card-title>
+        <md-card-subtitle>
+          {{room.members.join(", ")}}<br>
+          {{utils.toYMDHMS(room.timeStamp)}}
+        </md-card-subtitle>
+      </md-card-header>
+
+      <md-card-content *ngIf="room.selected">
+
+      </md-card-content>
+
+      <md-card-actions *ngIf="room.selected">
+        <button md-raised-button color="primary"
+              (click)="signIn( room.id )">
+          参加
+        </button>
+      </md-card-actions>
+
+    </md-card>
+  </div>
+</div>

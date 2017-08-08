@@ -68,6 +68,11 @@ import { BlackMarketPileComponent         } from './dominion/randomizer/black-ma
 import { VictoryPointsCalculatorComponent } from './dominion/randomizer/victory-points-calculator/victory-points-calculator.component';
 import { CardImageSizeSliderComponent } from './dominion/card-image-size-slider/card-image-size-slider.component';
 import { GameResultDetailDialogComponent } from './dominion/game-result/game-result-list/game-result-detail-dialog/game-result-detail-dialog.component';
+import { DominionOnlineComponent } from './dominion/dominion-online/dominion-online.component';
+import { GameRoomListComponent } from './dominion/dominion-online/game-room-list/game-room-list.component';
+import { AddGameGroupComponent } from './dominion/dominion-online/add-game-group/add-game-group.component';
+import { SignInToGameRoomDialogComponent } from './dominion/dominion-online/sign-in-to-game-room-dialog/sign-in-to-game-room-dialog.component';
+import { MyNameSelectorComponent } from './dominion/my-name-selector/my-name-selector.component';
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,6 +113,11 @@ import { GameResultDetailDialogComponent } from './dominion/game-result/game-res
     VictoryPointsCalculatorComponent,
     CardImageSizeSliderComponent,
     GameResultDetailDialogComponent,
+    DominionOnlineComponent,
+    GameRoomListComponent,
+    AddGameGroupComponent,
+    SignInToGameRoomDialogComponent,
+    MyNameSelectorComponent,
   ],
   imports: [
     BrowserModule,
@@ -124,6 +134,7 @@ import { GameResultDetailDialogComponent } from './dominion/game-result/game-res
       { path: 'dominion/gameresult'   , component: GameResultComponent       },
       { path: 'dominion/players'      , component: PlayersComponent          },
       { path: 'dominion/scoring'      , component: ScoringTableComponent     },
+      { path: 'dominion/online'       , component: DominionOnlineComponent     },
       { path: 'user_admin'            , component: UserAdminComponent        },
     ], { useHash: true } ),
     MaterialModule,
@@ -148,7 +159,8 @@ import { GameResultDetailDialogComponent } from './dominion/game-result/game-res
       SubmitGameResultDialogComponent,
       AlertDialogComponent,
       ConfirmDialogComponent,
-      GameResultDetailDialogComponent
+      GameResultDetailDialogComponent,
+      SignInToGameRoomDialogComponent
   ],
   bootstrap: [AppComponent]
 })

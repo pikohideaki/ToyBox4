@@ -53,18 +53,23 @@ export class CardPropertyDialogComponent implements OnInit {
    * outerHeight, outerWidth : browser window size
    */
   setImageWidth() {
-
     const padding = 24;
-
     const modalWidth = 0.8 * innerWidth;
-    const correction1 = 30;  // 補正
-    const w1 = 0.4 * (modalWidth - padding * 2) - correction1;
-
     const modalHeight = 0.8 * innerHeight;
-    const correction2 = 150;  // 補正
-    const w2 = 75 / 115 * ((modalHeight - padding * 2) - correction2);
 
-    return Math.min( w1, w2 );
+    const forSmartPhone = (innerWidth < 400);
+
+    // const correctionForWidth1 = 30;  // 補正
+    // const width1 = (forSmartPhone ? 1 : 0.4) * (modalWidth - padding * 2) - correctionForWidth1;
+
+    // const correctionForWidth2 = 150;  // 補正
+    // const width2 = (75 / 115) * ((modalHeight - padding * 2) - correctionForWidth2);
+
+    const width1 = (forSmartPhone ? 1 : 0.4) * (modalWidth - padding * 2);
+    const width2 = 75 / 115 * (modalHeight - padding * 2);
+    console.log(innerWidth, forSmartPhone, Math.min( width1, width2 ))
+
+    return Math.min( width1, width2 );
   }
 
 

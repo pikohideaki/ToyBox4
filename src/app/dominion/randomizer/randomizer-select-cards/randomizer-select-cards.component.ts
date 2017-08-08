@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 
 // import { Observable } from 'rxjs/Observable';
 // import 'rxjs/rx';
@@ -35,9 +35,10 @@ import { CardPropertyDialogComponent } from '../../card-property-dialog/card-pro
   ]
 })
 export class RandomizerSelectCardsComponent implements OnInit, OnDestroy {
-
   private alive = true;
   getDataDone = false;
+
+  @Input() showCheckbox: boolean = true;
 
   cardPropertyList: CardProperty[] = [];
 

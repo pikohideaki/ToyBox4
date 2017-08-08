@@ -8,7 +8,6 @@
 .description {
   width: 60%;
   padding: 10px;
-  box-sizing: border-box;
 }
 .image {
   width: 40%;
@@ -16,4 +15,5 @@
 
 .content {
   display: flex;
+  flex-wrap: wrap-reverse;
 }

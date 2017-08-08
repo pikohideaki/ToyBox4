@@ -47,7 +47,7 @@
       <table class='my-data-table my-data-table--shadow3px my-data-table--vertical-line'>
         <thead>
           <tr *ngIf="selectedCards.KingdomCards10.length > 0">
-            <th></th>
+            <th *ngIf="showCheckbox"></th>
             <th>セット</th>
             <th>名前</th>
             <th>name</th>
@@ -56,7 +56,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let cardIndex of selectedCards.KingdomCards10; let idx = index ">
-            <td>
+            <td *ngIf="showCheckbox">
               <md-checkbox
                   [(ngModel)]="selectedCardsCheckboxValues.KingdomCards10[idx]"
                   (change)="selectedCardsCheckboxOnChange( 'KingdomCards10', idx )">
@@ -80,7 +80,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let cardIndex of selectedCards.BaneCard; let idx = index ">
-            <td>
+            <td *ngIf="showCheckbox">
               <md-checkbox
                   [(ngModel)]="selectedCardsCheckboxValues.BaneCard[idx]"
                   (change)="selectedCardsCheckboxOnChange( 'BaneCard', idx )">
@@ -104,7 +104,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let cardIndex of selectedCards.EventCards; let idx = index ">
-            <td>
+            <td *ngIf="showCheckbox">
               <md-checkbox
                   [(ngModel)]="selectedCardsCheckboxValues.EventCards[idx]"
                   (change)="selectedCardsCheckboxOnChange( 'EventCards', idx )">
@@ -128,7 +128,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let cardIndex of selectedCards.LandmarkCards; let idx = index ">
-            <td>
+            <td *ngIf="showCheckbox">
               <md-checkbox
                   [(ngModel)]="selectedCardsCheckboxValues.LandmarkCards[idx]"
                   (change)="selectedCardsCheckboxOnChange( 'LandmarkCards', idx )">
@@ -152,7 +152,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let cardIndex of selectedCards.Obelisk; let idx = index ">
-            <td>
+            <td *ngIf="showCheckbox">
               <md-checkbox
                   [(ngModel)]="selectedCardsCheckboxValues.Obelisk[idx]"
                   (change)="selectedCardsCheckboxOnChange( 'Obelisk', idx )">
@@ -176,7 +176,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let cardIndex of selectedCards.BlackMarketPile; let idx = index ">
-            <td>
+            <td *ngIf="showCheckbox">
               <md-checkbox
                   [(ngModel)]="selectedCardsCheckboxValues.BlackMarketPile[idx]"
                   (change)="selectedCardsCheckboxOnChange( 'BlackMarketPile', idx )">

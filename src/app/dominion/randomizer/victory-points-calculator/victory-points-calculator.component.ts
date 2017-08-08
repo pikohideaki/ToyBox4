@@ -117,9 +117,9 @@ export class VictoryPointsCalculatorComponent implements OnInit, OnDestroy {
         this.userInfo.getMyPlayerName$(),
         (playersNameList, myName) => playersNameList.findIndex( e => e.name === this.myName ) );
 
-    this.userInfo.getMyPlayerName$()
-      .takeWhile( () => this.alive )
-      .subscribe( val => this.myName = val );
+    // this.userInfo.getMyPlayerName$()
+    //   .takeWhile( () => this.alive )
+    //   .subscribe( val => this.myName = val );
 
 
     Observable.combineLatest(
@@ -146,11 +146,10 @@ export class VictoryPointsCalculatorComponent implements OnInit, OnDestroy {
   }
 
 
-  changeMyName( myName: string ) {
-    // this.myName = myName;
-    this.updateVPtotal();
-    this.userInfo.registerMyPlayerName( myName );
-  }
+  // changeMyName( myName: string ) {
+  //   this.updateVPtotal();
+  //   this.userInfo.registerMyPlayerName( myName );
+  // }
 
   private displayOnlyThoseInSelectedCards() {
     const selectedCards_all = this.selectedCards.concatAll();
