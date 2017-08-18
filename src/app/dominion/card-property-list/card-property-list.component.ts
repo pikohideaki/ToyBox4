@@ -1,17 +1,13 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
-
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/takeWhile';
-
 import { MdDialog } from '@angular/material';
 
 
-import { MyUtilitiesService } from '../../my-utilities.service';
-import { MyDataTableComponent } from '../../my-data-table/my-data-table.component';
-
+import { UtilitiesService } from '../../utilities.service';
+import { DataTableComponent } from '../../data-table/data-table.component';
 import { DominionDatabaseService } from '../dominion-database.service';
-
 import { CardProperty } from '../card-property';
 import { CardPropertyDialogComponent } from '../card-property-dialog/card-property-dialog.component';
 
@@ -24,47 +20,44 @@ import { CardPropertyDialogComponent } from '../card-property-dialog/card-proper
 })
 export class CardPropertyListComponent implements OnInit, OnDestroy {
 
-  getDataDone = false;
+  receiveDataDone = false;
   private alive: boolean = true;
 
-  private cardPropertyListForView: any[] = [];
-  public cardPropertyListForView$: Observable< any >;
+  private cardPropertyList: CardProperty[] = [];
+  public cardPropertyListForView: any[] = [];
 
   public columnSettings = [
-    { name: 'no'                  , align: 'c', manip: 'none'             , button: false, headerTitle: 'No.' },
-    { name: 'name_jp'             , align: 'c', manip: 'incrementalSearch', button: true , headerTitle: '名前' },
-    { name: 'name_eng'            , align: 'c', manip: 'incrementalSearch', button: false, headerTitle: 'Name' },
-    { name: 'DominionSetName'     , align: 'c', manip: 'filterBySelecter' , button: false, headerTitle: 'セット名' },
-    { name: 'category'            , align: 'c', manip: 'filterBySelecter' , button: false, headerTitle: '分類' },
-    { name: 'cardType'            , align: 'c', manip: 'filterBySelecter' , button: false, headerTitle: '種別' },
-    { name: 'costStr'             , align: 'c', manip: 'none'             , button: false, headerTitle: 'コスト' },
-    { name: 'VP'                  , align: 'c', manip: 'none'             , button: false, headerTitle: 'VP' },
-    { name: 'drawCard'            , align: 'c', manip: 'none'             , button: false, headerTitle: '+card' },
-    { name: 'action'              , align: 'c', manip: 'none'             , button: false, headerTitle: '+action' },
-    { name: 'buy'                 , align: 'c', manip: 'none'             , button: false, headerTitle: '+buy' },
-    { name: 'coin'                , align: 'c', manip: 'none'             , button: false, headerTitle: '+coin' },
-    { name: 'VPtoken'             , align: 'c', manip: 'none'             , button: false, headerTitle: '+VPtoken' },
-    { name: 'implemented'         , align: 'c', manip: 'filterBySelecter' , button: false, headerTitle: 'ゲーム実装状況' },
-    { name: 'randomizerCandidate' , align: 'c', manip: 'filterBySelecter' , button: false, headerTitle: 'ランダマイザー対象' },
+    { align: 'c', button: false, manip: 'none'             , name: 'no'                 , headerTitle: 'No.' },
+    { align: 'c', button: true , manip: 'incrementalSearch', name: 'name_jp'            , headerTitle: '名前' },
+    { align: 'c', button: false, manip: 'incrementalSearch', name: 'name_eng'           , headerTitle: 'Name' },
+    { align: 'c', button: false, manip: 'filterBySelecter' , name: 'DominionSetName'    , headerTitle: 'セット名' },
+    { align: 'c', button: false, manip: 'filterBySelecter' , name: 'category'           , headerTitle: '分類' },
+    { align: 'c', button: false, manip: 'filterBySelecter' , name: 'cardTypesStr'       , headerTitle: '種別' },
+    { align: 'c', button: false, manip: 'none'             , name: 'costStr'            , headerTitle: 'コスト' },
+    { align: 'c', button: false, manip: 'none'             , name: 'VP'                 , headerTitle: 'VP' },
+    { align: 'c', button: false, manip: 'none'             , name: 'drawCard'           , headerTitle: '+card' },
+    { align: 'c', button: false, manip: 'none'             , name: 'action'             , headerTitle: '+action' },
+    { align: 'c', button: false, manip: 'none'             , name: 'buy'                , headerTitle: '+buy' },
+    { align: 'c', button: false, manip: 'none'             , name: 'coin'               , headerTitle: '+coin' },
+    { align: 'c', button: false, manip: 'none'             , name: 'VPtoken'            , headerTitle: '+VPtoken' },
+    { align: 'c', button: false, manip: 'filterBySelecter' , name: 'implemented'        , headerTitle: 'ゲーム実装状況' },
+    { align: 'c', button: false, manip: 'filterBySelecter' , name: 'randomizerCandidate', headerTitle: 'ランダマイザー対象' },
   ];
 
 
 
 
   constructor(
-    private utils: MyUtilitiesService,
+    private utils: UtilitiesService,
     public dialog: MdDialog,
     private database: DominionDatabaseService,
   ) {
-    this.cardPropertyListForView$
-      = this.database.cardPropertyList$
-          .map( list => list.map( cardProperty => cardProperty.transform() ) );
-
-    this.cardPropertyListForView$
+    this.database.cardPropertyList$
       .takeWhile( () => this.alive )
-      .subscribe( val => {
-        this.getDataDone = true;
-        this.cardPropertyListForView = val;
+      .subscribe( list => {
+        this.cardPropertyList = list;
+        this.cardPropertyListForView = list.map( e => e.transform() );
+        this.receiveDataDone = true;
       });
   }
 
@@ -77,7 +70,6 @@ export class CardPropertyListComponent implements OnInit, OnDestroy {
 
   showDetail( dataIndex: number ) {
     const dialogRef = this.dialog.open( CardPropertyDialogComponent );
-    dialogRef.componentInstance.card = this.cardPropertyListForView[dataIndex];
+    dialogRef.componentInstance.card = this.cardPropertyList[dataIndex];
   }
 }
-

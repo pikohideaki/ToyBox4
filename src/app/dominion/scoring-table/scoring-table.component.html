@@ -1,9 +1,8 @@
-
 <div class="bodyWithPadding">
-  <app-my-data-table *ngIf="getDataDone"
+  <app-data-table *ngIf="receiveDataDone"
       [data]='scoringListForView$ | async'
       [columnSettings]='columnSettings' >
-  </app-my-data-table>
+  </app-data-table>
 
-  <app-my-waiting-spinner [done]="getDataDone"></app-my-waiting-spinner>
+  <app-waiting-spinner [done]="receiveDataDone"></app-waiting-spinner>
 </div>

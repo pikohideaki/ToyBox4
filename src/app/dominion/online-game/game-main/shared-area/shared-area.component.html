@@ -1,0 +1,117 @@
+<ng-container *ngIf="receiveDataDone">
+  <div class="shared-area box-shadow">
+    <div class="BasicCards_KingdomCards">
+      <div class="BasicCards">
+        <app-cards-pile
+          [cardPropertyList]="cardPropertyList"
+          [gameCardData]="myGameState.gameCardData"
+          [gameCardIDarray]="myGameState.BasicCards.Copper"
+          width='55'
+          [faceUp]="true"
+          [isButton]="true"
+          (cardClicked)="onClick( $event )" >
+        </app-cards-pile>
+        <app-cards-pile
+          [cardPropertyList]="cardPropertyList"
+          [gameCardData]="myGameState.gameCardData"
+          [gameCardIDarray]="myGameState.BasicCards.Silver"
+          width='55'
+          [faceUp]="true"
+          [isButton]="true"
+          (cardClicked)="onClick( $event )" >
+        </app-cards-pile>
+        <app-cards-pile
+          [cardPropertyList]="cardPropertyList"
+          [gameCardData]="myGameState.gameCardData"
+          [gameCardIDarray]="myGameState.BasicCards.Gold"
+          width='55'
+          [faceUp]="true"
+          [isButton]="true"
+          (cardClicked)="onClick( $event )" >
+        </app-cards-pile>
+        <app-cards-pile *ngIf="myGameRoom.selectedCards.Prosperity"
+          [cardPropertyList]="cardPropertyList"
+          [gameCardData]="myGameState.gameCardData"
+          [gameCardIDarray]="myGameState.BasicCards.Platinum"
+          width='55'
+          [faceUp]="true"
+          [isButton]="true"
+          (cardClicked)="onClick( $event )" >
+        </app-cards-pile>
+
+        <app-cards-pile
+          [cardPropertyList]="cardPropertyList"
+          [gameCardData]="myGameState.gameCardData"
+          [gameCardIDarray]="myGameState.BasicCards.Estate"
+          width='55'
+          [faceUp]="true"
+          [isButton]="true"
+          (cardClicked)="onClick( $event )" >
+        </app-cards-pile>
+        <app-cards-pile
+          [cardPropertyList]="cardPropertyList"
+          [gameCardData]="myGameState.gameCardData"
+          [gameCardIDarray]="myGameState.BasicCards.Duchy"
+          width='55'
+          [faceUp]="true"
+          [isButton]="true"
+          (cardClicked)="onClick( $event )" >
+        </app-cards-pile>
+        <app-cards-pile
+          [cardPropertyList]="cardPropertyList"
+          [gameCardData]="myGameState.gameCardData"
+          [gameCardIDarray]="myGameState.BasicCards.Province"
+          width='55'
+          [faceUp]="true"
+          [isButton]="true"
+          (cardClicked)="onClick( $event )" >
+        </app-cards-pile>
+        <app-cards-pile *ngIf="myGameRoom.selectedCards.Prosperity"
+          [cardPropertyList]="cardPropertyList"
+          [gameCardData]="myGameState.gameCardData"
+          [gameCardIDarray]="myGameState.BasicCards.Colony"
+          width='55'
+          [faceUp]="true"
+          [isButton]="true"
+          (cardClicked)="onClick( $event )" >
+        </app-cards-pile>
+
+        <app-cards-pile
+          [cardPropertyList]="cardPropertyList"
+          [gameCardData]="myGameState.gameCardData"
+          [gameCardIDarray]="myGameState.BasicCards.Curse"
+          width='55'
+          [faceUp]="true"
+          [isButton]="true"
+          (cardClicked)="onClick( $event )" >
+        </app-cards-pile>
+      </div>
+
+      <div class="KingdomCards">
+        <ng-container *ngFor="let k of myGameState.KingdomCards">
+          <app-cards-pile
+            [cardPropertyList]="cardPropertyList"
+            [gameCardData]="myGameState.gameCardData"
+            [gameCardIDarray]="k"
+            width='70'
+            [faceUp]="true"
+            [isButton]="true"
+            (cardClicked)="onClick( $event )" >
+            </app-cards-pile>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="TrashPile" >
+      <app-cards-pile *ngIf="myGameState.TrashPile.length > 0"
+        [cardPropertyList]="cardPropertyList"
+        [gameCardData]="myGameState.gameCardData"
+        [gameCardIDarray]="myGameState.TrashPile"
+        width='70'
+        [faceUp]="true"
+        [isButton]="true"
+        (cardClicked)="onClick( $event )" >
+      </app-cards-pile>
+    </div>
+  </div>
+</ng-container>

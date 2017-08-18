@@ -1,0 +1,44 @@
+<div class="body">
+  <div class="sidebar">
+    <button md-button (click)="sidenav.toggle()"> <md-icon>textsms</md-icon> </button>
+
+    <span class="spacer"></span>
+    <app-turn-info *ngIf="receiveDataDone" [turnInfo]="myGameState.turnInfo"></app-turn-info>
+    <div myToolTip="sort hand cards" mdTooltipPosition="after">
+      <button md-button (click)="sortMyHandCards()"> <md-icon>sort</md-icon> </button>
+    </div>
+  </div>
+
+  <md-sidenav-container class="sidenavContainer">
+    <md-sidenav #sidenav class="sidenav" mode="side" opened="true" disableClose="true">
+      <app-chat [sidenav]="sidenav"> </app-chat>
+    </md-sidenav>
+
+    <div class="marginedElement">
+      <app-waiting-spinner [done]="receiveDataDone">
+      </app-waiting-spinner>
+    </div>
+    <div>
+      <div class="shared-area_other-player-area">
+        <app-shared-area class="shared-area"
+          [cardPropertyList$]="database.cardPropertyList$"
+          [myGameState$]="myGameState$"
+          [myGameRoom$]="myGameRoom$"
+          (cardClicked)="onCardClicked( $event )">
+        </app-shared-area>
+        <app-other-player-area
+          [cardPropertyList$]="database.cardPropertyList$"
+          [myGameState$]="myGameState$"
+          [myGameRoom$]="myGameRoom$"
+          (cardClicked)="onCardClicked( $event )">
+        </app-other-player-area>
+      </div>
+      <app-turn-player-area
+        [cardPropertyList$]="database.cardPropertyList$"
+        [myGameState$]="myGameState$"
+        [myGameRoom$]="myGameRoom$"
+        (cardClicked)="onCardClicked( $event )">
+      </app-turn-player-area>
+    </div>
+  </md-sidenav-container>
+</div>

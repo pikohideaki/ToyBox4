@@ -1,10 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
-
 import { Observable } from 'rxjs/Rx';
 
-import { MyUtilitiesService } from '../../../my-utilities.service';
-import { MyDataTableComponent } from '../../../my-data-table/my-data-table.component';
-
+import { UtilitiesService } from '../../../utilities.service';
+import { DataTableComponent } from '../../../data-table/data-table.component';
 import { GameResult } from '../../game-result';
 
 
@@ -12,7 +10,7 @@ import { GameResult } from '../../game-result';
   selector: 'app-game-result-of-player',
   templateUrl: './game-result-of-player.component.html',
   styleUrls: [
-    '../../../my-data-table/my-data-table.component.css',
+    '../../../data-table/data-table.component.css',
     './game-result-of-player.component.css'
   ]
 })
@@ -20,13 +18,13 @@ export class GameResultOfPlayerComponent implements OnInit {
 
   @Input() private gameResultListFiltered$: Observable<GameResult[]>;
 
-  rankOptions: boolean[] = [true, true, true, true, true, false, false ];  // Array.from( new Array(7) ).fill(true).fill( false, 5 );
+  rankOptions: boolean[] = [true, true, true, true, true, false, false ];
 
   GameResultOfEachPlayerForView$: Observable<any>;
 
 
   constructor(
-    private utils: MyUtilitiesService
+    private utils: UtilitiesService
   ) {}
 
 

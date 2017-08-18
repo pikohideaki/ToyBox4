@@ -1,27 +1,25 @@
-
-<div *ngIf="getDataDone">
-
-  <app-my-data-table--items-per-page
+<div *ngIf="receiveDataDone">
+  <app-data-table--items-per-page
     [itemsPerPageDefault]='200'
     [itemsPerPageOptions]='[ 50, 100, 200, 400 ]'
     [itemsPerPage]='itemsPerPage$ | async'
     [selectedPageIndex]='selectedPageIndex$ | async'
     (itemsPerPageChange)="changeItemsPerPage( $event )">
-  </app-my-data-table--items-per-page>
+  </app-data-table--items-per-page>
 
-  <app-my-data-table--pagenation
+  <app-data-table--pagenation
     [selectedPageIndex]='selectedPageIndex$ | async'
     [itemsPerPage]='itemsPerPage$ | async'
     [dataSize]='(gameResultListFiltered$ | async)?.length'
     (selectedPageIndexChange)="changeSelectedPageIndex( $event )">
-  </app-my-data-table--pagenation>
+  </app-data-table--pagenation>
 
 
   <span>{{(gameResultListFiltered$ | async)?.length}} Games</span>
   <div class='clear'></div>
 
 
-  <table class='my-data-table  my-data-table--shadow3px'>
+  <table class='data-table  data-table--shadow3px'>
     <thead>
       <tr>
         <th>No.</th>
@@ -35,23 +33,23 @@
     </thead>
     <tbody>
       <tr *ngFor='let line of currentPageData$ | async'>
-        <td class='my-data-table--cell-numeric'>{{line.no}}</td>
+        <td class='data-table--cell-numeric'>{{line.no}}</td>
         <td> {{line.date.getFullYear()}}/{{line.date.getMonth() + 1}}/{{line.date.getDate()}} </td>
         <td> {{line.place}}</td>
         <td>
-          <table class='my-data-table  sub-table' ><!--style='box-shadow: none'-->
+          <table class='data-table  sub-table' ><!--style='box-shadow: none'-->
             <tbody>
               <tr *ngFor='let playerResult of line.players'>
-                <td class='my-data-table--cell-numeric  sub-table--narrow-cell'>
+                <td class='data-table--cell-numeric  sub-table--narrow-cell'>
                   {{playerResult.rank  }}
                 </td>
                 <td class='sub-table--normal-cell'>
                   {{playerResult.name  }}
                 </td>
-                <td class='my-data-table--cell-numeric  sub-table--narrow-cell'>
+                <td class='data-table--cell-numeric  sub-table--narrow-cell'>
                   {{playerResult.VP}}{{(playerResult.lessTurns ? '*' : '')}}
                 </td>
-                <td class='my-data-table--cell-numeric  sub-table--narrow-cell'>
+                <td class='data-table--cell-numeric  sub-table--narrow-cell'>
                   {{playerResult.score }}
                 </td>
               </tr>
@@ -69,19 +67,18 @@
   </table>
 
 
-  <app-my-data-table--items-per-page
+  <app-data-table--items-per-page
     [itemsPerPageDefault]='200'
     [itemsPerPageOptions]='[ 50, 100, 200, 400 ]'
     [itemsPerPage]='itemsPerPage$ | async'
     [selectedPageIndex]='selectedPageIndex$ | async'
     (itemsPerPageChange)="changeItemsPerPage( $event )">
-  </app-my-data-table--items-per-page>
+  </app-data-table--items-per-page>
 
-  <app-my-data-table--pagenation
+  <app-data-table--pagenation
     [selectedPageIndex]='selectedPageIndex$ | async'
     [itemsPerPage]='itemsPerPage$ | async'
     [dataSize]='(gameResultListFiltered$ | async)?.length'
     (selectedPageIndexChange)="changeSelectedPageIndex( $event )">
-  </app-my-data-table--pagenation>
-
+  </app-data-table--pagenation>
 </div>

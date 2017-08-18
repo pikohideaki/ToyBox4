@@ -1,10 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
 
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
-
-import { MyUtilitiesService } from '../../my-utilities.service';
-import { MyDataTableComponent } from '../../my-data-table/my-data-table.component';
+import { UtilitiesService } from '../../utilities.service';
+import { DataTableComponent } from '../../data-table/data-table.component';
 import { PlayerName } from '../player-name';
 import { DominionDatabaseService } from '../dominion-database.service';
 
@@ -13,7 +11,7 @@ import { DominionDatabaseService } from '../dominion-database.service';
   selector: 'app-players',
   templateUrl: './players.component.html',
   styleUrls: [
-        '../../my-data-table/my-data-table.component.css',
+        '../../data-table/data-table.component.css',
         './players.component.css'
     ]
 })
@@ -21,7 +19,7 @@ export class PlayersComponent implements OnInit, OnDestroy {
 
   private alive = true;
 
-  getDataDone = false;
+  receiveDataDone = false;
 
   playersNameList$: Observable<{ name: string, name_yomi: string }[]>;
 
@@ -33,14 +31,14 @@ export class PlayersComponent implements OnInit, OnDestroy {
 
 
   constructor(
-    private utils: MyUtilitiesService,
+    private utils: UtilitiesService,
     private database: DominionDatabaseService
   ) {
       this.playersNameList$ = this.database.playersNameList$;
 
       this.playersNameList$
         .first()
-        .subscribe( () => this.getDataDone = true );
+        .subscribe( () => this.receiveDataDone = true );
   }
 
   ngOnInit() {

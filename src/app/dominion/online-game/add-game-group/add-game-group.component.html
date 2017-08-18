@@ -1,0 +1,35 @@
+<div class="bodyWithPadding" >
+  <span class="marginedElement">
+    <button md-raised-button color='primary'
+      (click)="newGame()"
+      [disabled]="!formIsValid()">
+      部屋を作成
+    </button>
+  </span>
+
+  <div class="marginedElement">
+    <div>
+      <span>人数（自分含む）：</span>
+      <button md-raised-button class="miniButton"
+          [disabled]="newRoom.numberOfPlayers <= 2"
+          (click)="decrement()">
+        <md-icon>exposure_neg_1</md-icon>
+      </button>
+      <span>{{newRoom.numberOfPlayers}}人</span>
+      <button md-raised-button class="miniButton"
+          [disabled]="newRoom.numberOfPlayers >= 6"
+          (click)="increment()">
+        <md-icon>exposure_plus_1</md-icon>
+      </button>
+    </div>
+  </div>
+
+  <hr>
+  <app-randomizer
+      implementedOnly="true"
+      [(selectedCards)]="newRoom.selectedCards"
+      [(BlackMarketPileShuffled)]="newRoom.BlackMarketPileShuffled"
+      [DominionSetToggleValues]="newRoom.DominionSetToggleValues"
+      (DominionSetToggleValueIndexValuePairEmitter)="DominionSetToggleValuesOnChange( $event )" >
+  </app-randomizer>
+</div>

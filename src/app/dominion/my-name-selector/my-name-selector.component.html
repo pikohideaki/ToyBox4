@@ -1,7 +1,7 @@
-<span>
+<div class="margin20">
   <md-select placeholder="自分の名前" [(ngModel)]="myName" (change)="changeMyName( $event.value )">
     <md-option *ngFor="let player of playersNameList$ | async" [value]="player.name">
       {{ player.name }}
     </md-option>
   </md-select>
-</span>
+</div>

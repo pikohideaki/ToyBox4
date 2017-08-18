@@ -1,0 +1,67 @@
+<ng-container *ngIf="receiveDataDone">
+  <div class="player-area"
+      *ngFor="let player of myGameState.players; let idx = index"
+      [class.turnPlayer]="idx === myGameState.turnPlayerIndex()">
+    <div>{{myGameRoom.players[idx]}}</div>
+    <div class="PlayArea_Aside">
+      <div class="CardArea box-shadow PlayArea" *ngIf="player.PlayArea.length > 0">
+        <app-cards-pile
+          [cardPropertyList]="cardPropertyList"
+          [gameCardData]="myGameState.gameCardData"
+          [gameCardIDarray]="player.PlayArea"
+          width='40'
+          [faceUp]="false"
+          [isButton]="true"
+          (cardClicked)="onClick( $event )" >
+        </app-cards-pile>
+      </div>
+      <div class="CardArea box-shadow Aside" *ngIf="player.Aside.length > 0">
+        <app-cards-pile
+          [cardPropertyList]="cardPropertyList"
+          [gameCardData]="myGameState.gameCardData"
+          [gameCardIDarray]="player.Aside"
+          width='40'
+          [faceUp]="false"
+          [isButton]="true"
+          (cardClicked)="onClick( $event )" >
+        </app-cards-pile>
+      </div>
+    </div>
+
+    <div class="Deck_HandCards_DiscardPile">
+      <div class="CardArea box-shadow Deck">
+        <app-cards-pile
+          [cardPropertyList]="cardPropertyList"
+          [gameCardData]="myGameState.gameCardData"
+          [gameCardIDarray]="player.Deck"
+          width='40'
+          [faceUp]="false"
+          [isButton]="true"
+          (cardClicked)="onClick( $event )" >
+        </app-cards-pile>
+      </div>
+      <div class="CardArea box-shadow HandCards">
+        <app-dominion-card-image *ngFor="let gameCardID of player.HandCards"
+          [card]="cardPropertyList[ myGameState.gameCardData[ gameCardID ].cardPropertyListIndex ]"
+          [isButton]="true"
+          width="40"
+          [faceUp]="true"
+          [isButton]="true"
+          [returnValueOnClicked]="gameCardID"
+          (cardClicked)="onClick( $event )" >
+        </app-dominion-card-image>
+      </div>
+      <div class="CardArea box-shadow DiscardPile">
+        <app-cards-pile
+          [cardPropertyList]="cardPropertyList"
+          [gameCardData]="myGameState.gameCardData"
+          [gameCardIDarray]="player.DiscardPile"
+          width='40'
+          [faceUp]="true"
+          [isButton]="true"
+          (cardClicked)="onClick( $event )" >
+        </app-cards-pile>
+      </div>
+    </div>
+  </div>
+</ng-container>

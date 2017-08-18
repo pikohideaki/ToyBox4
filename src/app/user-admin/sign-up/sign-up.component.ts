@@ -50,10 +50,14 @@ export class SignUpComponent implements OnInit {
       this.setDisplayName();
 
       this.database.updateUserInfo( afUser.uid, new UserInfo({
-          databaseKey     : afUser.uid,
-          id              : afUser.uid,
-          name            : this.displayName,
-          DominionGroupID : '',
+          databaseKey                          : afUser.uid,
+          id                                   : afUser.uid,
+          name                                 : this.displayName,
+          randomizerGroupID                    : '',
+          DominionSetToggleValuesForOnlineGame : [],
+          numberOfPlayersForOnlineGame         : 2,
+          onlineGameRoomID                     : '',
+          onlineGameStateID                    : '',
         }) );
 
       this.location.back();

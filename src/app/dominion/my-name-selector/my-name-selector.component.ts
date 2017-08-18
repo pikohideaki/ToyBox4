@@ -1,22 +1,19 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
-
 import { Observable } from 'rxjs/Observable';
 
 import { PlayerName } from '../player-name';
-
 import { DominionDatabaseService } from '../dominion-database.service';
-import { UserInfoService } from '../user-info.service';
+import { MyUserInfoService } from '../../my-user-info.service';
 
 
 @Component({
-  providers: [UserInfoService],
   selector: 'app-my-name-selector',
   templateUrl: './my-name-selector.component.html',
   styleUrls: ['./my-name-selector.component.css']
 })
 export class MyNameSelectorComponent implements OnInit, OnDestroy {
   private alive: boolean = true;
-  getDataDone: boolean = false;
+  receiveDataDone: boolean = false;
 
   playersNameList$: Observable<PlayerName[]>;
 
@@ -25,11 +22,11 @@ export class MyNameSelectorComponent implements OnInit, OnDestroy {
 
   constructor(
     private database: DominionDatabaseService,
-    private userInfo: UserInfoService
+    private myUserInfo: MyUserInfoService
   ) {
     this.playersNameList$ = this.database.playersNameList$;
 
-    this.userInfo.getMyPlayerName$()
+    this.myUserInfo.myPlayerName$
       .takeWhile( () => this.alive )
       .subscribe( val => {
         this.myName = val;
@@ -45,7 +42,7 @@ export class MyNameSelectorComponent implements OnInit, OnDestroy {
   }
 
   changeMyName( myName: string ) {
-    this.userInfo.registerMyPlayerName( myName );
+    this.myUserInfo.setMyPlayerName( myName );
     this.myNameChange.emit( myName );
   }
 

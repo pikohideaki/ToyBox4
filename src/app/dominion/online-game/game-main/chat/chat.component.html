@@ -1,0 +1,26 @@
+<div class="body">
+  <div class="message-list">
+    <div class="balloon6"  *ngFor="let message of chatList">
+      <div class="faceicon">
+        <md-icon>account_circle</md-icon>piko
+      </div>
+      <div class="chatting">
+        <div class="says">
+          <p>{{message}}</p>
+        </div>
+      </div>
+    </div>
+    <div class="mycomment">
+      <p> ( ˘ω˘ )ｽﾔｧ... </p>
+    </div>
+  </div>
+
+  <div class="new-message">
+    <md-input-container class="new-message-input-box">
+      <input mdInput [(ngModel)]="newMessage" placeholder="メッセージを入力">
+    </md-input-container>
+    <button md-raised-button class="send-button" color="primary" (click)="submitMessage()" >
+      <md-icon>send</md-icon>
+    </button>
+  </div>
+</div>

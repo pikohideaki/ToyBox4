@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Inject, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 
 import { CardProperty } from '../card-property';
 
@@ -11,17 +11,20 @@ export class DominionCardImageComponent implements OnInit, OnChanges {
 
   private CARD_IMAGE_DIR = `${this.DOMINION_DATA_DIR}/img/card`;
 
-  private wideCardTypes = [ 'イベント', 'ランドマーク' ];
-
   sourceDir: string;
 
-  @Input() private card: CardProperty;
+  @Input() private card: CardProperty = new CardProperty();
   @Input() public  faceUp: boolean;
   @Input() public  width: number;
   @Input() public  height: number;
-  @Input() public  isButton: boolean;
-  @Input() public  description: string;
+  @Input() public  isButton: boolean = false;
+  @Input() public  description: string = '';
+  @Input() public  empty: boolean = false;
 
+  @Input() private returnValueOnClicked: any = -1;
+  @Output() private cardClicked = new EventEmitter<any>();
+
+  public borderRadius: number;
 
 
   constructor(
@@ -29,23 +32,25 @@ export class DominionCardImageComponent implements OnInit, OnChanges {
   ) { }
 
   ngOnInit() {
-    this.setWidth();
-    this.setHeight();
-    this.setSourceDir();
   }
 
   ngOnChanges( changes ) {
     if ( changes.width || changes.height ) {
-      if ( this.height !== undefined ) { this.setWidth(); }
-      if ( this.width  !== undefined ) { this.setHeight(); }
+      if ( this.height !== undefined ) this.setWidth();
+      if ( this.width  !== undefined ) this.setHeight();
     }
-    if ( changes.faceUp || changes.card ) {
+    this.setBorderRadius();
+    if ( changes.faceUp || changes.card || changes.empty ) {
       this.setSourceDir();
     }
   }
 
 
   private setSourceDir() {
+    if ( this.empty ) {
+      this.sourceDir = `${this.CARD_IMAGE_DIR}/empty.png`;
+      return;
+    }
     if ( this.faceUp ) {
       this.sourceDir = `${this.CARD_IMAGE_DIR}/${this.card.name_eng.replace( / /g , '_' ).replace( /'/g , '' )}@2x.png`;
     } else {
@@ -54,18 +59,32 @@ export class DominionCardImageComponent implements OnInit, OnChanges {
   }
 
   setHeight() {
-    if ( this.wideCardTypes.findIndex( e => e === this.card.cardType ) !== -1 ) {
-      this.height = this.width * 75 / 115;  // wide
+    if ( !this.faceUp || !this.card.isWideType() ) {
+      this.height = this.width * (23 / 15);
     } else {
-      this.height = this.width * 115 / 75;
+      this.height = this.width * (15 / 23);  // wide
     }
   }
 
   setWidth() {
-    if ( this.wideCardTypes.findIndex( e => e === this.card.cardType ) !== -1  ) {
-      this.width = this.height * 115 / 75;  // wide
+    if ( !this.faceUp || !this.card.isWideType() ) {
+      this.width = this.height * (15 / 23);
     } else {
-      this.width = this.height * 75 / 115;
+      this.width = this.height * (23 / 15);  // wide
+    }
+  }
+
+  setBorderRadius() {
+    if ( this.width < this.height ) {
+      this.borderRadius = (18 / 250) * this.width;
+    } else {
+      this.borderRadius = (18 / 250) * this.height;
+    }
+  }
+
+  onClicked() {
+    if ( this.isButton ) {
+      this.cardClicked.emit( this.returnValueOnClicked );
     }
   }
 

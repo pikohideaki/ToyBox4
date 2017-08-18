@@ -2,21 +2,20 @@ import { Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs/Observable';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
-// import * as firebase from 'firebase/app';
 
-import { MyUtilitiesService } from '../my-utilities.service';
+import { UtilitiesService } from '../utilities.service';
 
 import { CardProperty } from './card-property';
 import { PlayerName } from './player-name';
 import { GameResult } from './game-result';
 import { UserInfo } from '../user-info';
-import { SyncGroup } from './randomizer/sync-group';
+import { RadomizerGroup } from './randomizer-group';
 
 @Injectable()
 export class DominionDatabaseService {
 
-  public syncGroups$:          Observable<{ id: string, selected: false, data: SyncGroup }[]>;
-  public userInfo$:            Observable<UserInfo[]>;
+  public randomizerGroupList$: Observable<{ id: string, selected: false, data: RadomizerGroup }[]>;
+  public userInfoList$:        Observable<UserInfo[]>;
   public DominionSetNameList$: Observable<string[]>;
   public cardPropertyList$:    Observable<CardProperty[]>;
   public playersNameList$:     Observable<PlayerName[]>;
@@ -28,83 +27,86 @@ export class DominionDatabaseService {
   constructor(
     private afDatabase: AngularFireDatabase,
   ) {
-    this.syncGroups$          = this.getSyncGroups$();
-    this.userInfo$            = this.getUserInfo$();
-    this.DominionSetNameList$ = this.getDominionSetNameList$();
-    this.cardPropertyList$    = this.getCardPropertyList$();
-    this.playersNameList$     = this.getPlayersNameList$();
-    this.scoringList$         = this.getScoringList$();
-    this.gameResultList$      = this.getGameResultList$();
+    this.randomizerGroupList$
+      = this.afDatabase.list('/randomizerGroupList', { preserveSnapshot: true })
+          .map( snapshots => snapshots.map( e => ({
+                  id: e.key,
+                  selected: false,
+                  data: new RadomizerGroup( e.val() )
+                })) );
+
+    this.userInfoList$
+      = this.afDatabase.list('/userInfoList').map( list => list.map( e => new UserInfo(e) ) );
+
+    this.DominionSetNameList$
+      = this.afDatabase.list( '/data/DominionSetNameList' )
+          .map( list => list.map( e => e.$value ) );
+
+    this.cardPropertyList$
+      = this.afDatabase.list( '/data/cardPropertyList' )
+          .map( list => list.map( val => new CardProperty( val ) ) );
+
+    this.playersNameList$
+      = this.afDatabase.list( '/data/playersNameList' )
+          .map( list => list.map( e => new PlayerName(e) ) );
+
+
+    this.scoringList$ = this.afDatabase.list( '/data/scoringList' );
+
+    this.gameResultList$ = Observable.combineLatest(
+        this.afDatabase.list( '/data/gameResultList', { preserveSnapshot: true } ),
+        this.afDatabase.list( '/data/scoringList' ),
+        (gameResultListSnapShots, scoringList: number[][]) => {
+              const gameResultList = gameResultListSnapShots.map( e => new GameResult(e.val(), e.key) );
+              gameResultList.forEach( (gr, index) => {
+                gr.setScores( scoringList );
+                gr.no = index + 1;
+              } );
+              return gameResultList;
+            } );
   }
 
-  getSyncGroups$() {
-    return this.afDatabase.list('/syncGroups', { preserveSnapshot: true })
-              .map( snapshots => snapshots.map( e => ({ id: e.key, selected: false, data: new SyncGroup( e.val() ) })) );
 
+  addRandomizerGroup( newGroup ) {
+    return this.afDatabase.list('/randomizerGroupList').push( newGroup );
   }
 
-  addSyncGroup( newGroup ) {
-    return this.afDatabase.list('/syncGroups').push( newGroup );
-  }
-
-  removeSyncGroup( groupID ) {
-    return this.afDatabase.list('/syncGroups').remove( groupID );
-  }
-
-
-  getUserInfo$() {
-    return this.afDatabase.list('/userInfo')
-             .map( list => list.map( e => new UserInfo(e) ))
+  removeRandomizerGroup( groupID ) {
+    return this.afDatabase.list('/randomizerGroupList').remove( groupID );
   }
 
   updateUserInfo( uid, newUser ) {
-    return this.afDatabase.object(`/userInfo/${uid}`).set( newUser );
+    return this.afDatabase.object(`/userInfoList/${uid}`).set( newUser );
   }
 
   updateUserGroupID( groupID, uid ) {
-    return this.afDatabase.object(`/userInfo/${uid}/DominionGroupID`).set( groupID );
+    return this.afDatabase.object(`/userInfoList/${uid}/DominionGroupID`).set( groupID );
   }
 
+  addGameResult( gameResult: GameResult ) {
+    const grObj = {
+      date    : gameResult.date.toString(),
+      place   : gameResult.place,
+      players : gameResult.players.map( pl => ({
+          name      : pl.name,
+          VP        : pl.VP,
+          lessTurns : pl.lessTurns,
+        }) ),
+      memo                : gameResult.memo,
+      selectedDominionSet : gameResult.selectedDominionSet,
+      selectedCardsID     : {
+        Prosperity      : gameResult.selectedCardsID.Prosperity,
+        DarkAges        : gameResult.selectedCardsID.DarkAges,
+        KingdomCards10  : gameResult.selectedCardsID.KingdomCards10,
+        BaneCard        : gameResult.selectedCardsID.BaneCard,
+        EventCards      : gameResult.selectedCardsID.EventCards,
+        Obelisk         : gameResult.selectedCardsID.Obelisk,
+        LandmarkCards   : gameResult.selectedCardsID.LandmarkCards,
+        BlackMarketPile : gameResult.selectedCardsID.BlackMarketPile,
+      }
+    };
 
-  getDominionSetNameList$() {
-    return this.afDatabase.list( '/data/DominionSetNameList' )
-                .map( list => list.map( e => e.$value ) );
-  }
-
-
-  getCardPropertyList$() {
-    return this.afDatabase.list( '/data/cardPropertyList' )
-             .map( list => list.map( val => new CardProperty( val ) ) );
-  }
-
-
-  getPlayersNameList$() {
-    return this.afDatabase.list( '/data/playersNameList' )
-             .map( list => list.map( e => new PlayerName(e) ) );
-  }
-
-
-  getScoringList$() {
-    return this.afDatabase.list( '/data/scoringList' );
-  }
-
-
-  getGameResultList$() {
-    return Observable.combineLatest(
-          this.afDatabase.list( '/data/gameResultList', { preserveSnapshot: true } ),
-          this.afDatabase.list( '/data/scoringList' ),
-          (gameResultListSnapShots, scoringList: number[][]) => {
-                const gameResultList = gameResultListSnapShots.map( e => new GameResult(e.val(), e.key) );
-                gameResultList.forEach( (gr, index) => {
-                  gr.setScores( scoringList );
-                  gr.no = index + 1;
-                } );
-                return gameResultList;
-              } );
-  }
-
-  addGameResult( gameResult ) {
-    return this.afDatabase.list('/data/gameResultList').push( gameResult );
+    return this.afDatabase.list('/data/gameResultList').push( grObj );
   }
 
   removeGameResult( key: string ) {

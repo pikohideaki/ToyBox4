@@ -1,7 +1,6 @@
 import { TestBed, async } from '@angular/core/testing';
 
 import { AppComponent } from './app.component';
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {

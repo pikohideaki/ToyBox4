@@ -1,21 +1,15 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
 import { MdDialog, MdDialogRef, MdSnackBar } from '@angular/material';
 
-// import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
-
-import { MyDataTableComponent } from '../../../my-data-table/my-data-table.component';
-import { ItemsPerPageComponent, initializeItemsPerPageOption } from '../../../my-data-table/items-per-page/items-per-page.component';
-import { PagenationComponent, getPagenatedData } from '../../../my-data-table/pagenation/pagenation.component';
-
+import { DataTableComponent } from '../../../data-table/data-table.component';
+import { ItemsPerPageComponent, initializeItemsPerPageOption } from '../../../data-table/items-per-page/items-per-page.component';
+import { PagenationComponent, getPagenatedData } from '../../../data-table/pagenation/pagenation.component';
 import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.component';
-
 import { DominionDatabaseService } from '../../dominion-database.service';
 import { GameResult } from '../../game-result';
-
 import { GameResultDetailDialogComponent } from './game-result-detail-dialog/game-result-detail-dialog.component';
 
 
@@ -23,13 +17,12 @@ import { GameResultDetailDialogComponent } from './game-result-detail-dialog/gam
   selector: 'app-game-result-list',
   templateUrl: './game-result-list.component.html',
   styleUrls: [
-    '../../../my-data-table/my-data-table.component.css',
+    '../../../data-table/data-table.component.css',
     './game-result-list.component.css'
   ]
 })
 export class GameResultListComponent implements OnInit {
-
-  getDataDone = false;
+  receiveDataDone = false;
 
   @Input() gameResultListFiltered$: Observable<GameResult[]>;
   private gameResultListFiltered: GameResult[] = [];
@@ -51,7 +44,7 @@ export class GameResultListComponent implements OnInit {
 
   ngOnInit() {
     this.gameResultListFiltered$.subscribe( gameResultListFiltered => {
-      this.getDataDone = true;
+      this.receiveDataDone = true;
       this.changeSelectedPageIndex(0);
       this.gameResultListFiltered = gameResultListFiltered;
     });
@@ -105,5 +98,3 @@ export class GameResultListComponent implements OnInit {
   }
 
 }
-
-

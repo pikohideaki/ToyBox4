@@ -1,10 +1,7 @@
-
 <div  class="bodyWithPadding" >
 
-  <!--title-->
   <h1 md-dialog-title>結果</h1>
 
-  <!--OK button-->
   <div md-dialog-content>
     <p> 以下の内容で登録します。 </p>
 
@@ -14,7 +11,7 @@
         {{newGameResult.date.getDate()}}日</p>
     <p>場所：{{newGameResult.place}}</p>
     <div>
-      <table class='my-data-table my-data-table--shadow3px my-data-table--vertical-line'>
+      <table class='data-table data-table--shadow3px data-table--vertical-line'>
         <thead>
           <tr>
             <th>Rank</th>
@@ -40,24 +37,22 @@
     <p> Memo : {{newGameResult.memo}} </p>
   </div>
 
-  <!--OK button-->
 
   <div md-dialog-actions class='actionButtons'>
     <span class="marginedElement">
       <button md-raised-button
-        md-dialog-close="OK Clicked"
-        color='primary'
-        (click)="submitGameResult()">
+          md-dialog-close="OK Clicked"
+          color='primary'
+          (click)="submitGameResult()">
         OK
       </button>
     </span>
     <span class="marginedElement">
       <button md-raised-button
-        md-dialog-close="Cancel Clicked"
-        class="marginedElement" >
+          md-dialog-close="Cancel Clicked"
+          class="marginedElement" >
         Cancel
       </button>
     </span>
   </div>
-
 </div>

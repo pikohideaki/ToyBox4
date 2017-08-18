@@ -1,5 +1,4 @@
 <div class="wrapper">
-
   <div>
     <md-input-container [color]="( errorMessageForEmail !== '' ? 'primary' : 'warn' )">
       <input mdInput [(ngModel)]="email" placeholder="E-mail" required>
@@ -37,6 +36,5 @@
     </button>
   </div>
 
-  <app-my-waiting-spinner [done]="!waitingForResponse"></app-my-waiting-spinner>
-
+  <app-waiting-spinner [done]="!waitingForResponse"></app-waiting-spinner>
 </div>

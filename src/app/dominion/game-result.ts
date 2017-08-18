@@ -1,4 +1,3 @@
-
 export class GameResult {
   databaseKey: string;  // key of this game-result in fire-database
   no:       number;   // <- calculate locally
@@ -82,4 +81,3 @@ export class GameResult {
   }
 
 }
-

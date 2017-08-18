@@ -5,6 +5,7 @@
 
 .container {
   display: flex;
+  flex-wrap: wrap;
 }
 
 .selectedDominionSetString,
@@ -18,7 +19,8 @@
   margin: 10px;
 }
 
-#randomizerOptions,
+#playerResult,
 #supplyTable {
-  margin: 20px;
+  padding: 20px;
+  flex-basis: auto;
 }

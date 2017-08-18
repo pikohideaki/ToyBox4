@@ -1,11 +1,8 @@
-
-<md-toolbar color='primary' class='header'>
+<md-toolbar color='primary' class='header box-shadow'>
   <a md-icon-button routerLink='/'> <md-icon>home</md-icon> </a>
   <a class='toolbarButton' md-button routerLink='/dominion' > Dominion </a>
 
-
   <span class="spacer"></span>
-
 
   <span class="userName">{{ (user$ | async)?.displayName }}</span>
   <ng-container *ngIf="!signedIn">
@@ -31,4 +28,3 @@
 <md-toolbar> </md-toolbar>
 
 <router-outlet></router-outlet>
-

@@ -1,0 +1,30 @@
+<div class="bodyWithPadding" (click)="backgroundClicked()">
+  <div *ngFor="let room of gameRoomList">
+    <md-card class="roomListItem"
+        [class.notWaitingForPlayers]="!room.waitingForPlayers"
+        (click)="roomClicked( room.id )">
+
+      <md-card-header>
+        <md-icon md-card-avatar>group</md-icon>
+        <md-card-title> {{room.name}} </md-card-title>
+        <md-card-subtitle>
+          {{room.players.join(", ")}}<br>
+          {{utils.toYMDHMS(room.timeStamp)}}
+        </md-card-subtitle>
+      </md-card-header>
+
+      <md-card-content *ngIf="isSelected[ room.id ]">
+        {{(room.waitingForPlayers ? '参加者募集中' : '対戦中')}}
+      </md-card-content>
+
+      <md-card-actions *ngIf="isSelected[ room.id ]">
+        <button md-raised-button color="primary"
+              (click)="signIn( room.id )"
+              [disabled]="!myName || !room.waitingForPlayers" >
+          参加
+        </button>
+      </md-card-actions>
+
+    </md-card>
+  </div>
+</div>

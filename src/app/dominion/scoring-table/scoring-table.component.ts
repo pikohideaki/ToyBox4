@@ -13,7 +13,7 @@ export class ScoringTableComponent implements OnInit, OnDestroy {
 
   private alive = true;
 
-  getDataDone = false;
+  receiveDataDone = false;
 
   scoringListForView$: Observable<{
     playerNum: number,
@@ -58,7 +58,7 @@ export class ScoringTableComponent implements OnInit, OnDestroy {
 
     this.scoringListForView$
       .takeWhile( () => this.alive )
-      .subscribe( () => this.getDataDone = true );
+      .subscribe( () => this.receiveDataDone = true );
 
   }
 

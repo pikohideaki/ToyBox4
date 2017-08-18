@@ -1,4 +1,3 @@
-
 import { Component, OnInit, Injectable, Inject } from '@angular/core';
 
 
@@ -83,4 +82,3 @@ export class RuleBooksComponent implements OnInit {
   }
 
 }
-

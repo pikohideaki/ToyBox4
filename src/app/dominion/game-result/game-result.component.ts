@@ -1,13 +1,8 @@
 import { Component, OnInit, Inject, OnDestroy, EventEmitter } from '@angular/core';
-// import { FormControl } from '@angular/forms';
-
 import { Observable } from 'rxjs/Rx';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
-
-import { MyUtilitiesService } from '../../my-utilities.service';
-
+import { UtilitiesService } from '../../utilities.service';
 import { DominionDatabaseService } from '../dominion-database.service';
 import { GameResult } from '../game-result';
 
@@ -20,7 +15,7 @@ import { GameResult } from '../game-result';
 export class GameResultComponent implements OnInit, OnDestroy {
 
   private alive = true;
-  getDataDone = false;
+  receiveDataDone = false;
 
   private gameResultList: GameResult[];
   gameResultListFiltered$: Observable<GameResult[]>;
@@ -41,13 +36,13 @@ export class GameResultComponent implements OnInit, OnDestroy {
 
 
   constructor(
-    private utils: MyUtilitiesService,
+    private utils: UtilitiesService,
     private database: DominionDatabaseService
   ) {
     this.database.gameResultList$
       .takeWhile( () => this.alive )
       .subscribe( gameResultList => {
-        this.getDataDone = true;
+        this.receiveDataDone = true;
         this.gameResultList = gameResultList;  // extract current value
         this.resetFormControls( gameResultList );
       });

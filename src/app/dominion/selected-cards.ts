@@ -7,7 +7,6 @@ export class SelectedCards {
   LandmarkCards:    number[];
   Obelisk:          number[];
   BlackMarketPile:  number[];
-  // SelectedDominionSets: boolean[];
 
 
   constructor( scObj? ) {

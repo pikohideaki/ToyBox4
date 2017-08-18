@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-
 import { MdDialogRef } from '@angular/material';
 
+import { CardProperty } from '../card-property';
 
 @Component({
   selector: 'app-card-property-dialog',
@@ -10,9 +10,8 @@ import { MdDialogRef } from '@angular/material';
 })
 export class CardPropertyDialogComponent implements OnInit {
 
-  public card: any;
-  faceUp: boolean = true;
-  width: number;
+  public card: CardProperty;
+  public cardForView: any;
 
   public items = [
     { memberName: 'no'                      , name: 'Card No.' },
@@ -45,33 +44,12 @@ export class CardPropertyDialogComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.width = this.setImageWidth();
+    this.cardForView = this.card.transform();
   }
 
   /**
    * innerHeight, innerWidth : app window size
    * outerHeight, outerWidth : browser window size
    */
-  setImageWidth() {
-    const padding = 24;
-    const modalWidth = 0.8 * innerWidth;
-    const modalHeight = 0.8 * innerHeight;
-
-    const forSmartPhone = (innerWidth < 400);
-
-    // const correctionForWidth1 = 30;  // 補正
-    // const width1 = (forSmartPhone ? 1 : 0.4) * (modalWidth - padding * 2) - correctionForWidth1;
-
-    // const correctionForWidth2 = 150;  // 補正
-    // const width2 = (75 / 115) * ((modalHeight - padding * 2) - correctionForWidth2);
-
-    const width1 = (forSmartPhone ? 1 : 0.4) * (modalWidth - padding * 2);
-    const width2 = 75 / 115 * (modalHeight - padding * 2);
-    console.log(innerWidth, forSmartPhone, Math.min( width1, width2 ))
-
-    return Math.min( width1, width2 );
-  }
-
-
 }
 

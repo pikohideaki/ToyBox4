@@ -5,15 +5,18 @@
   justify-content: center;
 }
 
+.image {
+  flex-basis: 250px;
+  flex-grow: 0;
+}
 .description {
-  width: 60%;
+  flex-basis: 250px;
+  flex-grow: 1;
   padding: 10px;
 }
-.image {
-  width: 40%;
-}
 
-.content {
+.flex-content {
   display: flex;
-  flex-wrap: wrap-reverse;
+  flex-wrap: wrap;
+  align-content: flex-start;
 }

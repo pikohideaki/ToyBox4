@@ -1,4 +1,3 @@
-
 <div class="bodyWithPadding">
 
   <!--<a class='floatButton'  [href]='GetGameResultListUrl' download="GameResultList.json">
@@ -32,7 +31,6 @@
         (selectedChanged)="changeDateEnd( $event )">
     </md-datepicker>
 
-    <!-- <button md-raised-button (click)="okClicked()"> OK </button>  -->
     <button md-raised-button class="latestResultButton"
         (click)="latestResultClicked()">
       最新の結果
@@ -57,7 +55,7 @@
 
 
 
-  <md-tab-group *ngIf="getDataDone">
+  <md-tab-group *ngIf="receiveDataDone">
      <md-tab label="総合成績">
       <app-game-result-list
           [gameResultListFiltered$]="gameResultListFiltered$">
@@ -70,6 +68,5 @@
     </md-tab>
   </md-tab-group>
 
-  <app-my-waiting-spinner [done]="getDataDone"></app-my-waiting-spinner>
+  <app-waiting-spinner [done]="receiveDataDone"></app-waiting-spinner>
 </div>
-

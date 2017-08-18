@@ -1,0 +1,36 @@
+<div  class="bodyWithPadding" *ngIf="playerCompleted( (players$ | async)?.length )">
+  <div class="center">人数が揃いました。まもなく開始します…</div>
+  <div class="center"> <md-spinner mode="indeterminate"></md-spinner> </div>
+</div>
+
+<div class="bodyWithPadding"  *ngIf="!playerCompleted( (players$ | async)?.length )">
+
+  <h1 md-dialog-title>新規ゲーム</h1>
+
+  <div md-dialog-content>
+    <ng-container>
+      <span>プレイヤーの参加を待っています…</span>
+      <md-progress-bar mode="indeterminate"></md-progress-bar>
+
+      <div class="marginedElement">
+        <span>参加中：{{(players$ | async).join(', ')}}</span>
+      </div>
+
+      <app-randomizer
+          [(selectedCards)]="newRoom.selectedCards"
+          forViewing="true"
+          [DominionSetToggleValues]="newRoom.DominionSetToggleValues" >  <!-- not tabbable -->
+      </app-randomizer>
+    </ng-container>
+  </div>
+
+  <div md-dialog-actions class='actionButtons'>
+    <span class="marginedElement">
+      <button md-raised-button
+          md-dialog-close="Cancel Clicked"
+          class="marginedElement">
+        Cancel
+      </button>
+    </span>
+  </div>
+</div>
