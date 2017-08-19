@@ -1,13 +1,10 @@
 export class PlayerResult {
-  name:      string;
-  selected:  boolean;
-  VP:        number;
-  lessTurns: boolean;
+  name:      string  = '';
+  selected:  boolean = false;
+  VP:        number  = 0;
+  lessTurns: boolean = false;
 
   constructor( name: string = '' ) {
-    this.name      = name;
-    this.selected  = false;
-    this.VP        = 0;
-    this.lessTurns = false;
+    this.name = name;
   }
 }

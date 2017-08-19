@@ -76,8 +76,4 @@ export class VictoryPointsCalculatorService {
       default : return 0;
     }
   }
-
-
-
 }
-

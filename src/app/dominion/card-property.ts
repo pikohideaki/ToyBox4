@@ -1,42 +1,77 @@
 import { submatch } from '../utilities';
 
 export class CardProperty {
-    no:                     number;
-    cardID:                 string;
-    name_jp:                string;
-    name_jp_yomi:           string;
-    name_eng:               string;
-    DominionSetName:        string;
-    cost:                   CardCost;
-    category:               string;
-    cardType:               string;
-    cardTypes:              CardTypes;
-    VP:                     number;
-    drawCard:               number;
-    action:                 number;
-    buy:                    number;
-    coin:                   number;
-    VPtoken:                number;
-    effect:                 string;
-    description:            string;
-    recommendedCombination: string;
-    memo:                   string;
-    implemented:            boolean;
-    randomizerCandidate:    boolean;
+  no:                     number = 0;
+  cardID:                 string = '';
+  name_jp:                string = '';
+  name_jp_yomi:           string = '';
+  name_eng:               string = '';
+  DominionSetName:        string = '';
+  cost:                   CardCost = new CardCost({ coin: 0, potion: 0, debt: 0 });
+  category:               string = '';
+  cardType:               string = '';
+  cardTypes:              CardTypes = new CardTypes();
+  VP:                     number = 0;
+  drawCard:               number = 0;
+  action:                 number = 0;
+  buy:                    number = 0;
+  coin:                   number = 0;
+  VPtoken:                number = 0;
+  effect:                 string = '';
+  description:            string = '';
+  recommendedCombination: string = '';
+  memo:                   string = '';
+  implemented:            boolean = false;
+  randomizerCandidate:    boolean = false;
 
-  constructor( cpObj? ) {
-    if ( !cpObj ) {
-      this.cost = new CardCost( 0, 0, 0 );
-      this.cardTypes = new CardTypes();
-    } else {
+  constructor( initObj?: {
+    no:                     number,
+    cardID:                 string,
+    name_jp:                string,
+    name_jp_yomi:           string,
+    name_eng:               string,
+    DominionSetName:        string,
+    cost:                   CardCost,
+    category:               string,
+    cardType:               string,
+    cardTypes:              CardTypes,
+    VP:                     number,
+    drawCard:               number,
+    action:                 number,
+    buy:                    number,
+    coin:                   number,
+    VPtoken:                number,
+    effect:                 string,
+    description:            string,
+    recommendedCombination: string,
+    memo:                   string,
+    implemented:            boolean,
+    randomizerCandidate:    boolean,
+  }) {
+    if ( !initObj ) return;
 
-      Object.keys( cpObj )
-      .filter( key => key !== 'cost' && key !== 'cardTypes' )
-      .forEach( key => this[key] = cpObj[key] );
-
-      this.cost = new CardCost( cpObj.cost.coin, cpObj.cost.potion, cpObj.cost.debt );
-      this.cardTypes = new CardTypes( cpObj.cardTypes );
-    }
+    this.no                     = ( initObj.no                     || 0 );
+    this.cardID                 = ( initObj.cardID                 || '' );
+    this.name_jp                = ( initObj.name_jp                || '' );
+    this.name_jp_yomi           = ( initObj.name_jp_yomi           || '' );
+    this.name_eng               = ( initObj.name_eng               || '' );
+    this.DominionSetName        = ( initObj.DominionSetName        || '' );
+    this.cost                   = new CardCost( initObj.cost );
+    this.category               = ( initObj.category               || '' );
+    this.cardType               = ( initObj.cardType               || '' );
+    this.cardTypes              = new CardTypes( initObj.cardTypes );
+    this.VP                     = ( initObj.VP                     || 0 );
+    this.drawCard               = ( initObj.drawCard               || 0 );
+    this.action                 = ( initObj.action                 || 0 );
+    this.buy                    = ( initObj.buy                    || 0 );
+    this.coin                   = ( initObj.coin                   || 0 );
+    this.VPtoken                = ( initObj.VPtoken                || 0 );
+    this.effect                 = ( initObj.effect                 || '' );
+    this.description            = ( initObj.description            || '' );
+    this.recommendedCombination = ( initObj.recommendedCombination || '' );
+    this.memo                   = ( initObj.memo                   || '' );
+    this.implemented            = !!initObj.implemented;
+    this.randomizerCandidate    = !!initObj.randomizerCandidate;
   }
 
 
@@ -112,9 +147,45 @@ export class CardTypes {
   EventCards:    boolean = false;  // イベント
   LandmarkCards: boolean = false;  // ランドマーク
 
-  constructor( obj? ) {
-    if ( !obj ) return;
-    Object.keys( obj ).forEach( key => this[key] = obj[key] );
+  constructor( initObj?: {
+    Curse:         boolean,
+    Action:        boolean,
+    Treasure:      boolean,
+    Victory:       boolean,
+    Attack:        boolean,
+    Reaction:      boolean,
+    Duration:      boolean,
+    Ruins:         boolean,
+    Prize:         boolean,
+    Looter:        boolean,
+    Shelter:       boolean,
+    Knights:       boolean,
+    Reserve:       boolean,
+    Traveller:     boolean,
+    Castle:        boolean,
+    Gather:        boolean,
+    EventCards:    boolean,
+    LandmarkCards: boolean,
+  } ) {
+    if ( !initObj ) return;
+    this.Curse         = !!initObj.Curse;
+    this.Action        = !!initObj.Action;
+    this.Treasure      = !!initObj.Treasure;
+    this.Victory       = !!initObj.Victory;
+    this.Attack        = !!initObj.Attack;
+    this.Reaction      = !!initObj.Reaction;
+    this.Duration      = !!initObj.Duration;
+    this.Ruins         = !!initObj.Ruins;
+    this.Prize         = !!initObj.Prize;
+    this.Looter        = !!initObj.Looter;
+    this.Shelter       = !!initObj.Shelter;
+    this.Knights       = !!initObj.Knights;
+    this.Reserve       = !!initObj.Reserve;
+    this.Traveller     = !!initObj.Traveller;
+    this.Castle        = !!initObj.Castle;
+    this.Gather        = !!initObj.Gather;
+    this.EventCards    = !!initObj.EventCards;
+    this.LandmarkCards = !!initObj.LandmarkCards;
   }
 
 
@@ -149,10 +220,11 @@ export class CardCost {
   potion = 0;
   debt   = 0;
 
-  constructor( coin: number, potion: number, debt: number ) {
-    this.coin   = coin;
-    this.potion = potion;
-    this.debt   = debt;
+  constructor( initObj: { coin: number, potion: number, debt: number } ) {
+    if ( !initObj ) return;
+    this.coin   = ( initObj.coin   || 0 );
+    this.potion = ( initObj.potion || 0 );
+    this.debt   = ( initObj.debt   || 0 );
   }
 }
 

@@ -1,23 +1,23 @@
 import { Injectable } from '@angular/core';
-
-import { Observable, BehaviorSubject } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Rx';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 import { UtilitiesService } from '../../utilities.service';
+import { DominionDatabaseService } from '../dominion-database.service';
 import { GameRoom } from './game-room';
+
 
 @Injectable()
 export class GameRoomsService {
-
   public gameRoomList$: Observable<GameRoom[]>;
+
 
   constructor(
     private afDatabase: AngularFireDatabase,
     private utils: UtilitiesService,
+    private database: DominionDatabaseService
   ) {
-    this.gameRoomList$
-      = this.afDatabase.list( '/onlineGameRooms', { preserveSnapshot: true } )
-          .map( snapshots => snapshots.map( e => new GameRoom( e.val(), e.key ) ) );
+    this.gameRoomList$ = this.database.gameRoomList$;
   }
 
 

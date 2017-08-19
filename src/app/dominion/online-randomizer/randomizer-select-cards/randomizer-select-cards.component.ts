@@ -17,11 +17,8 @@ import { BlackMarketPileShuffledService } from '../black-market-pile-shuffled.se
 import { AlertDialogComponent } from '../../../alert-dialog/alert-dialog.component';
 
 import { DataTableComponent } from '../../../data-table/data-table.component';
-import { CardProperty } from '../../card-property';
 import { SelectedCards } from '../../selected-cards';
 import { SelectedCardsCheckboxValues } from '../../selected-cards-checkbox-values';
-import { RadomizerGroup } from '../../randomizer-group';
-import { UserInfo } from '../../../user-info';
 
 import { CardPropertyDialogComponent } from '../../card-property-dialog/card-property-dialog.component';
 
@@ -89,7 +86,7 @@ export class RandomizerSelectCardsComponent implements OnInit, OnDestroy {
   }
 
   selectedCardsOnChange( selectedCards: SelectedCards ) {
-    this.selectedCards.set( selectedCards );
+    this.selectedCards = new SelectedCards( selectedCards );
     this.selectedCardsService.changeSelectedCards( this.selectedCards );
     this.myRandomizerGroup.addToSelectedCardsHistory( this.selectedCards );
   }

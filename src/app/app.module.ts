@@ -188,9 +188,9 @@ import { TurnInfoComponent } from './dominion/online-game/game-main/turn-info/tu
     { provide: 'HOST_NAME', useValue: 'http://dominion.piko-apps.info/' },
     { provide: 'FIREBASE_DATA_URL', useValue: 'https://dominionapps.firebaseio.com/data' },
     UtilitiesService,
-    MyRandomizerGroupService,
+    MyUserInfoService,
     DominionDatabaseService,
-    MyUserInfoService
+    MyRandomizerGroupService,
   ],
   /* for dialog, snackbar */
   entryComponents: [

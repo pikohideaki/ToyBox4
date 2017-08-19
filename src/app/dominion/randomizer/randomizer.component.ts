@@ -9,8 +9,6 @@ import { DataTableComponent } from '../../data-table/data-table.component';
 import { CardProperty } from '../card-property';
 import { SelectedCards } from '../selected-cards';
 import { SelectedCardsCheckboxValues } from '../selected-cards-checkbox-values';
-import { RadomizerGroup } from '../randomizer-group';
-import { UserInfo } from '../../user-info';
 import { CardPropertyDialogComponent } from '../card-property-dialog/card-property-dialog.component';
 
 
@@ -114,14 +112,14 @@ export class RandomizerComponent implements OnInit, OnDestroy {
 
     this.toggleRandomizerButton(true);
 
-    const [valid, result] = this.randomizer();
-    if ( !valid ) {
+    const result = this.randomizer();
+    if ( !result.valid ) {
       const dialogRef = this.dialog.open( AlertDialogComponent );
       dialogRef.componentInstance.message = `サプライが足りません．セットの選択数を増やしてください．`;
       return;
     }
 
-    this.selectedCards.set( result );
+    this.selectedCards = new SelectedCards( result.selectedCards );
     this.selectedCardsChange.emit( this.selectedCards );
 
     this.selectedCardsCheckboxValues.clear();
@@ -152,7 +150,7 @@ export class RandomizerComponent implements OnInit, OnDestroy {
     // 10 Supply KingdomCards10 and Event, LandmarkCards
     while ( selectedCardsTemp.KingdomCards10.length < 10 ) {
       const card = CardsInSelectedSets_Shuffled.pop();
-      if ( !card ) return [false, selectedCardsTemp];
+      if ( !card ) return { valid: false, selectedCards: selectedCardsTemp };
       if ( card.data.category === '王国' ) {
         selectedCardsTemp.KingdomCards10.push( card.index );
       }
@@ -175,7 +173,9 @@ export class RandomizerComponent implements OnInit, OnDestroy {
     // 災いカード（収穫祭：魔女娘）
     if ( selectedCardsTemp.KingdomCards10
         .findIndex( e => this.cardPropertyList[e].name_jp === '魔女娘' ) >= 0 ) {
-      if ( CardsInSelectedSets_Shuffled.length <= 0 ) return [false, selectedCardsTemp];
+      if ( CardsInSelectedSets_Shuffled.length <= 0 ) {
+        return { valid: false, selectedCards: selectedCardsTemp };
+      }
       const cardIndex = this.utils.removeIf( CardsInSelectedSets_Shuffled, e => (
                e.data.cost.debt   === 0
             && e.data.cost.potion === 0
@@ -189,7 +189,7 @@ export class RandomizerComponent implements OnInit, OnDestroy {
            .findIndex( e => this.cardPropertyList[e].name_jp === '闇市場' ) >= 0 ) {
       while ( selectedCardsTemp.BlackMarketPile.length < 15 ) {
         const card = CardsInSelectedSets_Shuffled.pop();
-        if ( !card ) return [false, selectedCardsTemp];
+        if ( !card ) return { valid: false, selectedCards: selectedCardsTemp }
         if ( card.data.category === '王国' ) {
           selectedCardsTemp.BlackMarketPile.push( card.index );
         }
@@ -216,7 +216,7 @@ export class RandomizerComponent implements OnInit, OnDestroy {
     selectedCardsTemp.LandmarkCards  .sort( (a, b) => a - b );
     selectedCardsTemp.BlackMarketPile.sort( (a, b) => a - b );
 
-    return [true, selectedCardsTemp];
+    return { valid: true, selectedCards: selectedCardsTemp };
   }
 
 }

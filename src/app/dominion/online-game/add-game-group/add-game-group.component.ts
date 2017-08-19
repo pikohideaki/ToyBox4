@@ -10,7 +10,7 @@ import { DominionDatabaseService } from '../../dominion-database.service';
 import { CardProperty } from '../../card-property';
 import { SelectedCards } from '../../selected-cards';
 import { MyUserInfoService } from '../../../my-user-info.service';
-import { GameState, GamePlayer } from '../game-state';
+import { GameState } from '../game-state';
 import { GameStateService } from '../game-state.service';
 
 
@@ -27,7 +27,7 @@ export class AddGameGroupComponent implements OnInit, OnDestroy {
   private KingdomCardsTest = this.utils.numberSequence(7, 10);
 
   @Input() private myName: string;
-  private cardPropertyList: CardProperty[];
+  private cardPropertyList: CardProperty[] = [];
   newRoom: GameRoom = new GameRoom();
   selectedCards: SelectedCards = new SelectedCards();
   BlackMarketPileShuffled: { cardIndex: number, faceUp: boolean }[] = [];
@@ -79,7 +79,7 @@ export class AddGameGroupComponent implements OnInit, OnDestroy {
 
   DominionSetToggleValuesOnChange( value: { index: number, checked: boolean } ) {
     this.newRoom.DominionSetToggleValues[ value.index ] = value.checked;
-    this.myUserInfo.setDominionSetToggleValuesForOnlineGame( this.newRoom.DominionSetToggleValues );
+    this.myUserInfo.setDominionSetsSelectedForOnlineGame( this.newRoom.DominionSetToggleValues );
   }
 
   newGame() {
@@ -90,7 +90,7 @@ export class AddGameGroupComponent implements OnInit, OnDestroy {
     this.newRoom.gameStateID = this.gameStateService.addGameState( newGameState ).key;
 
     const newRoomID = this.gameRoomsService.addGameRoom( this.newRoom ).key;
-    this.newRoom.id = newRoomID;
+    this.newRoom.databaseKey = newRoomID;
 
     this.gameRoomsService.addMember( newRoomID, this.myName );
 
@@ -106,7 +106,7 @@ export class AddGameGroupComponent implements OnInit, OnDestroy {
       .subscribe( result => {
         this.newRoom.players = [];  // reset members
         if ( result === 'Cancel Clicked' ) {
-          this.gameRoomsService.removeGameRoomByID( this.newRoom.id );
+          this.gameRoomsService.removeGameRoomByID( this.newRoom.databaseKey );
           this.gameStateService.removeGameStateByID( this.newRoom.gameStateID );
         } else {
           this.openSnackBar('Successfully signed in!');

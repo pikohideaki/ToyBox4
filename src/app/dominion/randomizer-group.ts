@@ -1,37 +1,55 @@
 import { SelectedCards } from './selected-cards';
-import { GameResult } from './game-result';
 import { SelectedCardsCheckboxValues } from './selected-cards-checkbox-values';
+import { PlayerResult } from './online-randomizer/player-result';
 
-export class RadomizerGroup {
-  name:           string  = '';          // written only when newly created
-  password:       string  = '';          // written only when newly created
-  timeStamp:      number  = Date.now();  // written only when newly created
-  onlineGameRoom: boolean = false;      // written only when newly created
-
-  randomizerButtonLocked:     boolean = false;
-  selectedDominionSet:        boolean[] = [];
-  selectedCards               = new SelectedCards();
-  selectedCardsCheckboxValues = new SelectedCardsCheckboxValues();
-  BlackMarketPileShuffled:    { cardIndex: number, revealed: boolean }[] = [];
-  BlackMarketOperationPhase:  number = 1;
-
-  newGameResultPlayers: {
-    name:      string,
-    selected:  boolean,
-    VP:        number,
-    lessTurns: boolean
-  }[] = [];
-  newGameResultPlace:     string = '';
-  newGameResultMemo:      string = '';
-  newGameResultDialogOpened: boolean = false;
-
+export class RandomizerGroup {
+  name:                                 string = '';
+  password:                             string = '';
+  timeStamp:                            number = 0;
+  randomizerButtonLocked:               boolean = false;
+  selectedDominionSet:                  boolean[] = [];
+  selectedCards:                        SelectedCards = new SelectedCards();
+  selectedCardsCheckboxValues:          SelectedCardsCheckboxValues = new SelectedCardsCheckboxValues();
+  BlackMarketPileShuffled:              { cardIndex: number, revealed: boolean }[] = [];
+  BlackMarketOperationPhase:            number = 1;
+  newGameResultPlayers:                 PlayerResult[] = [];
+  newGameResultPlace:                   string = '';
+  newGameResultMemo:                    string = '';
+  newGameResultDialogOpened:            boolean = false;
   resetVictoryPointsCalculatorOfPlayer: boolean[] = [];
 
 
-  constructor( sgObj? ) {
-    if ( sgObj ) {
-      Object.keys( sgObj ).forEach( key => this[key] = sgObj[key] );
-    }
+  constructor( initObj?: {
+    name:                                 string,
+    password:                             string,
+    timeStamp:                            number,
+    randomizerButtonLocked:               boolean,
+    selectedDominionSet:                  boolean[],
+    selectedCards:                        SelectedCards,
+    selectedCardsCheckboxValues:          SelectedCardsCheckboxValues,
+    BlackMarketPileShuffled:              { cardIndex: number, revealed: boolean }[],
+    BlackMarketOperationPhase:            number,
+    newGameResultPlayers:                 PlayerResult[],
+    newGameResultPlace:                   string,
+    newGameResultMemo:                    string,
+    newGameResultDialogOpened:            boolean,
+    resetVictoryPointsCalculatorOfPlayer: boolean[],
+  }) {
+    if ( !initObj ) return;
+    this.name                                 = ( initObj.name || '');
+    this.password                             = ( initObj.password || '');
+    this.timeStamp                            = ( initObj.timeStamp || 0);
+    this.randomizerButtonLocked               = !!initObj.randomizerButtonLocked;
+    this.selectedDominionSet                  = ( initObj.selectedDominionSet || []);
+    this.selectedCards               = new SelectedCards( initObj.selectedCards );
+    this.selectedCardsCheckboxValues = new SelectedCardsCheckboxValues( initObj.selectedCardsCheckboxValues );
+    this.BlackMarketPileShuffled              = ( initObj.BlackMarketPileShuffled || []);
+    this.BlackMarketOperationPhase            = ( initObj.BlackMarketOperationPhase || 0);
+    this.newGameResultPlayers                 = ( initObj.newGameResultPlayers || []);
+    this.newGameResultPlace                   = ( initObj.newGameResultPlace || '');
+    this.newGameResultMemo                    = ( initObj.newGameResultMemo || '');
+    this.newGameResultDialogOpened            = !!initObj.newGameResultDialogOpened;
+    this.resetVictoryPointsCalculatorOfPlayer = ( initObj.resetVictoryPointsCalculatorOfPlayer || []);
   }
 
   getDate() {

@@ -15,7 +15,7 @@ export class NumberOfVictoryCards {
   Island:           number = 0;  //  2
   Tunnel:           number = 0;  //  2
   Dame_Josephine:   number = 0;  //  2
-  Overgrown_Estate: number = 0;  // 0
+  Overgrown_Estate: number = 0;  //  0
 
   Gardens:          number = 0;
   Duke:             number = 0;  // 公爵
@@ -79,6 +79,4 @@ export class NumberOfVictoryCards {
       + this.Grand_Castle
       + this.Kings_Castle
   }
-
-
 }

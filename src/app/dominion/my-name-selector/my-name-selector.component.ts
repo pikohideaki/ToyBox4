@@ -26,7 +26,7 @@ export class MyNameSelectorComponent implements OnInit, OnDestroy {
   ) {
     this.playersNameList$ = this.database.playersNameList$;
 
-    this.myUserInfo.myPlayerName$
+    this.myUserInfo.myName$
       .takeWhile( () => this.alive )
       .subscribe( val => {
         this.myName = val;
@@ -42,7 +42,7 @@ export class MyNameSelectorComponent implements OnInit, OnDestroy {
   }
 
   changeMyName( myName: string ) {
-    this.myUserInfo.setMyPlayerName( myName );
+    this.myUserInfo.setMyName( myName );
     this.myNameChange.emit( myName );
   }
 

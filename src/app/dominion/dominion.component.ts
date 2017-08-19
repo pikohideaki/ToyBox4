@@ -1,9 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 
-import { CardProperty } from './card-property';
-import { GameResult } from './game-result';
-import { PlayerName } from './player-name';
-
 
 @Component({
   selector: 'app-dominion',

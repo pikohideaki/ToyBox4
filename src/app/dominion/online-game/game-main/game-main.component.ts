@@ -9,7 +9,7 @@ import { UtilitiesService } from '../../../utilities.service';
 import { GameRoom } from '../game-room';
 import { GameRoomsService } from '../game-rooms.service';
 
-import { GameState, GamePlayer } from '../game-state';
+import { GameState } from '../game-state';
 import { GameStateService } from '../game-state.service';
 
 import { DominionDatabaseService } from '../../dominion-database.service';
@@ -59,14 +59,14 @@ export class GameMainComponent implements OnInit, OnDestroy {
     this.myGameRoom$
       = this.gameRoomsService.gameRoomList$.combineLatest(
           this.roomID$,
-          (list, id) => list.find( e => e.id === id ) );
+          (list, id) => list.find( e => e.databaseKey === id ) );
 
     const myGameStateID$ = this.myGameRoom$.map( (myGameRoom: GameRoom) => myGameRoom.gameStateID );
 
     this.myGameState$
       = this.gameStateService.gameStateList$.combineLatest(
           myGameStateID$,
-          (list, id) => list.find( e => e.id === id ) );
+          (list, id) => list.find( e => e.databaseKey === id ) );
 
     Observable.combineLatest(
         this.myGameRoom$,
@@ -88,7 +88,7 @@ export class GameMainComponent implements OnInit, OnDestroy {
 
     this.myIndex$ = Observable.combineLatest(
         this.myGameRoom$,
-        this.myUserInfo.myPlayerName$,
+        this.myUserInfo.myName$,
         (myGameRoom, myName) => myGameRoom.players.findIndex( e => e === myName ) )
       .first();
 

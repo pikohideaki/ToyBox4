@@ -109,7 +109,7 @@ export class VictoryPointsCalculatorComponent implements OnInit, OnDestroy {
 
     const myIndex$ = Observable.combineLatest(
         this.database.playersNameList$,
-        this.myUserInfo.myPlayerName$,
+        this.myUserInfo.myName$,
         (playersNameList, myName) => playersNameList.findIndex( e => e.name === this.myName ) );
 
     Observable.combineLatest(
@@ -137,9 +137,9 @@ export class VictoryPointsCalculatorComponent implements OnInit, OnDestroy {
 
 
   private displayOnlyThoseInSelectedCards() {
-    const selectedCards_all = this.selectedCards.concatAll();
+    const selectedCardsAll = this.selectedCards.concatAll();
     const isInSupply
-      = ( cardID => selectedCards_all.findIndex( e => cardID === this.cardPropertyList[e].cardID ) >= 0 );
+      = ( cardID => selectedCardsAll.findIndex( e => cardID === this.cardPropertyList[e].cardID ) >= 0 );
 
     this.VictoryCards
       .filter( e => e.displayIf === 'isInSupply' )

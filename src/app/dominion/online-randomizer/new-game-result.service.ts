@@ -1,10 +1,7 @@
 import { Injectable } from '@angular/core';
-
 import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 
-import { SelectedCards } from '../selected-cards';
 import { UtilitiesService } from '../../utilities.service';
 import { DominionDatabaseService } from '../dominion-database.service';
 import { MyRandomizerGroupService } from './my-randomizer-group.service';
@@ -14,14 +11,19 @@ import { MyRandomizerGroupService } from './my-randomizer-group.service';
 export class NewGameResultService {
 
   private placeSource = new ReplaySubject<string>();
-  public place$ = this.placeSource.asObservable();
+  public place$ = Observable.merge(
+      this.myRandomizerGroup.newGameResultPlace$(),
+      this.placeSource.asObservable() );
 
   private memoSource = new ReplaySubject<string>();
-  public memo$ = this.memoSource.asObservable();
+  public memo$ = Observable.merge(
+      this.myRandomizerGroup.newGameResultMemo$(),
+      this.memoSource.asObservable() );
 
   private startPlayerNameSource = new ReplaySubject<string>();
-  public startPlayerName$
-    = this.startPlayerNameSource.asObservable();
+  public startPlayerName$ = Observable.merge(
+      this.myRandomizerGroup.newGameResultStartPlayerName$(),
+      this.startPlayerNameSource.asObservable() );
 
   private playerResultsSelectedMergedSource
     = new ReplaySubject<{ value: boolean, playerIndex: number }>();
@@ -50,24 +52,6 @@ export class NewGameResultService {
     private database: DominionDatabaseService,
     private myRandomizerGroup: MyRandomizerGroupService
   ) {
-    this.place$ = Observable.merge(
-      this.myRandomizerGroup.newGameResultPlace$(),
-      this.placeSource.asObservable() );
-    // this.myRandomizerGroup.newGameResultPlace$().subscribe( val => {
-    //   if ( val === undefined || val === null ) return;
-    //   this.placeSource.next( val );
-    // });
-
-    this.myRandomizerGroup.newGameResultMemo$().subscribe( val => {
-      if ( val === undefined || val === null ) return;
-      this.memoSource.next( val );
-    });
-
-    this.myRandomizerGroup.newGameResultStartPlayerName$().subscribe( val => {
-      if ( val === undefined || val === null ) return;
-      this.startPlayerNameSource.next( val );
-    });
-
     this.database.playersNameList$
       .subscribe( playersNameList =>
         this.utils.numberSequence( 0, playersNameList.length ).forEach( playerIndex => {
@@ -92,17 +76,17 @@ export class NewGameResultService {
   }
 
 
-  changePlace( newValue ) {
+  changePlace( newValue: string ) {
     this.placeSource.next( newValue );
     this.myRandomizerGroup.setNewGameResultPlace( newValue );
   }
 
-  changeMemo( newValue ) {
+  changeMemo( newValue: string ) {
     this.memoSource.next( newValue );
     this.myRandomizerGroup.setNewGameResultMemo( newValue );
   }
 
-  changeStartPlayerName( newValue ) {
+  changeStartPlayerName( newValue: string ) {
     this.startPlayerNameSource.next( newValue );
     this.myRandomizerGroup.setNewGameResultStartPlayerName( newValue );
   }

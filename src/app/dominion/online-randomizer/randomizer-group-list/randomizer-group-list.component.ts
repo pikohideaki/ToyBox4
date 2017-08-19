@@ -3,16 +3,13 @@ import { NgForm } from '@angular/forms';
 import { MdSnackBar } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 
-
 import { UtilitiesService } from '../../../utilities.service';
 import { DominionDatabaseService } from '../../dominion-database.service';
-
 import { MyRandomizerGroupService } from '../my-randomizer-group.service';
 import { SelectedDominionSetService } from '../selected-dominion-set.service';
 import { MyUserInfoService } from '../../../my-user-info.service';
-
 import { SelectedCards } from '../../selected-cards';
-import { RadomizerGroup } from '../../randomizer-group';
+import { RandomizerGroup } from '../../randomizer-group';
 import { UserInfo } from '../../../user-info';
 
 
@@ -28,7 +25,7 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
   @Input() private sidenav;
   private DominionSetToggleValues: boolean[] = [];
   private selectedCards: SelectedCards = new SelectedCards();
-  randomizerGroupList: { id: string, selected: boolean, data: RadomizerGroup }[] = [];
+  randomizerGroupList: { id: string, selected: boolean, data: RandomizerGroup }[] = [];
   private userInfoList: UserInfo[] = [];
   private myID: string;
   newGroupName: string;
@@ -81,13 +78,11 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
     return isValid;
   }
 
-  private updateMyGroupID( groupID ) {
-    return this.database.updateUserGroupID( groupID, this.myID );
-  }
-
   private removeMemberEmptyGroup() {
-    const promises = this.randomizerGroupList
-            .filter( g => this.userInfoList.findIndex( user => user.randomizerGroupID === g.id ) === -1 )
+    console.log( this.userInfoList, this.myID )
+    const promises
+      = this.randomizerGroupList
+            .filter( g => this.getUserNamesInGroup( g.id ).length === 0 )  // empty
             .map( g => this.database.removeRandomizerGroup( g.id ) )
     return Promise.all( promises );
   }
@@ -102,15 +97,18 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
   }
 
   addRandomizerGroup = async () => {
-    const ref = await this.database.addRandomizerGroup( new RadomizerGroup({
-        name                : this.newGroupName,
-        password            : this.newGroupPassword,
-        timeStamp           : Date.now(),
-        selectedCards       : this.selectedCards,
-        selectedDominionSet : this.DominionSetToggleValues,
-      }) );
+    const newRandomizerGroup = new RandomizerGroup();
+    {
+      newRandomizerGroup.name                = this.newGroupName;
+      newRandomizerGroup.password            = this.newGroupPassword;
+      newRandomizerGroup.timeStamp           = Date.now();
+      newRandomizerGroup.selectedCards       = this.selectedCards;
+      newRandomizerGroup.selectedDominionSet = this.DominionSetToggleValues;
+    }
+
+    const ref = await this.database.addRandomizerGroup( newRandomizerGroup );
     const groupID = ref.key;
-    await this.updateMyGroupID( groupID );
+    await this.database.updateUserGroupID( groupID, this.myID );
     await this.removeMemberEmptyGroup();
     this.resetAddGroupForm();
   };
@@ -118,7 +116,7 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
 
   signIn = async ( groupID ) => {
     if ( !this.signInPasswordIsValid( groupID ) ) return;
-    await this.updateMyGroupID( groupID );
+    await this.database.updateUserGroupID( groupID, this.myID );
     await this.removeMemberEmptyGroup();
     this.resetSignInForm();
     this.openSnackBar('Successfully signed in!');
@@ -127,7 +125,7 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
 
   signOut = async ( groupID ) => {
     if ( !this.signInPasswordIsValid( groupID ) ) return;
-    await this.updateMyGroupID('');
+    await this.database.updateUserGroupID( '', this.myID );
     await this.removeMemberEmptyGroup();
     this.resetSignInForm();
     this.openSnackBar('Successfully signed out!');
@@ -141,7 +139,8 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
 
   // view
   getUserNamesInGroup( groupID ) {
-    return this.userInfoList.filter( user => user.randomizerGroupID === groupID ).map( user => user.name );
+    return this.userInfoList.filter( user => user.randomizerGroupID === groupID )
+                            .map( user => user.name );
   }
 
   groupClicked( $event, index: number ) {

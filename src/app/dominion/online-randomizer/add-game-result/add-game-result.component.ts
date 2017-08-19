@@ -58,22 +58,19 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
     private newGameResultService: NewGameResultService
   ) {
     const playersGameResult$ = this.database.playersNameList$
-      .map( list => list.map( player => new PlayerResult(player.name) ) );
+      .map( list => list.map( player => new PlayerResult( player.name ) ) );
 
     Observable.combineLatest(
         this.selectedCardsService.selectedCards$,
         this.database.cardPropertyList$,
         this.database.gameResultList$,
         playersGameResult$,
-        ( selectedCards,
-          cardPropertyList,
-          gameResultList,
-          playersGameResult ) => ({
+        ( selectedCards, cardPropertyList, gameResultList, playersGameResult ) => ({
             selectedCards             : selectedCards,
             cardPropertyList          : cardPropertyList,
             gameResultList            : gameResultList,
             playersGameResult         : playersGameResult,
-          }) )
+        }))
       .takeWhile( () => this.alive )
       .subscribe( value => {
         this.selectedCards = value.selectedCards;
@@ -84,20 +81,38 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
 
         this.playersGameResult = value.playersGameResult;
 
-        this.newGameResultService.playerResultsSelectedMerged$
-          .takeWhile( () => this.alive )
-          .subscribe( val => this.playersGameResult[ val.playerIndex ].selected = val.value );
+        // this.newGameResultService.playerResultsSelectedMerged$
+        //   .takeWhile( () => this.alive )
+        //   .subscribe( val => this.playersGameResult[ val.playerIndex ].selected = val.value );
 
-        this.newGameResultService.playerResultsVPMerged$
-          .takeWhile( () => this.alive )
-          .subscribe( val => this.playersGameResult[ val.playerIndex ].VP = val.value );
+        // this.newGameResultService.playerResultsVPMerged$
+        //   .takeWhile( () => this.alive )
+        //   .subscribe( val => this.playersGameResult[ val.playerIndex ].VP = val.value );
 
-        this.newGameResultService.playerResultsLessTurnsMerged$
-          .takeWhile( () => this.alive )
-          .subscribe( val => this.playersGameResult[ val.playerIndex ].lessTurns = val.value );
+        // this.newGameResultService.playerResultsLessTurnsMerged$
+        //   .takeWhile( () => this.alive )
+        //   .subscribe( val => this.playersGameResult[ val.playerIndex ].lessTurns = val.value );
 
         this.receiveDataDone = true;
       });
+
+    this.newGameResultService.playerResultsSelectedMerged$.combineLatest(
+          playersGameResult$,
+          (playerResultsSelectedMerged, _) => playerResultsSelectedMerged )
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.playersGameResult[ val.playerIndex ].selected = val.value );
+
+    this.newGameResultService.playerResultsVPMerged$.combineLatest(
+          playersGameResult$,
+          (playerResultsVPMerged, _) => playerResultsVPMerged )
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.playersGameResult[ val.playerIndex ].VP = val.value );
+
+    this.newGameResultService.playerResultsLessTurnsMerged$.combineLatest(
+        playersGameResult$,
+        (playerResultsLessTurnsMerged, _) => playerResultsLessTurnsMerged )
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.playersGameResult[ val.playerIndex ].lessTurns = val.value );
 
 
     this.selectedDominionSetService.selectedDominionSetMerged$

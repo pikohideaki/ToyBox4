@@ -4,8 +4,6 @@ import { MdDialogRef } from '@angular/material';
 import { UtilitiesService } from '../../utilities.service';
 import { DominionDatabaseService } from '../dominion-database.service';
 import { GameResult } from '../game-result';
-import { CardProperty } from '../card-property';
-import { SelectedCards } from '../selected-cards';
 
 @Component({
   selector: 'app-submit-game-result-dialog',

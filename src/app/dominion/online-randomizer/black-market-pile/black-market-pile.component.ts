@@ -18,7 +18,6 @@ import { DominionCardImageComponent } from '../../dominion-card-image/dominion-c
 import { CardPropertyDialogComponent } from '../../card-property-dialog/card-property-dialog.component';
 
 import { CardProperty } from '../../card-property';
-import { SelectedCards } from '../../selected-cards';
 
 
 @Component({

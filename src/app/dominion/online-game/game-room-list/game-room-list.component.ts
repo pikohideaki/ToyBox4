@@ -47,7 +47,7 @@ export class GameRoomListComponent implements OnInit, OnDestroy {
   }
 
   private roomByID( roomID ): GameRoom {
-    return this.gameRoomList.find( g => g.id === roomID );
+    return this.gameRoomList.find( g => g.databaseKey === roomID );
   }
 
   signIn( roomID: number ) {

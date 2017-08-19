@@ -29,21 +29,21 @@ export class SignInToGameRoomDialogComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.gameRooms.gameRoomList$
-      .map( list => list.findIndex( room => room.id === this.newRoom.id ) )
+      .map( list => list.findIndex( room => room.databaseKey === this.newRoom.databaseKey ) )
       .filter( result => result === -1 )  // selecting room has removed
       .takeWhile( () => this.alive )
       .subscribe( () => this.dialogRef.close() );
 
     this.players$ = this.gameRooms.gameRoomList$.map( list =>
-        ( list.find( e => e.id === this.newRoom.id ) || new GameRoom() ).players )
+        ( list.find( e => e.databaseKey === this.newRoom.databaseKey ) || new GameRoom() ).players )
 
     this.players$
       .filter( players => this.playerCompleted( players.length ) )
       .takeWhile( () => this.alive )
       .subscribe( () => {
-        this.gameRooms.setWaitingForPlayersValue( this.newRoom.id, false );
+        this.gameRooms.setWaitingForPlayersValue( this.newRoom.databaseKey, false );
         setTimeout( () => {
-          this.router.navigate( ['/dominion/online-game-main', this.newRoom.id] );
+          this.router.navigate( ['/dominion/online-game-main', this.newRoom.databaseKey] );
           this.dialogRef.close();
         }, 3000);
       });

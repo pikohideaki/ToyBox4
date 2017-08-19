@@ -49,21 +49,23 @@ export class SignUpComponent implements OnInit {
       this.waitingForResponse = false;
       this.setDisplayName();
 
-      this.database.updateUserInfo( afUser.uid, new UserInfo({
-          databaseKey                          : afUser.uid,
-          id                                   : afUser.uid,
-          name                                 : this.displayName,
-          randomizerGroupID                    : '',
-          DominionSetToggleValuesForOnlineGame : [],
-          numberOfPlayersForOnlineGame         : 2,
-          onlineGameRoomID                     : '',
-          onlineGameStateID                    : '',
-        }) );
+      this.database.updateUserInfo(
+          afUser.uid,
+          new UserInfo( {
+            databaseKey:                          afUser.uid,
+            id:                                   afUser.uid,
+            name:                                 this.displayName,
+            randomizerGroupID:                    '',
+            DominionSetsSelectedForOnlineGame: [],
+            numberOfPlayersForOnlineGame:         2,
+            onlineGameRoomID:                     '',
+            onlineGameStateID:                    ''
+          } ) );
 
       this.location.back();
       this.openSnackBar('Successfully logged in!');
     } )
-    .catch( (error: any ) => {
+    .catch( (error: any) => {
       this.waitingForResponse = false;
 
       switch ( error.code ) {

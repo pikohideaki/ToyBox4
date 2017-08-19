@@ -1,28 +1,21 @@
 import { Injectable } from '@angular/core';
-
 import { Observable } from 'rxjs/Observable';
-
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
 
 import { UserInfo } from './user-info';
-
 import { DominionDatabaseService } from './dominion/dominion-database.service';
 
 
 
 @Injectable()
 export class MyUserInfoService {
-
   private myID: string = '';
   myID$: Observable<string>;
   signedIn$: Observable<boolean>;
   myUserInfo$: Observable<UserInfo>;
-
-  myPlayerName$: Observable<string>;
-
+  myName$: Observable<string>;
   myRandomizerGroupID$: Observable<string>;
-
   numberOfPlayersForOnlineGame$: Observable<number>;
   onlineGameRoomID$: Observable<string>;
   onlineGameStateID$: Observable<string>;
@@ -39,12 +32,14 @@ export class MyUserInfoService {
     this.signedIn$ = this.afAuth.authState.map( e => !!e );
 
     this.myUserInfo$ = Observable.combineLatest(
-        this.database.userInfoList$,
         this.myID$,
-        (userInfoList: UserInfo[], myID) =>
-          ( !myID || userInfoList.length === 0 ? new UserInfo() : userInfoList[myID] ) );
+        this.database.userInfoList$,
+        ( myID: string, userInfoList: UserInfo[] ) =>
+          ( (!myID || userInfoList.length === 0) ? new UserInfo()
+                                                 : userInfoList.find( e => e.id === myID ) ) );
 
-    this.myPlayerName$ = this.getObservable( 'playerName' ).map( v => v.$value );
+    this.myName$
+      = this.myUserInfo$.map( e => e.name );
 
     this.myRandomizerGroupID$
       = this.myUserInfo$.map( e => e.randomizerGroupID );
@@ -64,9 +59,9 @@ export class MyUserInfoService {
         this.database.DominionSetNameList$,
         (myUserInfo, setList) => {
           const falseArray = setList.map( () => false );
-          const ar = myUserInfo.DominionSetToggleValuesForOnlineGame;
+          const ar = myUserInfo.DominionSetsSelectedForOnlineGame;
           if ( !ar || ar.length < setList.length ) {
-            this.setDominionSetToggleValuesForOnlineGame( falseArray );  // initialize
+            this.setDominionSetsSelectedForOnlineGame( falseArray );  // initialize
             return falseArray;
           }
           return ar;
@@ -76,18 +71,6 @@ export class MyUserInfoService {
 
 
 
-  private getObservable( pathSuffix: string, asList: boolean = false ): Observable<any> {
-    if ( asList ) {
-      return this.myID$
-          .map( myID => this.afDatabase.list(`/userInfoList/${myID}/${pathSuffix}`) )
-          .switch();
-    } else {
-      return this.myID$
-          .map( myID => this.afDatabase.object(`/userInfoList/${myID}/${pathSuffix}`) )
-          .switch();
-    }
-  }
-
   private setValue( pathSuffix: string, value ) {
     if ( this.myID === '' ) return Promise.resolve();
     return this.afDatabase.object( `/userInfoList/${this.myID}/${pathSuffix}` ).set( value );
@@ -95,12 +78,16 @@ export class MyUserInfoService {
 
 
 
-  setMyPlayerName( playerName: string ) {
-    return this.setValue( 'playerName', playerName );
+  setMyName( name: string ) {
+    return this.setValue( 'name', name );
   }
 
-  setMyRandomizerGroupID( value: string ) {
-    return this.setValue( 'myRandomizerGroupID', value );
+  setRandomizerGroupID( value: string ) {
+    return this.setValue( 'randomizerGroupID', value );
+  }
+
+  setDominionSetsSelectedForOnlineGame( value: boolean[] ) {
+    return this.setValue( 'DominionSetsSelectedForOnlineGame', value );
   }
 
   setNumberOfPlayersForOnlineGame( value: number ) {
@@ -113,10 +100,6 @@ export class MyUserInfoService {
 
   setOnlineGameStateID( value: string ) {
     return this.setValue( 'onlineGameStateID', value );
-  }
-
-  setDominionSetToggleValuesForOnlineGame( value: boolean[] ) {
-    return this.setValue( 'DominionSetToggleValuesForOnlineGame', value );
   }
 
 }

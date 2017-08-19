@@ -1,12 +1,9 @@
 import { SelectedCards } from '../selected-cards';
 
 export class GameRoom {
-  // set automatically
-  id:        string;
-  timeStamp: Date = new Date( Date.now() );
-  name:      string = '';
-
-  // set manually
+  databaseKey:             string;
+  timeStamp:               Date = new Date( Date.now() );
+  name:                    string = '';
   memo:                    string = '';
   waitingForPlayers:       boolean = true;
   players:                 string[] = [];
@@ -14,16 +11,26 @@ export class GameRoom {
   DominionSetToggleValues: boolean[] = [];
   selectedCards:           SelectedCards = new SelectedCards();
   BlackMarketPileShuffled: { cardIndex: number, faceUp: boolean }[] = [];
+  gameStateID:             string;
 
-  gameStateID: string;
 
-
-  constructor( dataObj?, id? ) {
-    if ( !dataObj || !id ) return;
-    this.id                      = ( id || '' );
-    this.timeStamp               = new Date( dataObj.timeStamp );
+  constructor( databaseKey?, dataObj?: {
+      timeStamp:               string,
+      name:                    string,
+      memo:                    string,
+      waitingForPlayers:       boolean,
+      players:                 string[],
+      numberOfPlayers:         number,
+      DominionSetToggleValues: boolean[],
+      selectedCards:           SelectedCards,
+      BlackMarketPileShuffled: { cardIndex: number, faceUp: boolean }[],
+      gameStateID:             string,
+    }
+  ) {
+    if ( !databaseKey || !dataObj ) return;
+    this.databaseKey             = ( databaseKey || '' );
+    this.timeStamp               = new Date( dataObj.timeStamp || Date.now().toString() );
     this.name                    = ( dataObj.name || '' );
-
     this.memo                    = ( dataObj.memo || '' );
     this.waitingForPlayers       = !!dataObj.waitingForPlayers;
     this.players                 = Object.keys( dataObj.players || {} ).map( key => dataObj.players[key] );
@@ -31,7 +38,6 @@ export class GameRoom {
     this.DominionSetToggleValues = ( dataObj.DominionSetToggleValues || [] );
     this.selectedCards           = new SelectedCards( dataObj.selectedCards );
     this.BlackMarketPileShuffled = ( dataObj.BlackMarketPileShuffled || [] );
-
     this.gameStateID             = ( dataObj.gameStateID || '' );
   }
 }

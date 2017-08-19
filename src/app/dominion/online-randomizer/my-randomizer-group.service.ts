@@ -1,37 +1,17 @@
-/**
- * interact with
- * - selectedCards
- * - newGameResult
- * - RandomizerSelectCardsComponent
- * - MyRandomizerGroupListComponent
- *
- * get randomizerGroupList from FireDataBase
- */
-
 import { Injectable } from '@angular/core';
-
-import 'rxjs/add/operator/toPromise';
 import { Observable } from 'rxjs/Observable';
-
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
-
-import { UserInfo } from '../../user-info';
-import { CardProperty } from '../card-property';
 import { PlayerName } from '../player-name';
 import { SelectedCards } from '../selected-cards';
-import { PlayerResult } from './player-result';
-import { RadomizerGroup } from '../randomizer-group';
 import { SelectedCardsCheckboxValues } from '../selected-cards-checkbox-values';
 import { MyUserInfoService } from '../../my-user-info.service';
 
 
 @Injectable()
 export class MyRandomizerGroupService {
-
   myRandomizerGroupID$: Observable<string>;
   myRandomizerGroupID: string;
-
   signedIn$: Observable<boolean>;
   signedIn: boolean;
 
@@ -192,6 +172,5 @@ export class MyRandomizerGroupService {
   setNewGameResultDialogOpened( newGameResultDialogOpened ) {
     return this.setValue( 'newGameResultDialogOpened', newGameResultDialogOpened );
   }
-
 
 }

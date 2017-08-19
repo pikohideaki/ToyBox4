@@ -1,68 +1,43 @@
 export class SelectedCards {
-  Prosperity:       boolean;
-  DarkAges:         boolean;
-  KingdomCards10:   number[];
-  BaneCard:         number[];
-  EventCards:       number[];
-  LandmarkCards:    number[];
-  Obelisk:          number[];
-  BlackMarketPile:  number[];
+  Prosperity:       boolean  = false;
+  DarkAges:         boolean  = false;
+  KingdomCards10:   number[] = [];
+  BaneCard:         number[] = [];
+  EventCards:       number[] = [];
+  LandmarkCards:    number[] = [];
+  Obelisk:          number[] = [];
+  BlackMarketPile:  number[] = [];
 
 
-  constructor( scObj? ) {
-    if ( scObj === undefined ) {
-      this.Prosperity      = false;
-      this.DarkAges        = false;
-      this.KingdomCards10  = [];
-      this.BaneCard        = [];
-      this.EventCards      = [];
-      this.LandmarkCards   = [];
-      this.Obelisk         = [];
-      this.BlackMarketPile = [];
-    } else {
-      this.Prosperity      = ( scObj.Prosperity      || false );
-      this.DarkAges        = ( scObj.DarkAges        || false );
-      this.KingdomCards10  = ( scObj.KingdomCards10  || [] );
-      this.BaneCard        = ( scObj.BaneCard        || [] );
-      this.EventCards      = ( scObj.EventCards      || [] );
-      this.LandmarkCards   = ( scObj.LandmarkCards   || [] );
-      this.Obelisk         = ( scObj.Obelisk         || [] );
-      this.BlackMarketPile = ( scObj.BlackMarketPile || [] );
-    }
+  constructor( initObj?: {
+      Prosperity:       boolean,
+      DarkAges:         boolean,
+      KingdomCards10:   number[],
+      BaneCard:         number[],
+      EventCards:       number[],
+      LandmarkCards:    number[],
+      Obelisk:          number[],
+      BlackMarketPile:  number[],
+  }) {
+    if ( !initObj ) return;
+    this.Prosperity      = ( initObj.Prosperity      || false );
+    this.DarkAges        = ( initObj.DarkAges        || false );
+    this.KingdomCards10  = ( initObj.KingdomCards10  || [] );
+    this.BaneCard        = ( initObj.BaneCard        || [] );
+    this.EventCards      = ( initObj.EventCards      || [] );
+    this.LandmarkCards   = ( initObj.LandmarkCards   || [] );
+    this.Obelisk         = ( initObj.Obelisk         || [] );
+    this.BlackMarketPile = ( initObj.BlackMarketPile || [] );
   }
 
-
-
-  set( scObj ) {
-    this.Prosperity      = ( scObj.Prosperity      || false );
-    this.DarkAges        = ( scObj.DarkAges        || false );
-    this.KingdomCards10  = ( scObj.KingdomCards10  || [] );
-    this.BaneCard        = ( scObj.BaneCard        || [] );
-    this.EventCards      = ( scObj.EventCards      || [] );
-    this.LandmarkCards   = ( scObj.LandmarkCards   || [] );
-    this.Obelisk         = ( scObj.Obelisk         || [] );
-    this.BlackMarketPile = ( scObj.BlackMarketPile || [] );
-  }
-
-
-  reset() {
-    this.Prosperity      = false;
-    this.DarkAges        = false;
-    this.KingdomCards10  = [];
-    this.BaneCard        = [];
-    this.EventCards      = [];
-    this.LandmarkCards   = [];
-    this.Obelisk         = [];
-    this.BlackMarketPile = [];
-  }
 
   concatAll(): number[] {
     return [].concat(
-      this.KingdomCards10 ,
-      this.BaneCard       ,
-      this.EventCards     ,
-      this.LandmarkCards  ,
-      this.Obelisk        ,
+      this.KingdomCards10,
+      this.BaneCard,
+      this.EventCards,
+      this.LandmarkCards,
+      this.Obelisk,
       this.BlackMarketPile,
     );
   }
