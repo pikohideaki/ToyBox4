@@ -1,24 +1,18 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-
 import { Observable } from 'rxjs/Rx';
 
-
-import { UtilitiesService } from '../../../utilities.service';
-
-import { GameRoom } from '../game-room';
-import { GameRoomsService } from '../game-rooms.service';
-
-import { GameState } from '../game-state';
-import { GameStateService } from '../game-state.service';
-
-import { DominionDatabaseService } from '../../dominion-database.service';
-import { CardProperty } from '../../card-property';
+import { UtilitiesService } from '../../../my-library/utilities.service';
 import { MyUserInfoService } from '../../../my-user-info.service';
+import { FireDatabaseMediatorService } from '../../../fire-database-mediator.service';
+
+import { GameRoom     } from '../../../classes/game-room';
+import { GameState    } from '../../../classes/game-state';
+import { CardProperty } from '../../../classes/card-property';
 
 
 @Component({
-  providers: [GameRoomsService, GameStateService, MyUserInfoService],
+  providers: [MyUserInfoService],
   selector: 'app-game-main',
   templateUrl: './game-main.component.html',
   styleUrls: ['./game-main.component.css']
@@ -46,9 +40,7 @@ export class GameMainComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     public utils: UtilitiesService,
-    public database: DominionDatabaseService,
-    private gameRoomsService: GameRoomsService,
-    private gameStateService: GameStateService,
+    public database: FireDatabaseMediatorService,
     private myUserInfo: MyUserInfoService
   ) {
   }
@@ -57,14 +49,14 @@ export class GameMainComponent implements OnInit, OnDestroy {
     this.roomID$ = this.route.paramMap.switchMap( (params: ParamMap) => params.getAll('id') );
 
     this.myGameRoom$
-      = this.gameRoomsService.gameRoomList$.combineLatest(
+      = this.database.onlineGameRoomList$.combineLatest(
           this.roomID$,
           (list, id) => list.find( e => e.databaseKey === id ) );
 
     const myGameStateID$ = this.myGameRoom$.map( (myGameRoom: GameRoom) => myGameRoom.gameStateID );
 
     this.myGameState$
-      = this.gameStateService.gameStateList$.combineLatest(
+      = this.database.onlineGameStateList$.combineLatest(
           myGameStateID$,
           (list, id) => list.find( e => e.databaseKey === id ) );
 

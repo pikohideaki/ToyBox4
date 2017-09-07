@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy, Inject, Input, Output, EventEmitter } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
 
-import { GameState, GameCardID } from '../../game-state';
-import { CardProperty } from '../../../card-property';
-import { GameRoom } from '../../game-room';
+import { GameState, GameCardID } from '../../../../classes/game-state';
+import { CardProperty } from '../../../../classes/card-property';
+import { GameRoom } from '../../../../classes/game-room';
 
 @Component({
   selector: 'app-other-player-area',

@@ -2,7 +2,7 @@
   <div *ngFor="let room of gameRoomList">
     <md-card class="roomListItem"
         [class.notWaitingForPlayers]="!room.waitingForPlayers"
-        (click)="roomClicked( room.id )">
+        (click)="roomClicked( room.databaseKey )">
 
       <md-card-header>
         <md-icon md-card-avatar>group</md-icon>
@@ -13,13 +13,13 @@
         </md-card-subtitle>
       </md-card-header>
 
-      <md-card-content *ngIf="isSelected[ room.id ]">
+      <md-card-content *ngIf="room.databaseKey === selectedRoomID">
         {{(room.waitingForPlayers ? '参加者募集中' : '対戦中')}}
       </md-card-content>
 
-      <md-card-actions *ngIf="isSelected[ room.id ]">
+      <md-card-actions *ngIf="room.databaseKey === selectedRoomID">
         <button md-raised-button color="primary"
-              (click)="signIn( room.id )"
+              (click)="signIn( room.databaseKey )"
               [disabled]="!myName || !room.waitingForPlayers" >
           参加
         </button>

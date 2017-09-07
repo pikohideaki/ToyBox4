@@ -1,36 +1,35 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
 
-import { UserInfo } from './user-info';
-import { DominionDatabaseService } from './dominion/dominion-database.service';
-
+import { UserInfo } from './classes/user-info';
+import { FireDatabaseMediatorService } from './fire-database-mediator.service';
 
 
 @Injectable()
 export class MyUserInfoService {
   private myID: string = '';
-  myID$: Observable<string>;
-  signedIn$: Observable<boolean>;
-  myUserInfo$: Observable<UserInfo>;
-  myName$: Observable<string>;
-  myRandomizerGroupID$: Observable<string>;
-  numberOfPlayersForOnlineGame$: Observable<number>;
-  onlineGameRoomID$: Observable<string>;
-  onlineGameStateID$: Observable<string>;
+  myID$:                                 Observable<string>;
+  signedIn$:                             Observable<boolean>;
+  myUserInfo$:                           Observable<UserInfo>;
+  myName$:                               Observable<string>;
+  myDisplayName$:                        Observable<string>;
+  myRandomizerGroupID$:                  Observable<string>;
+  numberOfPlayersForOnlineGame$:         Observable<number>;
+  onlineGameRoomID$:                     Observable<string>;
+  onlineGameStateID$:                    Observable<string>;
   DominionSetToggleValuesForOnlineGame$: Observable<boolean[]>;
 
 
   constructor(
     private afAuth: AngularFireAuth,
-    private afDatabase: AngularFireDatabase,
-    private database: DominionDatabaseService
+    private database: FireDatabaseMediatorService,
   ) {
     this.myID$ = this.afAuth.authState.map( user => (!user ? '' : user.uid) );
     this.myID$.subscribe( val => this.myID = val );
-    this.signedIn$ = this.afAuth.authState.map( e => !!e );
+    this.signedIn$ = this.afAuth.authState.map( user => !!user ); // this.afAuth.auth.currentUser
 
+    this.myDisplayName$ = this.afAuth.authState.map( user => ( !user ? '' : user.displayName ) );
     this.myUserInfo$ = Observable.combineLatest(
         this.myID$,
         this.database.userInfoList$,
@@ -73,7 +72,7 @@ export class MyUserInfoService {
 
   private setValue( pathSuffix: string, value ) {
     if ( this.myID === '' ) return Promise.resolve();
-    return this.afDatabase.object( `/userInfoList/${this.myID}/${pathSuffix}` ).set( value );
+    return this.database.userInfo.setProperty( this.myID, pathSuffix, value );
   }
 
 

@@ -4,15 +4,16 @@ import { Observable } from 'rxjs/Observable';
 
 import { MdDialog } from '@angular/material';
 
-import { UtilitiesService } from '../../../utilities.service';
-import { DominionDatabaseService } from '../../dominion-database.service';
+import { UtilitiesService } from '../../../my-library/utilities.service';
+import { FireDatabaseMediatorService } from '../../../fire-database-mediator.service';
 
 import { SelectedCardsService } from '../selected-cards.service';
 
-import { CardProperty } from '../../card-property';
-import { SelectedCards } from '../../selected-cards';
-import { DominionCardImageComponent } from '../../dominion-card-image/dominion-card-image.component';
-import { CardPropertyDialogComponent } from '../../card-property-dialog/card-property-dialog.component';
+import { CardProperty  } from '../../../classes/card-property';
+import { SelectedCards } from '../../../classes/selected-cards';
+
+import { DominionCardImageComponent } from '../../pure-components/dominion-card-image/dominion-card-image.component';
+import { CardPropertyDialogComponent } from '../../pure-components/card-property-dialog/card-property-dialog.component';
 
 
 @Component({
@@ -40,7 +41,7 @@ export class RandomizerCardImageComponent implements OnInit, OnDestroy {
   constructor(
     private utils: UtilitiesService,
     public dialog: MdDialog,
-    private database: DominionDatabaseService,
+    private database: FireDatabaseMediatorService,
     private selectedCardsService: SelectedCardsService
   ) { }
 

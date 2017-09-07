@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 
-import { UtilitiesService } from '../../utilities.service';
-import { DominionDatabaseService } from '../dominion-database.service';
+import { UtilitiesService } from '../../my-library/utilities.service';
+import { FireDatabaseMediatorService } from '../../fire-database-mediator.service';
 import { MyRandomizerGroupService } from './my-randomizer-group.service';
 
 
@@ -12,17 +12,17 @@ export class NewGameResultService {
 
   private placeSource = new ReplaySubject<string>();
   public place$ = Observable.merge(
-      this.myRandomizerGroup.newGameResultPlace$(),
+      this.myRandomizerGroup.myRandomizerGroup$.map( e => e.newGameResultPlace ),
       this.placeSource.asObservable() );
 
   private memoSource = new ReplaySubject<string>();
   public memo$ = Observable.merge(
-      this.myRandomizerGroup.newGameResultMemo$(),
+      this.myRandomizerGroup.myRandomizerGroup$.map( e => e.newGameResultMemo ),
       this.memoSource.asObservable() );
 
   private startPlayerNameSource = new ReplaySubject<string>();
   public startPlayerName$ = Observable.merge(
-      this.myRandomizerGroup.newGameResultStartPlayerName$(),
+      this.myRandomizerGroup.myRandomizerGroup$.map( e => e.startPlayerName ),
       this.startPlayerNameSource.asObservable() );
 
   private playerResultsSelectedMergedSource
@@ -35,41 +35,49 @@ export class NewGameResultService {
   public playerResultsVPMerged$
     = this.playerResultsVPMergedSource.asObservable();
 
-  private playerResultsLessTurnsMergedSource
+  private playerResultsWinByTurnMergedSource
     = new ReplaySubject<{ value: boolean, playerIndex: number }>();
-  public playerResultsLessTurnsMerged$
-    = this.playerResultsLessTurnsMergedSource.asObservable();
+  public playerResultsWinByTurnMerged$
+    = this.playerResultsWinByTurnMergedSource.asObservable();
 
-  private resetVictoryPointsCalculatorOfPlayerMergedSource
+  private resetVPCalculatorOfPlayerMergedSource
     = new ReplaySubject<{ value: boolean, playerIndex: number }>();
-  public resetVictoryPointsCalculatorOfPlayerMerged$
-    = this.resetVictoryPointsCalculatorOfPlayerMergedSource.asObservable();
+  public resetVPCalculatorOfPlayerMerged$
+    = this.resetVPCalculatorOfPlayerMergedSource.asObservable();
 
 
 
   constructor(
     private utils: UtilitiesService,
-    private database: DominionDatabaseService,
+    private database: FireDatabaseMediatorService,
     private myRandomizerGroup: MyRandomizerGroupService
   ) {
     this.database.playersNameList$
       .subscribe( playersNameList =>
         this.utils.numberSequence( 0, playersNameList.length ).forEach( playerIndex => {
-          this.myRandomizerGroup.newGameResultPlayerSelected$( playerIndex ).subscribe( val => {
+          // this.myRandomizerGroup.newGameResultPlayerSelected$( playerIndex ).subscribe( val => {
+          this.myRandomizerGroup.myRandomizerGroup$.map( e => e.newGameResultPlayers[playerIndex].selected )
+          .subscribe( val => {
             if ( val === undefined || val === null ) return;
             this.playerResultsSelectedMergedSource.next({ value: val, playerIndex: playerIndex });
           });
-          this.myRandomizerGroup.newGameResultPlayerVP$( playerIndex ).subscribe( val => {
+
+          this.myRandomizerGroup.myRandomizerGroup$.map( e => e.newGameResultPlayers[playerIndex].VP )
+          .subscribe( val => {
             if ( val === undefined || val === null ) return;
             this.playerResultsVPMergedSource.next({ value: val, playerIndex: playerIndex });
           });
-          this.myRandomizerGroup.newGameResultPlayerLessTurns$( playerIndex ).subscribe( val => {
+
+          this.myRandomizerGroup.myRandomizerGroup$.map( e => e.newGameResultPlayers[playerIndex].winByTurn )
+          .subscribe( val => {
             if ( val === undefined || val === null ) return;
-            this.playerResultsLessTurnsMergedSource.next({ value: val, playerIndex: playerIndex });
+            this.playerResultsWinByTurnMergedSource.next({ value: val, playerIndex: playerIndex });
           });
-          this.myRandomizerGroup.resetVictoryPointsCalculatorOfPlayer$( playerIndex ).subscribe( val => {
+
+          this.myRandomizerGroup.myRandomizerGroup$.map( e => e.resetVPCalculatorOfPlayer[playerIndex] )
+          .subscribe( val => {
             if ( val === undefined || val === null ) return;
-            this.resetVictoryPointsCalculatorOfPlayerMergedSource.next({ value: val, playerIndex: playerIndex });
+            this.resetVPCalculatorOfPlayerMergedSource.next({ value: val, playerIndex: playerIndex });
           });
         })
       );
@@ -88,27 +96,27 @@ export class NewGameResultService {
 
   changeStartPlayerName( newValue: string ) {
     this.startPlayerNameSource.next( newValue );
-    this.myRandomizerGroup.setNewGameResultStartPlayerName( newValue );
+    this.myRandomizerGroup.setStartPlayerName( newValue );
   }
 
   changePlayerResultSelected( playerIndex: number, value: boolean ) {
     this.playerResultsSelectedMergedSource.next({ value: value, playerIndex: playerIndex });
-    this.myRandomizerGroup.setNewGameResultPlayerSelected( value, playerIndex );
+    this.myRandomizerGroup.setNewGameResultPlayerSelected( playerIndex, value );
   }
 
   changePlayerResultVP( playerIndex: number, value: number ) {
     this.playerResultsVPMergedSource.next({ value: value, playerIndex: playerIndex });
-    this.myRandomizerGroup.setNewGameResultPlayerVP( value, playerIndex );
+    this.myRandomizerGroup.setNewGameResultPlayerVP( playerIndex, value );
   }
 
-  changePlayerResultLessTurns( playerIndex: number, value: boolean ) {
-    this.playerResultsLessTurnsMergedSource.next({ value: value, playerIndex: playerIndex });
-    this.myRandomizerGroup.setNewGameResultPlayerLessTurns( value, playerIndex );
+  changePlayerResultWinByTurn( playerIndex: number, value: boolean ) {
+    this.playerResultsWinByTurnMergedSource.next({ value: value, playerIndex: playerIndex });
+    this.myRandomizerGroup.setNewGameResultPlayerWinByTurn( playerIndex, value );
   }
 
-  changeResetVictoryPointsCalculatorOfPlayerMerged( playerIndex: number, value: boolean ) {
-    this.resetVictoryPointsCalculatorOfPlayerMergedSource.next({ value: value, playerIndex: playerIndex });
-    this.myRandomizerGroup.setResetVictoryPointsCalculatorOfPlayer( value, playerIndex );
+  changeresetVPCalculatorOfPlayerMerged( playerIndex: number, value: boolean ) {
+    this.resetVPCalculatorOfPlayerMergedSource.next({ value: value, playerIndex: playerIndex });
+    this.myRandomizerGroup.setResetVPCalculatorOfPlayer( playerIndex, value );
   }
 
 }

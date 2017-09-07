@@ -19,7 +19,6 @@
           min="70" max="280" default="180" [(value)]="cardLongSideLength" >
         </app-card-image-size-slider>
       </span>
-
     </div>
 
     <hr>
@@ -121,12 +120,12 @@
           <span *ngIf="victoryCard.display" class="VictoryCard">
 
             <app-dominion-card-image
-              class="cardImage"
-              [height]="cardLongSideLength"
-              [isButton]="false"
-              [faceUp]="true"
-              [description]=""
-              [card]="card( victoryCard.id )">
+                class="cardImage"
+                [height]="cardLongSideLength"
+                [isButton]="false"
+                [faceUp]="true"
+                [description]=""
+                [card]="card( victoryCard.id )">
             </app-dominion-card-image>
             <span class="VPPerCard">
               {{VPPerCard( victoryCard.id )}} VP

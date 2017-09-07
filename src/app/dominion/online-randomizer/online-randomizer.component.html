@@ -1,7 +1,7 @@
 <div>
   <md-sidenav-container class="sidenavContainer">
     <md-sidenav #sidenav class="sidenav">
-      <app-randomizer-group-list [sidenav]="sidenav"> </app-randomizer-group-list>
+      <!-- <app-randomizer-group-list [sidenav]="sidenav"> </app-randomizer-group-list> -->
     </md-sidenav>
 
 
@@ -16,21 +16,21 @@
       <md-tab-group>
         <md-tab label="Randomizer">
           <ng-container data-comment="使用する拡張セットにチェック"></ng-container>
-          <app-randomizer-select-cards></app-randomizer-select-cards>
+          <!-- <app-randomizer-select-cards></app-randomizer-select-cards> -->
           <hr>
-          <app-randomizer-card-image [longSideLength]="180"> </app-randomizer-card-image>
+          <!-- <app-randomizer-card-image [longSideLength]="180"> </app-randomizer-card-image> -->
         </md-tab>
 
-        <md-tab *ngIf="(selectedCards$ | async)?.BlackMarketPile.length > 0" label="闇市場デッキ">
-          <app-black-market-pile [longSideLength]="180"> </app-black-market-pile>
+        <md-tab *ngIf="BlackMarketUsed$ | async" label="闇市場デッキ">
+          <!-- <app-black-market-pile [longSideLength]="180"> </app-black-market-pile> -->
         </md-tab>
 
         <md-tab label="結果入力">
-          <app-add-game-result></app-add-game-result>
+          <!-- <app-add-game-result></app-add-game-result> -->
         </md-tab>
 
         <md-tab label="勝利点計算機">
-          <app-victory-points-calculator></app-victory-points-calculator>
+          <!-- <app-victory-points-calculator></app-victory-points-calculator> -->
         </md-tab>
 
       </md-tab-group>

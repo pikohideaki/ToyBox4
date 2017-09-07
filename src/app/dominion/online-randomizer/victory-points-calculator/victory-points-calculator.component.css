@@ -2,12 +2,7 @@
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  /*justify-content: center;*/
   padding: 10px;
-}
-
-.cardImage {
-  /*justify-content: center;*/
 }
 
 .miniButton {
@@ -18,12 +13,9 @@
 }
 
 .setNumberOfCards {
-  /*display: inline-flex;*/
-  /*justify-content: center;*/
   align-items: baseline;
   padding: 5px;
 }
-
 
 .result {
   display: flex;

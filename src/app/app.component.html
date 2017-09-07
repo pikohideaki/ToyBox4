@@ -4,12 +4,12 @@
 
   <span class="spacer"></span>
 
-  <span class="userName">{{ (user$ | async)?.displayName }}</span>
-  <ng-container *ngIf="!signedIn">
+  <span class="userName">{{ myUserInfo.myDisplayName$ | async }}</span>
+  <ng-container *ngIf="!myUserInfo.signedIn$ | async">
     <a md-icon-button routerLink='/user_admin'> <md-icon>person</md-icon> </a>
   </ng-container>
 
-  <ng-container *ngIf="signedIn">
+  <ng-container *ngIf="myUserInfo.signedIn$ | async">
     <a md-icon-button [mdMenuTriggerFor]="menu"> <md-icon>person</md-icon> </a>
 
     <md-menu #menu="mdMenu" [overlapTrigger]="false">

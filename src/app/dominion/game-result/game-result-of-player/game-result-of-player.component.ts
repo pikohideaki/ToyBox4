@@ -1,18 +1,16 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
 
-import { UtilitiesService } from '../../../utilities.service';
-import { DataTableComponent } from '../../../data-table/data-table.component';
-import { GameResult } from '../../game-result';
+import { UtilitiesService   } from '../../../my-library/utilities.service';
+import { DataTableComponent } from '../../../my-library/data-table/data-table.component';
+
+import { GameResult } from '../../../classes/game-result';
 
 
 @Component({
   selector: 'app-game-result-of-player',
   templateUrl: './game-result-of-player.component.html',
-  styleUrls: [
-    '../../../data-table/data-table.component.css',
-    './game-result-of-player.component.css'
-  ]
+  styleUrls: [ '../../../my-library/data-table/data-table.component.css' ]
 })
 export class GameResultOfPlayerComponent implements OnInit {
 

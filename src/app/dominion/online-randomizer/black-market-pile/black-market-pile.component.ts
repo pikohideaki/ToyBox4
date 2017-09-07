@@ -1,23 +1,20 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
-
 import { MdDialog, MdDialogRef } from '@angular/material';
-
-import 'rxjs/add/operator/toPromise';
 import { Observable } from 'rxjs/Observable';
 
-import { UtilitiesService } from '../../../utilities.service';
-import { DominionDatabaseService } from '../../dominion-database.service';
+import { UtilitiesService       } from '../../../my-library/utilities.service';
+import { ConfirmDialogComponent } from '../../../my-library/confirm-dialog/confirm-dialog.component';
+
+import { FireDatabaseMediatorService } from '../../../fire-database-mediator.service';
 
 import { MyRandomizerGroupService } from '../my-randomizer-group.service';
 import { SelectedCardsService } from '../selected-cards.service';
 import { BlackMarketPileShuffledService } from '../black-market-pile-shuffled.service';
 
-import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.component';
+import { DominionCardImageComponent } from '../../pure-components/dominion-card-image/dominion-card-image.component';
+import { CardPropertyDialogComponent } from '../../pure-components/card-property-dialog/card-property-dialog.component';
 
-import { DominionCardImageComponent } from '../../dominion-card-image/dominion-card-image.component';
-import { CardPropertyDialogComponent } from '../../card-property-dialog/card-property-dialog.component';
-
-import { CardProperty } from '../../card-property';
+import { CardProperty } from '../../../classes/card-property';
 
 
 @Component({
@@ -36,7 +33,7 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
   cardPropertyList: CardProperty[];
 
   BlackMarketPileShuffled: { cardIndex: number, faceUp: boolean }[] = [];
-  BlackMarketOperationPhase = 1;
+  BlackMarketPhase = 1;
 
   promiseResolver = {};
 
@@ -45,14 +42,14 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
   constructor(
     public dialog: MdDialog,
     private utils: UtilitiesService,
-    private database: DominionDatabaseService,
+    private database: FireDatabaseMediatorService,
     private selectedCardsService: SelectedCardsService,
     private myRandomizerGroup: MyRandomizerGroupService,
     private BlackMarketService: BlackMarketPileShuffledService
   ) {
-    this.myRandomizerGroup.BlackMarketOperationPhase$()
+    this.myRandomizerGroup.myRandomizerGroup$.map( e => e.BlackMarketPhase )
       .takeWhile( () => this.alive )
-      .subscribe( val => this.BlackMarketOperationPhase = val );
+      .subscribe( val => this.BlackMarketPhase = val );
 
     Observable.combineLatest(
         this.database.cardPropertyList$,
@@ -95,14 +92,14 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
 
   revealTop3Cards = async () => {
     // 上から3枚をめくる
-    this.myRandomizerGroup.setBlackMarketOperationPhase(1);
+    this.myRandomizerGroup.setBlackMarketPhase(1);
 
     this.BlackMarketPileShuffled.forEach( (e, i) => e.faceUp = (i < 3) );
     this.myRandomizerGroup.setBlackMarketPileShuffled( this.BlackMarketPileShuffled );
 
 
     // 3枚のうち1枚を購入するか，1枚も購入しない
-    this.myRandomizerGroup.setBlackMarketOperationPhase(2);
+    this.myRandomizerGroup.setBlackMarketPhase(2);
 
     while (true) {
       const clickedElementValue
@@ -124,7 +121,7 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
     }
 
     // 残りは好きな順に闇市場デッキの下に置く
-    this.myRandomizerGroup.setBlackMarketOperationPhase(3);
+    this.myRandomizerGroup.setBlackMarketPhase(3);
 
     while (true) {
       const clickedElementValue2
@@ -140,7 +137,7 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
     this.BlackMarketPileShuffled.forEach( e => e.faceUp = false );  // reset
     this.myRandomizerGroup.setBlackMarketPileShuffled( this.BlackMarketPileShuffled );
 
-    this.myRandomizerGroup.setBlackMarketOperationPhase(1);
+    this.myRandomizerGroup.setBlackMarketPhase(1);
   }
 
 }

@@ -32,14 +32,14 @@
 
       <md-card-header>
         <md-icon md-card-avatar>group</md-icon>
-        <md-card-title> {{group.data.name}} </md-card-title>
+        <md-card-title> {{group.name}} </md-card-title>
         <md-card-subtitle>
-          {{getUserNamesInGroup( group.id ).join(", ")}}<br>
-          {{utils.toYMDHMS(group.data.getDate())}}
+          {{getUserNamesInGroup( group.databaseKey ).join(", ")}}<br>
+          {{utils.toYMDHMS(group.getDate())}}
         </md-card-subtitle>
       </md-card-header>
 
-      <md-card-content *ngIf="group.selected">
+      <md-card-content *ngIf="group.databaseKey === selectedGroupID">
         <md-input-container [color]="(showWrongPasswordAlert ? 'primary' : 'warn')" >
           <input mdInput placeholder="password" [required]="signInPassword == '' "
               name="signInPassword" [(ngModel)]="signInPassword">
@@ -49,14 +49,14 @@
         </md-input-container>
       </md-card-content>
 
-      <md-card-actions *ngIf="group.selected">
+      <md-card-actions *ngIf="group.databaseKey === selectedGroupID">
         <button md-raised-button color="primary"
-              (click)="signIn(group.id)"
+              (click)="signIn(group.databaseKey)"
               [disabled]="!signInPassword">
           参加
         </button>
         <button md-raised-button color="warn"
-              (click)="signOut(group.id)"
+              (click)="signOut(group.databaseKey)"
               [disabled]="!signInPassword">
           退出
         </button>

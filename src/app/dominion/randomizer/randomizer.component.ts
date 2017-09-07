@@ -2,21 +2,22 @@ import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angu
 import { Observable } from 'rxjs/Rx';
 import { MdDialog } from '@angular/material';
 
-import { UtilitiesService } from '../../utilities.service';
-import { DominionDatabaseService } from '../dominion-database.service';
-import { AlertDialogComponent } from '../../alert-dialog/alert-dialog.component';
-import { DataTableComponent } from '../../data-table/data-table.component';
-import { CardProperty } from '../card-property';
-import { SelectedCards } from '../selected-cards';
-import { SelectedCardsCheckboxValues } from '../selected-cards-checkbox-values';
-import { CardPropertyDialogComponent } from '../card-property-dialog/card-property-dialog.component';
+import { UtilitiesService     } from '../../my-library/utilities.service';
+import { AlertDialogComponent } from '../../my-library/alert-dialog/alert-dialog.component';
+
+import { FireDatabaseMediatorService } from '../../fire-database-mediator.service';
+import { CardPropertyDialogComponent } from '../pure-components/card-property-dialog/card-property-dialog.component';
+
+import { CardProperty                } from '../../classes/card-property';
+import { SelectedCards               } from '../../classes/selected-cards';
+import { selectedCardsCheckbox } from '../../classes/selected-cards-checkbox-values';
 
 
 @Component({
   selector: 'app-randomizer',
   templateUrl: './randomizer.component.html',
   styleUrls: [
-    '../../data-table/data-table.component.css',
+    '../../my-library/data-table/data-table.component.css',
     './randomizer.component.css'
   ]
 })
@@ -34,27 +35,38 @@ export class RandomizerComponent implements OnInit, OnDestroy {
   @Input()  randomizerButtonLocked: boolean;
   @Output() randomizerButtonLockedChange = new EventEmitter<boolean>();
 
+  @Input()  DominionSetToggleValues: boolean[] = [];
+  @Output() DominionSetToggleIndexValuePairEmitter
+    = new EventEmitter<{ index: number, checked: boolean }>();
+
   @Input()  selectedCards: SelectedCards;
   @Output() selectedCardsChange = new EventEmitter<SelectedCards>();
 
-  @Input()  DominionSetToggleValues: boolean[] = [];
-  @Output() DominionSetToggleValueIndexValuePairEmitter
-    = new EventEmitter<{ index: number, checked: boolean }>();
-
-  @Input()  selectedCardsCheckboxValues: SelectedCardsCheckboxValues
-    = new SelectedCardsCheckboxValues();
-  @Output() selectedCardsCheckboxValueIndexValuePairEmitter
-    = new EventEmitter<{ index: number, category: string, checked: boolean }>();
-  @Output() selectedCardsCheckboxValuesOnReset = new EventEmitter<void>();
+  @Input()  selectedCardsCheckbox: selectedCardsCheckbox
+    = new selectedCardsCheckbox();
+  @Output() selectedCardsCheckboxIndexValuePairEmitter
+    = new EventEmitter<{ category: string, index: number, checked: boolean }>();
+  @Output() selectedCardsCheckboxOnReset = new EventEmitter<void>();
 
   @Input()  BlackMarketPileShuffled: { cardIndex: number, faceUp: boolean }[] = [];
   @Output() BlackMarketPileShuffledChange
     = new EventEmitter<{ cardIndex: number, faceUp: boolean }[]>();
 
+
+  selectedCardsCategories = [
+    { name: 'KingdomCards10' , description: '王国カード' },
+    { name: 'BaneCard'       , description: '災いカード（魔女娘用）' },
+    { name: 'EventCards'     , description: 'EventCards' },
+    { name: 'LandmarkCards'  , description: 'LandmarkCards' },
+    { name: 'Obelisk'        , description: 'Obelisk 指定カード' },
+    { name: 'BlackMarketPile', description: '闇市場デッキ' },
+  ];
+
+
   constructor(
     private utils: UtilitiesService,
     public dialog: MdDialog,
-    private database: DominionDatabaseService,
+    private database: FireDatabaseMediatorService,
   ) {
     Observable.combineLatest(
         this.database.cardPropertyList$,
@@ -80,15 +92,13 @@ export class RandomizerComponent implements OnInit, OnDestroy {
 
 
   cardInfoButtonClicked( cardIndex: number ) {
-    // const selectedCardForView = this.cardPropertyList[cardIndex].transform();
     const dialogRef = this.dialog.open( CardPropertyDialogComponent );
-    // dialogRef.componentInstance.card = selectedCardForView;
     dialogRef.componentInstance.card = this.cardPropertyList[cardIndex];
   }
 
   toggleDominionSetList( checked: boolean, index: number ) {
     this.DominionSetToggleValues[ index ] = checked;
-    this.DominionSetToggleValueIndexValuePairEmitter.emit({ checked: checked, index: index });
+    this.DominionSetToggleIndexValuePairEmitter.emit({ checked: checked, index: index });
   }
 
   toggleRandomizerButton( lock: boolean ) {
@@ -97,9 +107,9 @@ export class RandomizerComponent implements OnInit, OnDestroy {
   }
 
   selectedCardsCheckboxOnChange( category, index: number ) {
-    const checked = this.selectedCardsCheckboxValues[category][index];
-    this.selectedCardsCheckboxValueIndexValuePairEmitter
-      .emit({ checked: checked, category: category, index: index });
+    const checked = this.selectedCardsCheckbox[category][index];
+    this.selectedCardsCheckboxIndexValuePairEmitter
+      .emit({ category: category, index: index, checked: checked });
   }
 
   DominionSetToggleIsEmpty(): boolean {
@@ -122,8 +132,8 @@ export class RandomizerComponent implements OnInit, OnDestroy {
     this.selectedCards = new SelectedCards( result.selectedCards );
     this.selectedCardsChange.emit( this.selectedCards );
 
-    this.selectedCardsCheckboxValues.clear();
-    this.selectedCardsCheckboxValuesOnReset.emit();
+    this.selectedCardsCheckbox.clear();
+    this.selectedCardsCheckboxOnReset.emit();
 
     const BlackMarketPileShuffled
       = this.utils.getShuffled( this.selectedCards.BlackMarketPile )

@@ -3,18 +3,18 @@ import { MdDialog, MdSnackBar } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 
 
-import { UtilitiesService } from '../../../utilities.service';
-import { DominionDatabaseService } from '../../dominion-database.service';
+import { UtilitiesService } from '../../../my-library/utilities.service';
+import { FireDatabaseMediatorService } from '../../../fire-database-mediator.service';
 
 import { MyRandomizerGroupService } from '../my-randomizer-group.service';
 import { SelectedDominionSetService } from '../selected-dominion-set.service';
 import { SelectedCardsService } from '../selected-cards.service';
 import { NewGameResultService } from '../new-game-result.service';
 
-import { GameResult } from '../../game-result';
-import { SelectedCards } from '../../selected-cards';
-import { PlayerResult } from '../player-result';
-import { CardProperty } from '../../card-property';
+import { CardProperty  } from '../../../classes/card-property';
+import { GameResult    } from '../../../classes/game-result';
+import { PlayerResult  } from '../../../classes/player-result';
+import { SelectedCards } from '../../../classes/selected-cards';
 
 import { SubmitGameResultDialogComponent } from '../../submit-game-result-dialog/submit-game-result-dialog.component';
 
@@ -23,7 +23,7 @@ import { SubmitGameResultDialogComponent } from '../../submit-game-result-dialog
   selector: 'app-add-game-result',
   templateUrl: './add-game-result.component.html',
   styleUrls: [
-    '../../../data-table/data-table.component.css',
+    '../../../my-library/data-table/data-table.component.css',
     './add-game-result.component.css'
   ]
 })
@@ -51,7 +51,7 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
     private utils: UtilitiesService,
     public dialog: MdDialog,
     public snackBar: MdSnackBar,
-    private database: DominionDatabaseService,
+    private database: FireDatabaseMediatorService,
     private myRandomizerGroup: MyRandomizerGroupService,
     private selectedCardsService: SelectedCardsService,
     private selectedDominionSetService: SelectedDominionSetService,
@@ -89,9 +89,9 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
         //   .takeWhile( () => this.alive )
         //   .subscribe( val => this.playersGameResult[ val.playerIndex ].VP = val.value );
 
-        // this.newGameResultService.playerResultsLessTurnsMerged$
+        // this.newGameResultService.playerResultsWinByTurnMerged$
         //   .takeWhile( () => this.alive )
-        //   .subscribe( val => this.playersGameResult[ val.playerIndex ].lessTurns = val.value );
+        //   .subscribe( val => this.playersGameResult[ val.playerIndex ].winByTurn = val.value );
 
         this.receiveDataDone = true;
       });
@@ -108,11 +108,11 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
       .takeWhile( () => this.alive )
       .subscribe( val => this.playersGameResult[ val.playerIndex ].VP = val.value );
 
-    this.newGameResultService.playerResultsLessTurnsMerged$.combineLatest(
+    this.newGameResultService.playerResultsWinByTurnMerged$.combineLatest(
         playersGameResult$,
-        (playerResultsLessTurnsMerged, _) => playerResultsLessTurnsMerged )
+        (playerResultsWinByTurnMerged, _) => playerResultsWinByTurnMerged )
       .takeWhile( () => this.alive )
-      .subscribe( val => this.playersGameResult[ val.playerIndex ].lessTurns = val.value );
+      .subscribe( val => this.playersGameResult[ val.playerIndex ].winByTurn = val.value );
 
 
     this.selectedDominionSetService.selectedDominionSetMerged$
@@ -131,7 +131,7 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
       .takeWhile( () => this.alive )
       .subscribe( val => this.startPlayerName = val );
 
-    this.newGameResultDialogOpened$ = this.myRandomizerGroup.newGameResultDialogOpened$();
+    this.newGameResultDialogOpened$ = this.myRandomizerGroup.myRandomizerGroup$.map( e => e.newGameResultDialogOpened );
   }
 
 
@@ -172,8 +172,8 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
     this.newGameResultService.changePlayerResultVP( this.playerIndexFromName( playerName ), value )
   }
 
-  changePlayersResultLessTurns( playerName: string, value: boolean ) {
-    this.newGameResultService.changePlayerResultLessTurns( this.playerIndexFromName( playerName ), value )
+  changePlayersResultWinByTurn( playerName: string, value: boolean ) {
+    this.newGameResultService.changePlayerResultWinByTurn( this.playerIndexFromName( playerName ), value )
   }
 
 
@@ -215,7 +215,7 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
       players : this.selectedPlayers().map( pl => ({
                 name      : pl.name,
                 VP        : pl.VP,
-                lessTurns : pl.lessTurns,
+                winByTurn : pl.winByTurn,
                 rank      : 1,
                 score     : 0,
               }) ),
@@ -228,13 +228,13 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
       if ( result === 'OK Clicked' ) {
         this.playersGameResult.forEach( player => {
           this.changePlayersResultVP( player.name, 0 );
-          this.changePlayersResultLessTurns( player.name, false );
+          this.changePlayersResultWinByTurn( player.name, false );
         });
 
         this.changeMemo('');
         this.changeStartPlayerName('');
         this.playersGameResult.forEach( (_, playerIndex) =>
-          this.newGameResultService.changeResetVictoryPointsCalculatorOfPlayerMerged( playerIndex, true ) );
+          this.newGameResultService.changeresetVPCalculatorOfPlayerMerged( playerIndex, true ) );
         this.openSnackBar();
       }
     });

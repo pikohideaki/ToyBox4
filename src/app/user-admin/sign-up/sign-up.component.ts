@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
-import { Router } from '@angular/router';
 import { MdSnackBar } from '@angular/material';
 
 import { Observable } from 'rxjs/Observable';
 import { AngularFireAuth } from 'angularfire2/auth';
 
-import { DominionDatabaseService } from '../../dominion/dominion-database.service';
+import { FireDatabaseMediatorService } from '../../fire-database-mediator.service';
 
-import { UserInfo } from '../../user-info';
+import { UserInfo } from '../../classes/user-info';
 
 @Component({
   selector: 'app-sign-up',
@@ -30,9 +29,8 @@ export class SignUpComponent implements OnInit {
   constructor(
     public snackBar: MdSnackBar,
     public afAuth: AngularFireAuth,
-    private router: Router,
     private location: Location,
-    private database: DominionDatabaseService
+    private database: FireDatabaseMediatorService
   ) {
   }
 
@@ -49,17 +47,17 @@ export class SignUpComponent implements OnInit {
       this.waitingForResponse = false;
       this.setDisplayName();
 
-      this.database.updateUserInfo(
+      this.database.userInfo.set(
           afUser.uid,
           new UserInfo( {
-            databaseKey:                          afUser.uid,
-            id:                                   afUser.uid,
-            name:                                 this.displayName,
-            randomizerGroupID:                    '',
+            databaseKey:                       afUser.uid,
+            id:                                afUser.uid,
+            name:                              this.displayName,
+            randomizerGroupID:                 '',
             DominionSetsSelectedForOnlineGame: [],
-            numberOfPlayersForOnlineGame:         2,
-            onlineGameRoomID:                     '',
-            onlineGameStateID:                    ''
+            numberOfPlayersForOnlineGame:      2,
+            onlineGameRoomID:                  '',
+            onlineGameStateID:                 ''
           } ) );
 
       this.location.back();

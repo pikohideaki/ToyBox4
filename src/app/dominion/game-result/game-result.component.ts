@@ -2,9 +2,10 @@ import { Component, OnInit, Inject, OnDestroy, EventEmitter } from '@angular/cor
 import { Observable } from 'rxjs/Rx';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
-import { UtilitiesService } from '../../utilities.service';
-import { DominionDatabaseService } from '../dominion-database.service';
-import { GameResult } from '../game-result';
+import { UtilitiesService } from '../../my-library/utilities.service';
+import { FireDatabaseMediatorService } from '../../fire-database-mediator.service';
+
+import { GameResult } from '../../classes/game-result';
 
 
 @Component({
@@ -37,7 +38,7 @@ export class GameResultComponent implements OnInit, OnDestroy {
 
   constructor(
     private utils: UtilitiesService,
-    private database: DominionDatabaseService
+    private database: FireDatabaseMediatorService
   ) {
     this.database.gameResultList$
       .takeWhile( () => this.alive )

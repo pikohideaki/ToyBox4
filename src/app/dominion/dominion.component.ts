@@ -3,8 +3,12 @@ import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-dominion',
-  templateUrl: './dominion.component.html',
-  styleUrls: ['./dominion.component.css']
+  template: `
+    <div class="bodyWithPadding">
+      <app-list AppName="Dominion Apps" [Apps]="dominionApps" > </app-list>
+    </div>
+  `,
+  styles: [],
 })
 export class DominionComponent implements OnInit {
 

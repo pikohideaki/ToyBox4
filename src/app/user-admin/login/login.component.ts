@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
-import { Router } from '@angular/router';
 import { MdSnackBar } from '@angular/material';
 
 import { Observable } from 'rxjs/Observable';
 import { AngularFireAuth } from 'angularfire2/auth';
-import * as firebase from 'firebase/app';
 
 
 @Component({
@@ -27,7 +25,6 @@ export class LoginComponent implements OnInit {
   constructor(
     public snackBar: MdSnackBar,
     public afAuth: AngularFireAuth,
-    private router: Router,
     private location: Location
   ) { }
 

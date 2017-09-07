@@ -1,8 +1,0 @@
-<div class="bodyWithPadding">
-  <app-data-table *ngIf="receiveDataDone"
-      [data]='playersNameList$ | async'
-      [columnSettings]='columnSettings' >
-  </app-data-table>
-
-  <app-waiting-spinner [done]="receiveDataDone"></app-waiting-spinner>
-</div>

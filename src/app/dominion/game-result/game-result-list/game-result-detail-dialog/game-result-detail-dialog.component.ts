@@ -2,20 +2,20 @@ import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 
 import { MdDialog } from '@angular/material';
 
-import { GameResult } from '../../../game-result';
-import { SelectedCards } from '../../../selected-cards';
-import { CardProperty } from '../../../card-property';
+import { GameResult    } from '../../../../classes/game-result';
+import { SelectedCards } from '../../../../classes/selected-cards';
+import { CardProperty  } from '../../../../classes/card-property';
 
-import { DominionDatabaseService } from '../../../dominion-database.service';
+import { FireDatabaseMediatorService } from '../../../../fire-database-mediator.service';
 
-import { CardPropertyDialogComponent } from '../../../card-property-dialog/card-property-dialog.component';
+import { CardPropertyDialogComponent } from '../../../pure-components/card-property-dialog/card-property-dialog.component';
 
 
 @Component({
   selector: 'app-game-result-detail-dialog',
   templateUrl: './game-result-detail-dialog.component.html',
   styleUrls: [
-    '../../../../data-table/data-table.component.css',
+    '../../../../my-library/data-table/data-table.component.css',
     './game-result-detail-dialog.component.css'
   ]
 })
@@ -31,7 +31,7 @@ export class GameResultDetailDialogComponent implements OnInit, OnDestroy {
 
   constructor(
     public dialog: MdDialog,
-    private database: DominionDatabaseService
+    private database: FireDatabaseMediatorService
   ) {
   }
 
@@ -62,9 +62,7 @@ export class GameResultDetailDialogComponent implements OnInit, OnDestroy {
 
 
   cardInfoButtonClicked( cardIndex ) {
-    // const selectedCardForView = this.cardPropertyList[cardIndex].transform();
     const dialogRef = this.dialog.open( CardPropertyDialogComponent );
     dialogRef.componentInstance.card = this.cardPropertyList[cardIndex];
-    // dialogRef.componentInstance.card = selectedCardForView;
   }
 }

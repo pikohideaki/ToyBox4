@@ -1,15 +1,11 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { Router } from '@angular/router';
-
 import { Observable } from 'rxjs/Rx';
-
-import { NgForm } from '@angular/forms';
 import { MdDialog, MdSnackBar } from '@angular/material';
 
-import { UtilitiesService } from '../../../utilities.service';
+import { UtilitiesService } from '../../../my-library/utilities.service';
+import { FireDatabaseMediatorService } from '../../../fire-database-mediator.service';
 
-import { GameRoom } from '../game-room';
-import { GameRoomsService } from '../game-rooms.service';
+import { GameRoom } from '../../../classes/game-room';
 import { SignInToGameRoomDialogComponent } from '../sign-in-to-game-room-dialog/sign-in-to-game-room-dialog.component';
 
 @Component({
@@ -21,19 +17,17 @@ export class GameRoomListComponent implements OnInit, OnDestroy {
   private alive: boolean = true;
 
   @Input() myName: string;
-
   gameRoomList: GameRoom[] = [];
+  selectedRoomID = '';
 
-  isSelected = {};
 
   constructor(
-    private router: Router,
     public snackBar: MdSnackBar,
     public dialog: MdDialog,
     public utils: UtilitiesService,
-    private gameRoomsService: GameRoomsService
+    private database: FireDatabaseMediatorService,
   ) {
-    this.gameRoomsService.gameRoomList$
+    this.database.onlineGameRoomList$
       .map( list => list.reverse() )
       .takeWhile( () => this.alive )
       .subscribe( val => this.gameRoomList = val );
@@ -50,18 +44,18 @@ export class GameRoomListComponent implements OnInit, OnDestroy {
     return this.gameRoomList.find( g => g.databaseKey === roomID );
   }
 
-  signIn( roomID: number ) {
+  signIn( roomID: string ) {
     const dialogRef = this.dialog.open( SignInToGameRoomDialogComponent );
     dialogRef.componentInstance.newRoom = this.roomByID( roomID );
     dialogRef.componentInstance.dialogRef = dialogRef;
     dialogRef.disableClose = true;
-    const myMemberID = this.gameRoomsService.addMember( roomID, this.myName ).key;
+    const myMemberID = this.database.onlineGameRoom.addMember( roomID, this.myName ).key;
 
     dialogRef.afterClosed()
       .takeWhile( () => this.alive )
       .subscribe( result => {
         if ( result === 'Cancel Clicked' ) {
-          this.gameRoomsService.removeMemberByID( roomID, myMemberID );
+          this.database.onlineGameRoom.removeMember( roomID, myMemberID );
         } else {
           this.openSnackBar('Successfully signed in!');
         }
@@ -74,15 +68,13 @@ export class GameRoomListComponent implements OnInit, OnDestroy {
   }
 
   roomClicked( clickedRoomID ) {
-    Object.keys( this.isSelected ).filter( key => key !== clickedRoomID )
-                                  .forEach( key => this.isSelected[key] = false );
-    this.isSelected[clickedRoomID] = !this.isSelected[clickedRoomID];  // toggle
+    if ( this.selectedRoomID === clickedRoomID ) this.selectedRoomID = '';  // toggle
+    else this.selectedRoomID = clickedRoomID;
     event.stopPropagation();
   }
 
   backgroundClicked() {
-    Object.keys( this.isSelected ).forEach( key => this.isSelected[key] = false );
+    this.selectedRoomID = '';
   }
-
 
 }

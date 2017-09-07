@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
@@ -15,7 +14,8 @@ export class BlackMarketPileShuffledService {
   constructor(
     private myRandomizerGroup: MyRandomizerGroupService
   ) {
-    this.myRandomizerGroup.BlackMarketPileShuffled$().subscribe( val => {
+    this.myRandomizerGroup.myRandomizerGroup$.map( e => e.BlackMarketPileShuffled )
+    .subscribe( val => {
       if ( !val ) return;
       this.BlackMarketPileShuffledSource.next( val );
     });

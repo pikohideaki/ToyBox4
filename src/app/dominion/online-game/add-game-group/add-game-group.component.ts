@@ -2,16 +2,16 @@ import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
 import { MdTooltipModule, MdDialog, MdSnackBar } from '@angular/material';
 
-import { UtilitiesService } from '../../../utilities.service';
-import { GameRoom } from '../game-room';
-import { GameRoomsService } from '../game-rooms.service';
-import { SignInToGameRoomDialogComponent } from '../sign-in-to-game-room-dialog/sign-in-to-game-room-dialog.component';
-import { DominionDatabaseService } from '../../dominion-database.service';
-import { CardProperty } from '../../card-property';
-import { SelectedCards } from '../../selected-cards';
+import { UtilitiesService } from '../../../my-library/utilities.service';
 import { MyUserInfoService } from '../../../my-user-info.service';
-import { GameState } from '../game-state';
-import { GameStateService } from '../game-state.service';
+import { FireDatabaseMediatorService } from '../../../fire-database-mediator.service';
+
+import { SignInToGameRoomDialogComponent } from '../sign-in-to-game-room-dialog/sign-in-to-game-room-dialog.component';
+
+import { CardProperty  } from '../../../classes/card-property';
+import { SelectedCards } from '../../../classes/selected-cards';
+import { GameRoom      } from '../../../classes/game-room';
+import { GameState     } from '../../../classes/game-state';
 
 
 @Component({
@@ -34,9 +34,7 @@ export class AddGameGroupComponent implements OnInit, OnDestroy {
 
   constructor(
     private utils: UtilitiesService,
-    private database: DominionDatabaseService,
-    private gameRoomsService: GameRoomsService,
-    private gameStateService: GameStateService,
+    private database: FireDatabaseMediatorService,
     public snackBar: MdSnackBar,
     public dialog: MdDialog,
     private myUserInfo: MyUserInfoService
@@ -87,12 +85,12 @@ export class AddGameGroupComponent implements OnInit, OnDestroy {
     newGameState.setNumberOfPlayers( this.newRoom.numberOfPlayers );
     newGameState.initCards( this.newRoom.selectedCards, this.cardPropertyList );
     newGameState.initDecks();
-    this.newRoom.gameStateID = this.gameStateService.addGameState( newGameState ).key;
+    this.newRoom.gameStateID = this.database.onlineGameState.add( newGameState ).key;
 
-    const newRoomID = this.gameRoomsService.addGameRoom( this.newRoom ).key;
+    const newRoomID = this.database.onlineGameRoom.add( this.newRoom ).key;
     this.newRoom.databaseKey = newRoomID;
 
-    this.gameRoomsService.addMember( newRoomID, this.myName );
+    this.database.onlineGameRoom.addMember( newRoomID, this.myName );
 
     console.log( newGameState, this.newRoom )
 
@@ -106,8 +104,8 @@ export class AddGameGroupComponent implements OnInit, OnDestroy {
       .subscribe( result => {
         this.newRoom.players = [];  // reset members
         if ( result === 'Cancel Clicked' ) {
-          this.gameRoomsService.removeGameRoomByID( this.newRoom.databaseKey );
-          this.gameStateService.removeGameStateByID( this.newRoom.gameStateID );
+          this.database.onlineGameRoom.remove( this.newRoom.databaseKey );
+          this.database.onlineGameState.remove( this.newRoom.gameStateID );
         } else {
           this.openSnackBar('Successfully signed in!');
         }

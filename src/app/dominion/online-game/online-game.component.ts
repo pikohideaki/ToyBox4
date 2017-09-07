@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { GameRoomsService } from './game-rooms.service';
-import { GameStateService } from './game-state.service';
 
 @Component({
-  providers: [GameRoomsService, GameStateService],
+  providers: [],
   selector: 'app-online-game',
   templateUrl: './online-game.component.html',
   styleUrls: ['./online-game.component.css']

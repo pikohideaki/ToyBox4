@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
-import { SelectedCards } from '../selected-cards';
+import { SelectedCards } from '../../classes/selected-cards';
+
 import { MyRandomizerGroupService } from './my-randomizer-group.service';
+
 
 @Injectable()
 export class SelectedCardsService {
@@ -15,7 +16,8 @@ export class SelectedCardsService {
   constructor(
     private myRandomizerGroup: MyRandomizerGroupService
   ) {
-    this.myRandomizerGroup.selectedCards$().subscribe( val => {
+    this.myRandomizerGroup.myRandomizerGroup$.map( e => e.selectedCards )
+    .subscribe( val => {
       if ( !val ) return;
       this.selectedCardsSource.next( val );
     });

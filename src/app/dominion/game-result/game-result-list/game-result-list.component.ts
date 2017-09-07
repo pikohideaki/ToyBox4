@@ -1,23 +1,25 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { MdDialog, MdDialogRef, MdSnackBar } from '@angular/material';
+import { MdDialog, MdSnackBar } from '@angular/material';
 
+import { DataTableComponent                 } from '../../../my-library/data-table/data-table.component';
+import { ItemsPerPageComponent              } from '../../../my-library/data-table/items-per-page/items-per-page.component';
+import { PagenationComponent, getDataAtPage } from '../../../my-library/data-table/pagenation/pagenation.component';
+import { ConfirmDialogComponent             } from '../../../my-library/confirm-dialog/confirm-dialog.component';
 
-import { DataTableComponent } from '../../../data-table/data-table.component';
-import { ItemsPerPageComponent, initializeItemsPerPageOption } from '../../../data-table/items-per-page/items-per-page.component';
-import { PagenationComponent, getPagenatedData } from '../../../data-table/pagenation/pagenation.component';
-import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.component';
-import { DominionDatabaseService } from '../../dominion-database.service';
-import { GameResult } from '../../game-result';
-import { GameResultDetailDialogComponent } from './game-result-detail-dialog/game-result-detail-dialog.component';
+import { FireDatabaseMediatorService } from '../../../fire-database-mediator.service';
+
+import { GameResultDetailDialogComponent    } from './game-result-detail-dialog/game-result-detail-dialog.component';
+
+import { GameResult } from '../../../classes/game-result';
 
 
 @Component({
   selector: 'app-game-result-list',
   templateUrl: './game-result-list.component.html',
   styleUrls: [
-    '../../../data-table/data-table.component.css',
+    '../../../my-library/data-table/data-table.component.css',
     './game-result-list.component.css'
   ]
 })
@@ -39,7 +41,7 @@ export class GameResultListComponent implements OnInit {
   constructor(
     public dialog: MdDialog,
     public snackBar: MdSnackBar,
-    private database: DominionDatabaseService
+    private database: FireDatabaseMediatorService
   ) {}
 
   ngOnInit() {
@@ -54,7 +56,7 @@ export class GameResultListComponent implements OnInit {
           this.itemsPerPage$,
           this.selectedPageIndex$,
           ( gameResultListFiltered, itemsPerPage, selectedPageIndex ) =>
-              getPagenatedData(
+              getDataAtPage(
                   Array.from( gameResultListFiltered ).reverse(),
                   itemsPerPage,
                   selectedPageIndex ) );
@@ -87,7 +89,7 @@ export class GameResultListComponent implements OnInit {
     dialogRef.componentInstance.message = `No.${no} を削除してもよろしいですか？`;
     dialogRef.afterClosed().subscribe( answer => {
       if ( answer === 'yes' ) {
-        this.database.removeGameResult( databaseKey );
+        this.database.gameResult.remove( databaseKey );
         this.openSnackBar();
       }
     });

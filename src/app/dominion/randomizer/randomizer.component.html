@@ -36,6 +36,7 @@
       </md-chip-list>
     </div>
 
+
     <div id="supplyTable">
       <div class="Prosperity_DarkAges">
         <md-chip-list *ngIf="selectedCards.KingdomCards10.length > 0">
@@ -54,11 +55,38 @@
             <th>コスト</th>
           </tr>
         </thead>
-        <tbody>
+
+        <ng-container *ngFor="let category of selectedCardsCategories">
+          <thead>
+            <tr *ngIf="selectedCards[category.name].length > 0">
+              <th colspan="5">category.description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let cardIndex of selectedCards[category.name]; let idx = index ">
+              <td *ngIf="showSelectedCardsCheckbox">
+                <md-checkbox
+                    [(ngModel)]="selectedCardsCheckbox[category.name][idx]"
+                    (change)="selectedCardsCheckboxOnChange( category.name, idx )">
+                </md-checkbox>
+              </td>
+              <td> {{ cardPropertyList[cardIndex].DominionSetName  }} </td>
+              <td>
+                <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
+                  {{ cardPropertyList[cardIndex].name_jp }}
+                </button>
+              </td>
+              <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
+              <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
+            </tr>
+          </tbody>
+        </ng-container>
+
+        <!-- <tbody>
           <tr *ngFor="let cardIndex of selectedCards.KingdomCards10; let idx = index ">
             <td *ngIf="showSelectedCardsCheckbox">
               <md-checkbox
-                  [(ngModel)]="selectedCardsCheckboxValues.KingdomCards10[idx]"
+                  [(ngModel)]="selectedCardsCheckbox.KingdomCards10[idx]"
                   (change)="selectedCardsCheckboxOnChange( 'KingdomCards10', idx )">
               </md-checkbox>
             </td>
@@ -82,7 +110,7 @@
           <tr *ngFor="let cardIndex of selectedCards.BaneCard; let idx = index ">
             <td *ngIf="showSelectedCardsCheckbox">
               <md-checkbox
-                  [(ngModel)]="selectedCardsCheckboxValues.BaneCard[idx]"
+                  [(ngModel)]="selectedCardsCheckbox.BaneCard[idx]"
                   (change)="selectedCardsCheckboxOnChange( 'BaneCard', idx )">
               </md-checkbox>
             </td>
@@ -106,7 +134,7 @@
           <tr *ngFor="let cardIndex of selectedCards.EventCards; let idx = index ">
             <td *ngIf="showSelectedCardsCheckbox">
               <md-checkbox
-                  [(ngModel)]="selectedCardsCheckboxValues.EventCards[idx]"
+                  [(ngModel)]="selectedCardsCheckbox.EventCards[idx]"
                   (change)="selectedCardsCheckboxOnChange( 'EventCards', idx )">
               </md-checkbox>
             </td>
@@ -130,7 +158,7 @@
           <tr *ngFor="let cardIndex of selectedCards.LandmarkCards; let idx = index ">
             <td *ngIf="showSelectedCardsCheckbox">
               <md-checkbox
-                  [(ngModel)]="selectedCardsCheckboxValues.LandmarkCards[idx]"
+                  [(ngModel)]="selectedCardsCheckbox.LandmarkCards[idx]"
                   (change)="selectedCardsCheckboxOnChange( 'LandmarkCards', idx )">
               </md-checkbox>
             </td>
@@ -154,7 +182,7 @@
           <tr *ngFor="let cardIndex of selectedCards.Obelisk; let idx = index ">
             <td *ngIf="showSelectedCardsCheckbox">
               <md-checkbox
-                  [(ngModel)]="selectedCardsCheckboxValues.Obelisk[idx]"
+                  [(ngModel)]="selectedCardsCheckbox.Obelisk[idx]"
                   (change)="selectedCardsCheckboxOnChange( 'Obelisk', idx )">
               </md-checkbox>
             </td>
@@ -178,7 +206,7 @@
           <tr *ngFor="let cardIndex of selectedCards.BlackMarketPile; let idx = index ">
             <td *ngIf="showSelectedCardsCheckbox">
               <md-checkbox
-                  [(ngModel)]="selectedCardsCheckboxValues.BlackMarketPile[idx]"
+                  [(ngModel)]="selectedCardsCheckbox.BlackMarketPile[idx]"
                   (change)="selectedCardsCheckboxOnChange( 'BlackMarketPile', idx )">
               </md-checkbox>
             </td>
@@ -191,7 +219,7 @@
             <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
             <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
           </tr>
-        </tbody>
+        </tbody> -->
       </table>
     </div>
   </div>

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { NumberOfVictoryCards } from './number-of-victory-cards'
+import { NumberOfVictoryCards } from '../../classes/number-of-victory-cards'
 
 @Injectable()
 export class VictoryPointsCalculatorService {
