@@ -24,10 +24,9 @@ export class GameResultDetailDialogComponent implements OnInit, OnDestroy {
 
   cardPropertyList: CardProperty[] = [];
 
-  @Input() gameResult: GameResult;
+  @Input() gameResult: GameResult = new GameResult();
   @Input() selectedCards: SelectedCards = new SelectedCards();
 
-  DominionSetToggleValues: boolean[] = [];
 
   constructor(
     public dialog: MdDialog,
@@ -53,7 +52,6 @@ export class GameResultDetailDialogComponent implements OnInit, OnDestroy {
         this.selectedCards.BlackMarketPile = (this.gameResult.selectedCardsID.BlackMarketPile || []).map( toIndex );
       });
 
-    this.DominionSetToggleValues = this.gameResult.selectedDominionSet;
   }
 
   ngOnDestroy() {
@@ -61,7 +59,7 @@ export class GameResultDetailDialogComponent implements OnInit, OnDestroy {
   }
 
 
-  cardInfoButtonClicked( cardIndex ) {
+  cardInfoButtonClicked( cardIndex: number ) {
     const dialogRef = this.dialog.open( CardPropertyDialogComponent );
     dialogRef.componentInstance.card = this.cardPropertyList[cardIndex];
   }

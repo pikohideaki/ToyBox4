@@ -55,34 +55,35 @@ class SelectedCardsID {
 
 
 export class GameResult {
-  databaseKey:         string = '';  // key of this game-result in fire-database
-  no:                  number = 0;   // <- calculate locally
-  date:                Date = new Date();
-  place:               string = '';
-  players:             PlayerResultRanked[] = [];
-  memo:                string = '';
-  selectedDominionSet: boolean[] = [];
-  selectedCardsID:     SelectedCardsID = new SelectedCardsID();
+  databaseKey:        string = '';  // key of this game-result in fire-database
+  no:                 number = 0;   // <- calculate locally
+  date:               Date = new Date();
+  place:              string = '';
+  players:            PlayerResultRanked[] = [];
+  memo:               string = '';
+  selectedExpansions: string[] = [];
+  selectedCardsID:    SelectedCardsID = new SelectedCardsID();
 
 
-  constructor( databaseKey?, initObj?: {
-    no:                  number,
-    date:                string,
-    place:               string,
-    players:             PlayerResultRanked[],
-    memo:                string,
-    selectedDominionSet: boolean[],
-    selectedCardsID:     SelectedCardsID,
+  constructor( databaseKey?: string, initObj?: {
+    no:                 number,
+    dateString:         string,
+    place:              string,
+    players:            PlayerResultRanked[],
+    memo:               string,
+    selectedExpansions: string[],
+    selectedCardsID:    SelectedCardsID,
   }) {
-    if ( !databaseKey || !initObj ) return;
-    this.databaseKey         = databaseKey;
-    this.no                  = ( initObj.no                  || 0 );
-    this.date                = new Date( initObj.date || Date.now().toString() );
-    this.place               = ( initObj.place               || '' );
-    this.players             = ( initObj.players || [] ).map( e => new PlayerResultRanked(e) );
-    this.memo                = ( initObj.memo                || '' );
-    this.selectedDominionSet = ( initObj.selectedDominionSet || [] );
-    this.selectedCardsID     = new SelectedCardsID( initObj.selectedCardsID );
+    this.databaseKey        = databaseKey;
+
+    if ( !initObj ) return;
+    this.no                 = ( initObj.no || 0 );
+    this.date               = new Date( initObj.dateString || new Date( Date.now() ).toString() );
+    this.place              = ( initObj.place || '' );
+    this.players            = ( initObj.players || [] ).map( e => new PlayerResultRanked(e) );
+    this.memo               = ( initObj.memo || '' );
+    this.selectedExpansions = ( initObj.selectedExpansions || [] );
+    this.selectedCardsID    = new SelectedCardsID( initObj.selectedCardsID );
 
     this.rankPlayers();
   }

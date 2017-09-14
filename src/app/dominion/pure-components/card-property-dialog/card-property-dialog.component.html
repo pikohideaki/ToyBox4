@@ -3,6 +3,7 @@
 </h1>
 
 <div md-dialog-content>
+
   <div class="flex-content">
     <div class="image">
       <app-dominion-card-image
@@ -16,9 +17,21 @@
         <li *ngFor="let item of items">
           【{{item.name}}】{{cardForView[item.memberName]}}
         </li>
+        <li *ngIf="card.linkId >= 0">
+          <a [href]="cardListLinkPath( card.linkId )" target="_blank">カードリスト</a>
+        </li>
       </ul>
     </div>
   </div>
+<!--
+  <iframe *ngIf="card.linkId >= 0"
+      [src]="cardListLinkPath( card.linkId )"
+      width="200"
+      height="500"
+      scrolling="no"
+      frameborder="0">
+  </iframe> -->
+
 </div>
 
 <div md-dialog-actions class="actionButtons">

@@ -8,15 +8,16 @@ import { FireDatabaseMediatorService } from '../../../fire-database-mediator.ser
 import { MyUserInfoService } from '../../../my-user-info.service';
 
 import { MyRandomizerGroupService } from '../my-randomizer-group.service';
-import { SelectedDominionSetService } from '../selected-dominion-set.service';
 
-import { SelectedCards   } from '../../../classes/selected-cards';
-import { RandomizerGroup } from '../../../classes/randomizer-group';
-import { UserInfo        } from '../../../classes/user-info';
+import { SelectedCards         } from '../../../classes/selected-cards';
+import { RandomizerGroup       } from '../../../classes/randomizer-group';
+import { UserInfo              } from '../../../classes/user-info';
+import { PlayerResult          } from '../../../classes/player-result';
+import { SelectedCardsCheckbox } from '../../../classes/selected-cards-checkbox-values';
+import { BlackMarketPileCard   } from '../../../classes/black-market-pile-card';
 
 
 @Component({
-  providers: [MyUserInfoService],
   selector: 'app-randomizer-group-list',
   templateUrl: './randomizer-group-list.component.html',
   styleUrls: ['./randomizer-group-list.component.css']
@@ -25,16 +26,14 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
   private alive = true;
 
   @Input() private sidenav;
-  private DominionSetToggleValues: boolean[] = [];
-  private selectedCards: SelectedCards = new SelectedCards();
   randomizerGroupList: RandomizerGroup[] = [];
-  private userInfoList: UserInfo[] = [];
-  private myID: string;
   newGroupName: string;
   newGroupPassword: string;
   signInPassword: string;
   showWrongPasswordAlert = false;
   selectedGroupID = '';
+
+  groupIdToUserNames: {};
 
 
   constructor(
@@ -43,28 +42,27 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
     private myUserInfo: MyUserInfoService,
     private database: FireDatabaseMediatorService,
     private myRandomizerGroup: MyRandomizerGroupService,
-    private selectedDominionSetService: SelectedDominionSetService
   ) {
-    this.myUserInfo.myID$
-      .takeWhile( () => this.alive )
-      .subscribe( val => this.myID = val );
-
     this.database.randomizerGroupList$
       .takeWhile( () => this.alive )
       .subscribe( val => this.randomizerGroupList = val )
 
-    this.database.userInfoList$
-      .takeWhile( () => this.alive )
-      .subscribe( val => this.userInfoList = val );
+    const groupIdToUserNames$
+      = Observable.combineLatest(
+            this.database.randomizerGroupList$,
+            this.database.userInfoList$,
+            (randomizerGroupList, userInfoList) => {
+              const mapObj = {};
+              randomizerGroupList.forEach( group =>
+                mapObj[ group.databaseKey ]
+                  = userInfoList.filter( user => user.randomizerGroupID === group.databaseKey )
+                                .map( user => user.name ) )
+              return mapObj;
+            });
 
-    this.myRandomizerGroup.myRandomizerGroup$.map( e => e.selectedCards )
+    groupIdToUserNames$
       .takeWhile( () => this.alive )
-      .subscribe( val => this.selectedCards = val );
-
-    this.selectedDominionSetService.selectedDominionSetMerged$
-      .takeWhile( () => this.alive )
-      .subscribe( val => this.DominionSetToggleValues[ val.index ] = val.checked );
-
+      .subscribe( val => this.groupIdToUserNames = val );
   }
 
   ngOnInit() {
@@ -81,11 +79,14 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
     return isValid;
   }
 
+  private hasNoMember( groupID: string ): boolean {
+    return this.groupIdToUserNames[ groupID ].length === 0;
+  }
+
   private removeMemberEmptyGroup() {
-    console.log( this.userInfoList, this.myID )
     const promises
       = this.randomizerGroupList
-            .filter( g => this.getUserNamesInGroup( g.databaseKey ).length === 0 )  // empty
+            .filter( g => this.hasNoMember( g.databaseKey ) )
             .map( g => this.database.randomizerGroup.removeGroup( g.databaseKey ) )
     return Promise.all( promises );
   }
@@ -100,18 +101,44 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
   }
 
   addRandomizerGroup = async () => {
-    const newRandomizerGroup = new RandomizerGroup();
-    {
-      newRandomizerGroup.name                = this.newGroupName;
-      newRandomizerGroup.password            = this.newGroupPassword;
-      newRandomizerGroup.timeStamp           = Date.now();
-      newRandomizerGroup.selectedCards       = this.selectedCards;
-      newRandomizerGroup.selectedDominionSet = this.DominionSetToggleValues;
-    }
+    const expansionsNameList
+      = await this.database.expansionsNameList$.first().toPromise();
+    const isSelectedExpansionsInit = expansionsNameList.map( _ => true );
+
+    const playersNameList
+      = await this.database.playersNameList$.first().toPromise();
+
+    const playerResults = {};
+    playersNameList.forEach( e => playerResults[ e.databaseKey ] = {
+        name      : e.name,
+        selected  : false,
+        VP        : 0,
+        winByTurn : false,
+    });
+
+    const newRandomizerGroup = new RandomizerGroup( null, {
+        name:                      this.newGroupName,
+        password:                  this.newGroupPassword,
+        dateString:                new Date( Date.now() ).toString(),
+        randomizerButtonLocked:    false,
+        isSelectedExpansions:      isSelectedExpansionsInit,
+        selectedCards:             new SelectedCards(),
+        selectedCardsCheckbox:     new SelectedCardsCheckbox(),
+        BlackMarketPileShuffled:   [],
+        BlackMarketPhase:          0,
+        newGameResult: {
+          players: playerResults,
+          place:   '',
+          memo:    '',
+        },
+        newGameResultDialogOpened: false,
+        resetVPCalculator:         0,
+        startPlayerName:           '',
+    });
 
     const ref = await this.database.randomizerGroup.addGroup( newRandomizerGroup );
     const groupID = ref.key;
-    await this.database.userInfo.setGroupID( this.myID, groupID );
+    await this.myUserInfo.setRandomizerGroupID( groupID );
     await this.removeMemberEmptyGroup();
     this.resetAddGroupForm();
   };
@@ -119,7 +146,7 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
 
   signIn = async ( groupID ) => {
     if ( !this.signInPasswordIsValid( groupID ) ) return;
-    await this.database.userInfo.setGroupID( this.myID, groupID );
+    await this.myUserInfo.setRandomizerGroupID( groupID );
     await this.removeMemberEmptyGroup();
     this.resetSignInForm();
     this.openSnackBar('Successfully signed in!');
@@ -128,7 +155,7 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
 
   signOut = async ( groupID ) => {
     if ( !this.signInPasswordIsValid( groupID ) ) return;
-    await this.database.userInfo.setGroupID( this.myID, '' );
+    await this.myUserInfo.setRandomizerGroupID('');
     await this.removeMemberEmptyGroup();
     this.resetSignInForm();
     this.openSnackBar('Successfully signed out!');
@@ -141,14 +168,14 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
 
 
   // view
-  getUserNamesInGroup( groupID ) {
-    return this.userInfoList.filter( user => user.randomizerGroupID === groupID )
-                            .map( user => user.name );
-  }
 
-  groupClicked( $event, index: number ) {
+  // setSelectedGroupID( groupID: string ) {
+  //   this.selectedGroupID = groupID;
+  // }
+
+  groupClicked( $event, groupID: string ) {
     this.resetSignInForm();
-    this.selectedGroupID = this.randomizerGroupList[index].databaseKey;
+    this.selectedGroupID = groupID;
     $event.stopPropagation();
   }
 

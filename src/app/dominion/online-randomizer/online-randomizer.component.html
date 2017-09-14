@@ -1,41 +1,45 @@
-<div>
-  <md-sidenav-container class="sidenavContainer">
-    <md-sidenav #sidenav class="sidenav">
-      <!-- <app-randomizer-group-list [sidenav]="sidenav"> </app-randomizer-group-list> -->
-    </md-sidenav>
+<md-sidenav-container class="sidenavContainer">
+  <md-sidenav #sidenav class="sidenav">
+    <app-randomizer-group-list [sidenav]="sidenav"> </app-randomizer-group-list>
+  </md-sidenav>
+
+  <div class="sidenavMain" *ngIf="!(signedIn$ | async)" >
+    ログインしてください。
+  </div>
+
+  <div class="sidenavMain" *ngIf="!(signedInToRandomizerGroup$ | async)" >
+    グループに参加してください。
+  </div>
 
 
-    <div class="sidenavMain">
-      <div class="marginedElement" *ngIf="signedIn$ | async" >
-        <button md-raised-button color="primary" (click)="sidenav.open()">
-          <md-icon>group</md-icon>
-        </button>
-        <span> Group : {{myRandomizerGroupName$ | async}} </span>
-      </div>
-
-      <md-tab-group>
-        <md-tab label="Randomizer">
-          <ng-container data-comment="使用する拡張セットにチェック"></ng-container>
-          <!-- <app-randomizer-select-cards></app-randomizer-select-cards> -->
-          <hr>
-          <!-- <app-randomizer-card-image [longSideLength]="180"> </app-randomizer-card-image> -->
-        </md-tab>
-
-        <md-tab *ngIf="BlackMarketUsed$ | async" label="闇市場デッキ">
-          <!-- <app-black-market-pile [longSideLength]="180"> </app-black-market-pile> -->
-        </md-tab>
-
-        <md-tab label="結果入力">
-          <!-- <app-add-game-result></app-add-game-result> -->
-        </md-tab>
-
-        <md-tab label="勝利点計算機">
-          <!-- <app-victory-points-calculator></app-victory-points-calculator> -->
-        </md-tab>
-
-      </md-tab-group>
-
+  <div class="sidenavMain" *ngIf="signedIn$ | async" >
+    <div class="marginedElement">
+      <button md-raised-button color="primary" (click)="sidenav.open()">
+        <md-icon>group</md-icon>
+      </button>
+      <span> Group : {{myRandomizerGroupName$ | async}} </span>
     </div>
-  </md-sidenav-container>
 
-</div>
+    <md-tab-group [(selectedIndex)]="selectedTabIndex" *ngIf="signedInToRandomizerGroup$ | async">
+      <md-tab label="Randomizer">
+        <ng-container data-comment="使用する拡張セットにチェック"></ng-container>
+        <app-randomizer-select-cards></app-randomizer-select-cards>
+        <hr>
+        <app-randomizer-card-image longSideLength="180"> </app-randomizer-card-image>
+      </md-tab>
+
+      <md-tab *ngIf="BlackMarketIsUsed$ | async" label="闇市場デッキ">
+        <app-black-market-pile longSideLength="180"> </app-black-market-pile>
+      </md-tab>
+
+      <md-tab label="結果入力">
+        <app-add-game-result (goToVPcalcTab)="goToNextTab()" ></app-add-game-result>
+      </md-tab>
+
+      <md-tab label="勝利点計算機">
+        <app-online-victory-points-calculator></app-online-victory-points-calculator>
+      </md-tab>
+    </md-tab-group>
+
+  </div>
+</md-sidenav-container>

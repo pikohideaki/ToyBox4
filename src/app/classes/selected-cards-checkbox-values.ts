@@ -1,4 +1,4 @@
-export class selectedCardsCheckbox {
+export class SelectedCardsCheckbox {
   KingdomCards10:  boolean[] = Array(10).fill(false);
   BaneCard:        boolean[] = Array( 1).fill(false);
   EventCards:      boolean[] = Array( 2).fill(false);

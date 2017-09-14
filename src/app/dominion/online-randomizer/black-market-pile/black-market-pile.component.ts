@@ -2,19 +2,17 @@ import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { MdDialog, MdDialogRef } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 
-import { UtilitiesService       } from '../../../my-library/utilities.service';
 import { ConfirmDialogComponent } from '../../../my-library/confirm-dialog/confirm-dialog.component';
 
+import { UtilitiesService       } from '../../../my-library/utilities.service';
 import { FireDatabaseMediatorService } from '../../../fire-database-mediator.service';
-
 import { MyRandomizerGroupService } from '../my-randomizer-group.service';
-import { SelectedCardsService } from '../selected-cards.service';
-import { BlackMarketPileShuffledService } from '../black-market-pile-shuffled.service';
 
 import { DominionCardImageComponent } from '../../pure-components/dominion-card-image/dominion-card-image.component';
 import { CardPropertyDialogComponent } from '../../pure-components/card-property-dialog/card-property-dialog.component';
 
-import { CardProperty } from '../../../classes/card-property';
+import { CardProperty        } from '../../../classes/card-property';
+import { BlackMarketPileCard } from '../../../classes/black-market-pile-card';
 
 
 @Component({
@@ -23,7 +21,6 @@ import { CardProperty } from '../../../classes/card-property';
   styleUrls: ['./black-market-pile.component.css']
 })
 export class BlackMarketPileComponent implements OnInit, OnDestroy {
-
   private alive = true;
   receiveDataDone = false;
 
@@ -32,10 +29,10 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
 
   cardPropertyList: CardProperty[];
 
-  BlackMarketPileShuffled: { cardIndex: number, faceUp: boolean }[] = [];
+  BlackMarketPileShuffled: BlackMarketPileCard[] = [];
   BlackMarketPhase = 1;
 
-  promiseResolver = {};
+  private promiseResolver = {};
 
 
 
@@ -43,25 +40,23 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
     public dialog: MdDialog,
     private utils: UtilitiesService,
     private database: FireDatabaseMediatorService,
-    private selectedCardsService: SelectedCardsService,
     private myRandomizerGroup: MyRandomizerGroupService,
-    private BlackMarketService: BlackMarketPileShuffledService
   ) {
-    this.myRandomizerGroup.myRandomizerGroup$.map( e => e.BlackMarketPhase )
+    this.myRandomizerGroup.BlackMarketPhase$
       .takeWhile( () => this.alive )
       .subscribe( val => this.BlackMarketPhase = val );
 
     Observable.combineLatest(
         this.database.cardPropertyList$,
-        this.BlackMarketService.BlackMarketPileShuffled$,
+        this.myRandomizerGroup.BlackMarketPileShuffled$,
         ( cardPropertyList, BlackMarketPileShuffled ) => ({
           cardPropertyList        : cardPropertyList,
           BlackMarketPileShuffled : BlackMarketPileShuffled
         }) )
       .takeWhile( () => this.alive )
-      .subscribe( value => {
-        this.cardPropertyList = value.cardPropertyList;
-        this.BlackMarketPileShuffled = value.BlackMarketPileShuffled;
+      .subscribe( val => {
+        this.cardPropertyList = val.cardPropertyList;
+        this.BlackMarketPileShuffled = val.BlackMarketPileShuffled;
         this.receiveDataDone = true;
       } );
   }
@@ -81,7 +76,16 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
    */
 
   onClick( operation: string, value: number ) {
-    this.promiseResolver[operation]( value );
+    switch ( operation ) {  // check operation string
+      case 'buy' :
+      case 'putOnTheBottom' :
+        this.promiseResolver[operation]( value );
+        break;
+      default :
+        console.error( `'promiseResolver' does not have operation '${operation}'.` );
+        break;
+    }
+
   }
 
   putOnTheBottomDone(): boolean {
@@ -93,6 +97,7 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
   revealTop3Cards = async () => {
     // 上から3枚をめくる
     this.myRandomizerGroup.setBlackMarketPhase(1);
+
 
     this.BlackMarketPileShuffled.forEach( (e, i) => e.faceUp = (i < 3) );
     this.myRandomizerGroup.setBlackMarketPileShuffled( this.BlackMarketPileShuffled );
@@ -129,7 +134,7 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
       if ( clickedElementValue2 === -1 ) break;
 
       const selectedElement = this.utils.removeAt( this.BlackMarketPileShuffled, clickedElementValue2 );
-      this.BlackMarketPileShuffled.push(selectedElement);
+      this.BlackMarketPileShuffled.push( selectedElement );
       this.myRandomizerGroup.setBlackMarketPileShuffled( this.BlackMarketPileShuffled );
     }
 

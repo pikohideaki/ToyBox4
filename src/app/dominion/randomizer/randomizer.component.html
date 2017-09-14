@@ -1,226 +1,30 @@
-<div class="bodyWithPadding">
-  <app-waiting-spinner [done]="receiveDataDone"></app-waiting-spinner>
-
-  <div *ngIf="receiveDataDone" class="container">
-
-    <div *ngIf="!forViewing" id="randomizerOptions">
-      <div *ngFor="let name of DominionSetNameList; let idx = index" >
-        <md-slide-toggle color="primary"
-              [checked]="DominionSetToggleValues[idx]"
-              (change)="toggleDominionSetList( $event.checked, idx )">
-          {{name}}
-        </md-slide-toggle>
-      </div>
-      <div class="marginedElement">
-        <button md-raised-button color='primary'
-            (click)='randomizerClicked()'
-            [disabled]="randomizerButtonLocked || DominionSetToggleIsEmpty()">
-          Randomizer
-        </button>
-      </div>
-      <div class="marginedElement">
-        <button md-raised-button [color]="(randomizerButtonLocked ? 'warn' : 'primary' )"
-              (click)='toggleRandomizerButton( !randomizerButtonLocked )'>
-          {{(randomizerButtonLocked ? "Unlock" : "Lock" )}}
-        </button>
-      </div>
+<div class="bodyWithPadding two-column">
+  <div class="randomizerOptions">
+    <app-expansions-toggle
+        [isSelectedExpansions]="isSelectedExpansions"
+        (isSelectedExpansionsPartEmitter)="expansionToggleOnChange( $event )" >
+    </app-expansions-toggle>
+    <div class="marginedElement">
+      <button md-raised-button color='primary'
+          (click)='randomizerClicked()'
+          [disabled]="randomizerButtonLocked || expansionsToggleIsEmpty()">
+        Randomizer
+      </button>
     </div>
-
-    <div *ngIf="forViewing" id="DominionSetList">
-      <md-chip-list *ngIf="selectedCards.KingdomCards10.length > 0">
-        <md-chip color="accent"
-            *ngFor="let name of DominionSetNameList; let idx = index"
-            [selected]="DominionSetToggleValues[idx]" >
-          {{name}}
-        </md-chip>
-      </md-chip-list>
+    <div class="marginedElement">
+      <button md-raised-button [color]="(randomizerButtonLocked ? 'warn' : 'primary' )"
+            (click)='lockRandomizerButton( !randomizerButtonLocked )'>
+        {{(randomizerButtonLocked ? "Unlock" : "Lock" )}}
+      </button>
     </div>
+  </div>
 
-
-    <div id="supplyTable">
-      <div class="Prosperity_DarkAges">
-        <md-chip-list *ngIf="selectedCards.KingdomCards10.length > 0">
-          <md-chip color="accent" [selected]="selectedCards.Prosperity" >植民地場</md-chip>
-          <md-chip color="accent" [selected]="selectedCards.DarkAges"   >避難所場</md-chip>
-        </md-chip-list>
-      </div>
-
-      <table class='data-table data-table--shadow3px data-table--vertical-line'>
-        <thead>
-          <tr *ngIf="selectedCards.KingdomCards10.length > 0">
-            <th *ngIf="showSelectedCardsCheckbox"></th>
-            <th>セット</th>
-            <th>名前</th>
-            <th>name</th>
-            <th>コスト</th>
-          </tr>
-        </thead>
-
-        <ng-container *ngFor="let category of selectedCardsCategories">
-          <thead>
-            <tr *ngIf="selectedCards[category.name].length > 0">
-              <th colspan="5">category.description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let cardIndex of selectedCards[category.name]; let idx = index ">
-              <td *ngIf="showSelectedCardsCheckbox">
-                <md-checkbox
-                    [(ngModel)]="selectedCardsCheckbox[category.name][idx]"
-                    (change)="selectedCardsCheckboxOnChange( category.name, idx )">
-                </md-checkbox>
-              </td>
-              <td> {{ cardPropertyList[cardIndex].DominionSetName  }} </td>
-              <td>
-                <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
-                  {{ cardPropertyList[cardIndex].name_jp }}
-                </button>
-              </td>
-              <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
-              <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
-            </tr>
-          </tbody>
-        </ng-container>
-
-        <!-- <tbody>
-          <tr *ngFor="let cardIndex of selectedCards.KingdomCards10; let idx = index ">
-            <td *ngIf="showSelectedCardsCheckbox">
-              <md-checkbox
-                  [(ngModel)]="selectedCardsCheckbox.KingdomCards10[idx]"
-                  (change)="selectedCardsCheckboxOnChange( 'KingdomCards10', idx )">
-              </md-checkbox>
-            </td>
-            <td> {{ cardPropertyList[cardIndex].DominionSetName  }} </td>
-            <td>
-              <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
-                {{ cardPropertyList[cardIndex].name_jp }}
-              </button>
-            </td>
-            <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
-            <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
-          </tr>
-        </tbody>
-
-        <thead>
-          <tr *ngIf="selectedCards.BaneCard.length > 0">
-            <th colspan="5">災いカード（魔女娘用）</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let cardIndex of selectedCards.BaneCard; let idx = index ">
-            <td *ngIf="showSelectedCardsCheckbox">
-              <md-checkbox
-                  [(ngModel)]="selectedCardsCheckbox.BaneCard[idx]"
-                  (change)="selectedCardsCheckboxOnChange( 'BaneCard', idx )">
-              </md-checkbox>
-            </td>
-            <td> {{ cardPropertyList[cardIndex].DominionSetName  }} </td>
-            <td>
-              <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
-                {{ cardPropertyList[cardIndex].name_jp }}
-              </button>
-            </td>
-            <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
-            <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
-          </tr>
-        </tbody>
-
-        <thead>
-          <tr *ngIf="selectedCards.EventCards.length > 0">
-            <th colspan="5">Event</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let cardIndex of selectedCards.EventCards; let idx = index ">
-            <td *ngIf="showSelectedCardsCheckbox">
-              <md-checkbox
-                  [(ngModel)]="selectedCardsCheckbox.EventCards[idx]"
-                  (change)="selectedCardsCheckboxOnChange( 'EventCards', idx )">
-              </md-checkbox>
-            </td>
-            <td> {{ cardPropertyList[cardIndex].DominionSetName  }} </td>
-            <td>
-              <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
-                {{ cardPropertyList[cardIndex].name_jp }}
-              </button>
-            </td>
-            <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
-            <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
-          </tr>
-        </tbody>
-
-        <thead>
-          <tr *ngIf="selectedCards.LandmarkCards.length > 0">
-            <th colspan="5">LandmarkCards</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let cardIndex of selectedCards.LandmarkCards; let idx = index ">
-            <td *ngIf="showSelectedCardsCheckbox">
-              <md-checkbox
-                  [(ngModel)]="selectedCardsCheckbox.LandmarkCards[idx]"
-                  (change)="selectedCardsCheckboxOnChange( 'LandmarkCards', idx )">
-              </md-checkbox>
-            </td>
-            <td> {{ cardPropertyList[cardIndex].DominionSetName  }} </td>
-            <td>
-              <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
-                {{ cardPropertyList[cardIndex].name_jp }}
-              </button>
-            </td>
-            <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
-            <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
-          </tr>
-        </tbody>
-
-        <thead>
-          <tr *ngIf="selectedCards.Obelisk.length > 0">
-            <th colspan="5">Obelisk 指定カード</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let cardIndex of selectedCards.Obelisk; let idx = index ">
-            <td *ngIf="showSelectedCardsCheckbox">
-              <md-checkbox
-                  [(ngModel)]="selectedCardsCheckbox.Obelisk[idx]"
-                  (change)="selectedCardsCheckboxOnChange( 'Obelisk', idx )">
-              </md-checkbox>
-            </td>
-            <td> {{ cardPropertyList[cardIndex].DominionSetName  }} </td>
-            <td>
-              <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
-                {{ cardPropertyList[cardIndex].name_jp }}
-              </button>
-            </td>
-            <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
-            <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
-          </tr>
-        </tbody>
-
-        <thead>
-          <tr *ngIf="selectedCards.BlackMarketPile.length > 0">
-            <th colspan="5">闇市場デッキ</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let cardIndex of selectedCards.BlackMarketPile; let idx = index ">
-            <td *ngIf="showSelectedCardsCheckbox">
-              <md-checkbox
-                  [(ngModel)]="selectedCardsCheckbox.BlackMarketPile[idx]"
-                  (change)="selectedCardsCheckboxOnChange( 'BlackMarketPile', idx )">
-              </md-checkbox>
-            </td>
-            <td> {{ cardPropertyList[cardIndex].DominionSetName  }} </td>
-            <td>
-              <button md-button color="primary" (click)="cardInfoButtonClicked( cardIndex )">
-                {{ cardPropertyList[cardIndex].name_jp }}
-              </button>
-            </td>
-            <td> {{ cardPropertyList[cardIndex].name_eng  }} </td>
-            <td> {{ cardPropertyList[cardIndex].costStr() }} </td>
-          </tr>
-        </tbody> -->
-      </table>
-    </div>
+  <div>
+    <app-selected-cards-list
+      showSelectedCardsCheckbox="true"
+      [selectedCards]="selectedCards"
+      [selectedCardsCheckbox]="selectedCardsCheckbox"
+      (selectedCardsCheckboxPartEmitter)="selectedCardsCheckboxOnChange( $event )">
+    </app-selected-cards-list>
   </div>
 </div>

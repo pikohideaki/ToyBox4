@@ -131,21 +131,21 @@ export class TurnInfo {
 
 
 export class GameState {
-  databaseKey: string;
-  cardPropertyList: CardProperty[] = [];
-  chatList: string[] = [];
-  turnInfo: TurnInfo = new TurnInfo();
+  databaseKey:       string;
+  cardPropertyList:  CardProperty[] = [];
+  chatList:          string[] = [];
+  turnInfo:          TurnInfo = new TurnInfo();
   private whoseTurn: number; // permute[0] -> permute[1] -> permute[2] -> ...
-  numberOfPlayers: number = 0;
-  private permute: number[];  // shuffle players
-  players: GamePlayer[] = [];
-  gameCardData: GameCardData[] = [];
-  BasicCards: BasicCards = new BasicCards();
-  KingdomCards: GameCardID[][] = Array.from( new Array(10), () => new Array() );
-  TrashPile: GameCardID[] = [];
+  numberOfPlayers:   number = 0;
+  private permute:   number[];  // shuffle players
+  players:           GamePlayer[] = [];
+  gameCardData:      GameCardData[] = [];
+  BasicCards:        BasicCards = new BasicCards();
+  KingdomCards:      GameCardID[][] = Array.from( new Array(10), () => new Array() );
+  TrashPile:         GameCardID[] = [];
 
 
-  constructor( databaseKey?, initObj?: {
+  constructor( databaseKey?: string, initObj?: {
     id:                string,
     cardPropertyList:  CardProperty[],
     chatList:          string[],
@@ -159,8 +159,9 @@ export class GameState {
     KingdomCards:      GameCardID[][],
     TrashPile:         GameCardID[],
   } ) {
-    if ( !databaseKey || !initObj ) return;
     this.databaseKey      = ( databaseKey || '' );
+
+    if ( !initObj ) return;
     this.cardPropertyList = ( initObj.cardPropertyList || [] );
     this.chatList         = ( initObj.chatList         || [] );
     this.turnInfo         = new TurnInfo( initObj.turnInfo );
@@ -258,29 +259,28 @@ export class GameState {
 
   getPlacePath( gameCardID: GameCardID ): (string|number)[] {
     let result: (string|number)[] = [];
-    const found = (array, value) => ( array.findIndex( e => e === value ) !== -1 );
 
     // found in BasicCards
     Object.keys( this.BasicCards ).forEach( key => {
-      if ( found( this.BasicCards[key], gameCardID ) ) { result = ['BasicCards', key]; return; }
+      if ( this.BasicCards[key].includes( gameCardID ) ) { result = ['BasicCards', key]; return; }
     });
 
     // found in KingdomCards
     this.KingdomCards.forEach( (pile, index) => {
-      if ( found( pile, gameCardID ) ) { result = ['KingdomCards', index]; return; }
+      if ( pile.includes( gameCardID ) ) { result = ['KingdomCards', index]; return; }
     });
 
     // found in TrashPile
-    if ( found( this.TrashPile, gameCardID ) ) result = ['TrashPile'];
+    if ( this.TrashPile.includes( gameCardID ) ) result = ['TrashPile'];
 
     // found in players
     this.players.forEach( (player, index) => {
-      if ( found( player.Deck       , gameCardID ) ) { result = ['players', index, 'Deck'       ]; return }
-      if ( found( player.DiscardPile, gameCardID ) ) { result = ['players', index, 'DiscardPile']; return }
-      if ( found( player.HandCards  , gameCardID ) ) { result = ['players', index, 'HandCards'  ]; return }
-      if ( found( player.PlayArea   , gameCardID ) ) { result = ['players', index, 'PlayArea'   ]; return }
-      if ( found( player.Aside      , gameCardID ) ) { result = ['players', index, 'Aside'      ]; return }
-      if ( found( player.Open       , gameCardID ) ) { result = ['players', index, 'Open'       ]; return }
+      if ( player.Deck       .includes( gameCardID ) ) { result = ['players', index, 'Deck'       ]; return }
+      if ( player.DiscardPile.includes( gameCardID ) ) { result = ['players', index, 'DiscardPile']; return }
+      if ( player.HandCards  .includes( gameCardID ) ) { result = ['players', index, 'HandCards'  ]; return }
+      if ( player.PlayArea   .includes( gameCardID ) ) { result = ['players', index, 'PlayArea'   ]; return }
+      if ( player.Aside      .includes( gameCardID ) ) { result = ['players', index, 'Aside'      ]; return }
+      if ( player.Open       .includes( gameCardID ) ) { result = ['players', index, 'Open'       ]; return }
     });
 
     return result;

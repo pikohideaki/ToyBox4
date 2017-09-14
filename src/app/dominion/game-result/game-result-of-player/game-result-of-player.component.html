@@ -16,7 +16,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let playerResult of GameResultOfEachPlayerForView$ | async; let idx = index">
+      <tr *ngFor="let playerResult of gameResultOfEachPlayerForView$ | async; let idx = index">
         <th>{{idx + 1}}</th>
         <th>{{playerResult.name}}</th>
         <th>{{playerResult.scoreAverage}}</th>

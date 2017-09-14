@@ -1,15 +1,25 @@
 <md-toolbar color='primary' class='header box-shadow'>
   <a md-icon-button routerLink='/'> <md-icon>home</md-icon> </a>
-  <a class='toolbarButton' md-button routerLink='/dominion' > Dominion </a>
+
+  <!-- <a *ngIf="signedIn$ | async"
+      class='toolbarButton' md-button
+      routerLink='/online-randomizer' >
+    Online Randomizer
+  </a> -->
+  <a *ngIf="signedIn$ | async"
+      class='toolbarButton' md-button
+      routerLink='/gameresult'>
+    Game Results
+  </a>
 
   <span class="spacer"></span>
 
-  <span class="userName">{{ myUserInfo.myDisplayName$ | async }}</span>
-  <ng-container *ngIf="!myUserInfo.signedIn$ | async">
+  <span class="userName">{{ myDisplayName$ | async }}</span>
+  <ng-container *ngIf="!(signedIn$ | async)">
     <a md-icon-button routerLink='/user_admin'> <md-icon>person</md-icon> </a>
   </ng-container>
 
-  <ng-container *ngIf="myUserInfo.signedIn$ | async">
+  <ng-container *ngIf="signedIn$ | async">
     <a md-icon-button [mdMenuTriggerFor]="menu"> <md-icon>person</md-icon> </a>
 
     <md-menu #menu="mdMenu" [overlapTrigger]="false">

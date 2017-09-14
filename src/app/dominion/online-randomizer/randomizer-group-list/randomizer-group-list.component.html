@@ -3,15 +3,14 @@
 </button>
 <div class="clear"></div>
 
-<div class="bodyWithPadding sideBarBody"  (click)="backgroundClicked()">
+<div class="bodyWithPadding sideBarBody" (click)="backgroundClicked()">
 
   <div id="addGroup">
-
     <md-input-container>
-      <input mdInput [(ngModel)]="newGroupName" placeholder="new group name" [required]="newGroupName == '' ">
+      <input mdInput [(ngModel)]="newGroupName" placeholder="New group name" required>
     </md-input-container>
     <md-input-container>
-      <input mdInput [(ngModel)]="newGroupPassword" placeholder="password" [required]="newGroupPassword =='' ">
+      <input mdInput [(ngModel)]="newGroupPassword" placeholder="Password" required>
     </md-input-container>
 
     <button md-raised-button color="primary"
@@ -24,24 +23,40 @@
 
   <hr>
 
+<!--
+  <md-accordion class="headers-align">
+    <md-expansion-panel *ngFor="let group of randomizerGroupList; let idx = index"
+        [expanded]="selectedGroupID === group.databaseKey"
+        (opened)="setSelectedGroupID( group.databaseKey )"
+        hideToggle="true">
+      <md-expansion-panel-header>
+        <md-panel-title>
+          <md-icon md-card-avatar>group</md-icon>
+          {{group.name}}
+        </md-panel-title>
+        <md-panel-description>
+          {{groupIdToUserNames[ group.databaseKey ].join(", ")}}<br>
+          {{utils.toYMDHMS( group.date )}}
+        </md-panel-description>
+      </md-expansion-panel-header>
+    </md-expansion-panel>
+  </md-accordion> -->
 
-  <div *ngFor="let group of randomizerGroupList; let idx = index">
-    <md-card class="groupListItem"
-        *ngIf="!group.data.onlineGameRoom"
-        (click)="groupClicked($event, idx)">
+  <div *ngFor="let group of randomizerGroupList">
+    <md-card class="groupListItem" (click)="groupClicked( $event, group.databaseKey )">
 
       <md-card-header>
         <md-icon md-card-avatar>group</md-icon>
         <md-card-title> {{group.name}} </md-card-title>
         <md-card-subtitle>
-          {{getUserNamesInGroup( group.databaseKey ).join(", ")}}<br>
-          {{utils.toYMDHMS(group.getDate())}}
+          {{groupIdToUserNames[ group.databaseKey ].join(", ")}}<br>
+          {{utils.toYMDHMS( group.date )}}
         </md-card-subtitle>
       </md-card-header>
 
       <md-card-content *ngIf="group.databaseKey === selectedGroupID">
         <md-input-container [color]="(showWrongPasswordAlert ? 'primary' : 'warn')" >
-          <input mdInput placeholder="password" [required]="signInPassword == '' "
+          <input mdInput placeholder="Password" [required]="signInPassword == '' "
               name="signInPassword" [(ngModel)]="signInPassword">
           <md-hint *ngIf="showWrongPasswordAlert" class="alert">
             Password does not match
@@ -51,12 +66,12 @@
 
       <md-card-actions *ngIf="group.databaseKey === selectedGroupID">
         <button md-raised-button color="primary"
-              (click)="signIn(group.databaseKey)"
+              (click)="signIn( group.databaseKey )"
               [disabled]="!signInPassword">
           参加
         </button>
         <button md-raised-button color="warn"
-              (click)="signOut(group.databaseKey)"
+              (click)="signOut( group.databaseKey )"
               [disabled]="!signInPassword">
           退出
         </button>

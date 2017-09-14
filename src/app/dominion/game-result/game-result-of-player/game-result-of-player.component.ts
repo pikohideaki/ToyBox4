@@ -18,7 +18,7 @@ export class GameResultOfPlayerComponent implements OnInit {
 
   rankOptions: boolean[] = [true, true, true, true, true, false, false ];
 
-  GameResultOfEachPlayerForView$: Observable<any>;
+  gameResultOfEachPlayerForView$: Observable<any>;
 
 
   constructor(
@@ -27,7 +27,7 @@ export class GameResultOfPlayerComponent implements OnInit {
 
 
   ngOnInit() {
-    this.GameResultOfEachPlayerForView$
+    this.gameResultOfEachPlayerForView$
       = this.gameResultListFiltered$.map( list =>
           this.toGameResultOfEachPlayerForView( this.getGameResultOfEachPlayer(list) ) );
 

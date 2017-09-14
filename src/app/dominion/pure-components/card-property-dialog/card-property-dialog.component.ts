@@ -18,7 +18,7 @@ export class CardPropertyDialogComponent implements OnInit {
     { memberName: 'name_jp'               , name: '和名' },
     { memberName: 'name_jp_yomi'          , name: '読み' },
     { memberName: 'name_eng'              , name: '英名' },
-    { memberName: 'DominionSetName'       , name: 'セット' },
+    { memberName: 'expansionName'         , name: 'セット' },
     { memberName: 'cost_coin'             , name: 'コスト（コイン）' },
     { memberName: 'cost_potion'           , name: 'コスト（ポーション）' },
     { memberName: 'cost_debt'             , name: 'コスト（借金）' },
@@ -30,10 +30,10 @@ export class CardPropertyDialogComponent implements OnInit {
     { memberName: 'buy'                   , name: '+Buy' },
     { memberName: 'coin'                  , name: '+Coin' },
     { memberName: 'VPtoken'               , name: '+VP-token' },
-    { memberName: 'effect'                , name: '効果' },
-    { memberName: 'description'           , name: '説明' },
-    { memberName: 'recommendedCombination', name: '推奨の組み合わせ' },
-    { memberName: 'memo'                  , name: 'メモ' },
+    // { memberName: 'effect'                , name: '効果' },
+    // { memberName: 'description'           , name: '説明' },
+    // { memberName: 'recommendedCombination', name: '推奨の組み合わせ' },
+    // { memberName: 'memo'                  , name: 'メモ' },
     { memberName: 'implemented'           , name: 'オンラインゲーム実装状況' },
   ];
 
@@ -45,6 +45,11 @@ export class CardPropertyDialogComponent implements OnInit {
 
   ngOnInit() {
     this.cardForView = this.card.transform();
+  }
+
+
+  cardListLinkPath( linkId: number ) {
+    return `http://suka.s5.xrea.com/dom/list.cgi?mode=show&id=${linkId}`;
   }
 
   /**

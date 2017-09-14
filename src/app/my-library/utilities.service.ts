@@ -29,13 +29,30 @@ export class UtilitiesService {
   }
 
 
-  toYMD( date: Date ): string {
-    return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+  isToday( date: Date ) {
+    // Get today's date
+    const todaysDate = new Date();
+
+    // call setHours to take the time out of the comparison
+    return ( date.setHours(0, 0, 0, 0).valueOf() === todaysDate.setHours(0, 0, 0, 0).valueOf() );
   }
 
-  toHMS( date: Date ): string {
+  toYMD( date: Date, delimiter: string = '/' ): string {
     const padzero = ( str => ('00' + str).slice(-2) );
-    return `${padzero(date.getHours())}:${padzero(date.getMinutes() + 1)}:${padzero(date.getSeconds())}`;
+    return date.getFullYear()
+        + delimiter
+        + padzero(date.getMonth() + 1)
+        + delimiter
+        + padzero(date.getDate());
+  }
+
+  toHMS( date: Date, delimiter: string = ':' ): string {
+    const padzero = ( str => ('00' + str).slice(-2) );
+    return padzero(date.getHours())
+        + delimiter
+        + padzero(date.getMinutes() + 1)
+        + delimiter
+        + padzero(date.getSeconds());
   }
 
   toYMDHMS( date: Date ): string {

@@ -14,11 +14,11 @@ import { CardPropertyDialogComponent } from './pure-components/card-property-dia
 
 @Component({
   selector: 'app-card-property-list',
+        // *ngIf="receiveDataDone"
   template: `
     <div class="bodyWithPadding">
       <app-data-table
-        *ngIf="receiveDataDone"
-        [data]='cardPropertyListForView'
+        [data]='cardPropertyListForView$ | async'
         [columnSettings]='columnSettings'
         [itemsPerPageOptions]='[ 25, 50, 100, 200 ]'
         [itemsPerPageDefault]='50'
@@ -34,13 +34,13 @@ export class CardPropertyListComponent implements OnInit, OnDestroy {
   private alive: boolean = true;
 
   private cardPropertyList: CardProperty[] = [];
-  public cardPropertyListForView: any[] = [];
+  cardPropertyListForView$: Observable<any[]>;
 
-  public columnSettings = [
+  columnSettings = [
     { align: 'c', button: false, manip: 'none'             , name: 'no'                 , headerTitle: 'No.' },
     { align: 'c', button: true , manip: 'incrementalSearch', name: 'name_jp'            , headerTitle: '名前' },
     { align: 'c', button: false, manip: 'incrementalSearch', name: 'name_eng'           , headerTitle: 'Name' },
-    { align: 'c', button: false, manip: 'filterBySelecter' , name: 'DominionSetName'    , headerTitle: 'セット名' },
+    { align: 'c', button: false, manip: 'filterBySelecter' , name: 'expansionName'      , headerTitle: 'セット名' },
     { align: 'c', button: false, manip: 'filterBySelecter' , name: 'category'           , headerTitle: '分類' },
     { align: 'c', button: false, manip: 'filterBySelecter' , name: 'cardTypesStr'       , headerTitle: '種別' },
     { align: 'c', button: false, manip: 'none'             , name: 'costStr'            , headerTitle: 'コスト' },
@@ -62,11 +62,13 @@ export class CardPropertyListComponent implements OnInit, OnDestroy {
     public dialog: MdDialog,
     private database: FireDatabaseMediatorService,
   ) {
+    this.cardPropertyListForView$
+      = this.database.cardPropertyList$.map( list => list.map( e => e.transform() ) );
+
     this.database.cardPropertyList$
       .takeWhile( () => this.alive )
       .subscribe( list => {
         this.cardPropertyList = list;
-        this.cardPropertyListForView = list.map( e => e.transform() );
         this.receiveDataDone = true;
       });
   }

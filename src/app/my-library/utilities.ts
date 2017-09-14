@@ -29,4 +29,25 @@ export function permutation( n: number ): number[] {
 export function filterRemove<T>( array: Array<T>, f: (T) => boolean ): [ Array<T>, Array<T> ] {
   const rest = array.filter( e => !f(e) );
   return [ array.filter(f), rest ];
-};
+}
+
+
+export function toYMD( date: Date, delimiter: string = '/' ): string {
+  const padzero = ( str => ('00' + str).slice(-2) );
+  return date.getFullYear()
+      + delimiter
+      + padzero(date.getMonth() + 1)
+      + delimiter
+      + padzero(date.getDate());
+}
+
+
+
+
+export function isToday( date: Date ) {
+  // Get today's date
+  const todaysDate = new Date();
+
+  // call setHours to take the time out of the comparison
+  return ( date.setHours(0, 0, 0, 0).valueOf() === todaysDate.setHours(0, 0, 0, 0).valueOf() );
+}

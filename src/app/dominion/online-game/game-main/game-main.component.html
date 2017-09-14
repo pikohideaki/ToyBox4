@@ -21,20 +21,20 @@
     <div>
       <div class="shared-area_other-player-area">
         <app-shared-area class="shared-area"
-          [cardPropertyList$]="database.cardPropertyList$"
+          [cardPropertyList$]="cardPropertyList$"
           [myGameState$]="myGameState$"
           [myGameRoom$]="myGameRoom$"
           (cardClicked)="onCardClicked( $event )">
         </app-shared-area>
         <app-other-player-area
-          [cardPropertyList$]="database.cardPropertyList$"
+          [cardPropertyList$]="cardPropertyList$"
           [myGameState$]="myGameState$"
           [myGameRoom$]="myGameRoom$"
           (cardClicked)="onCardClicked( $event )">
         </app-other-player-area>
       </div>
       <app-turn-player-area
-        [cardPropertyList$]="database.cardPropertyList$"
+        [cardPropertyList$]="cardPropertyList$"
         [myGameState$]="myGameState$"
         [myGameRoom$]="myGameRoom$"
         (cardClicked)="onCardClicked( $event )">

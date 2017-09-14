@@ -6,7 +6,7 @@ export class CardProperty {
   name_jp:                string = '';
   name_jp_yomi:           string = '';
   name_eng:               string = '';
-  DominionSetName:        string = '';
+  expansionName:          string[] = [];
   cost:                   CardCost = new CardCost({ coin: 0, potion: 0, debt: 0 });
   category:               string = '';
   cardType:               string = '';
@@ -17,12 +17,13 @@ export class CardProperty {
   buy:                    number = 0;
   coin:                   number = 0;
   VPtoken:                number = 0;
-  effect:                 string = '';
-  description:            string = '';
-  recommendedCombination: string = '';
-  memo:                   string = '';
+  // effect:                 string = '';
+  // description:            string = '';
+  // recommendedCombination: string = '';
+  // memo:                   string = '';
   implemented:            boolean = false;
   randomizerCandidate:    boolean = false;
+  linkId:                 number = -1;
 
   constructor( initObj?: {
     no:                     number,
@@ -30,7 +31,7 @@ export class CardProperty {
     name_jp:                string,
     name_jp_yomi:           string,
     name_eng:               string,
-    DominionSetName:        string,
+    expansionName:          string[],
     cost:                   CardCost,
     category:               string,
     cardType:               string,
@@ -41,12 +42,13 @@ export class CardProperty {
     buy:                    number,
     coin:                   number,
     VPtoken:                number,
-    effect:                 string,
-    description:            string,
-    recommendedCombination: string,
-    memo:                   string,
+    // effect:                 string,
+    // description:            string,
+    // recommendedCombination: string,
+    // memo:                   string,
     implemented:            boolean,
     randomizerCandidate:    boolean,
+    linkId:                 number,
   }) {
     if ( !initObj ) return;
 
@@ -55,7 +57,7 @@ export class CardProperty {
     this.name_jp                = ( initObj.name_jp                || '' );
     this.name_jp_yomi           = ( initObj.name_jp_yomi           || '' );
     this.name_eng               = ( initObj.name_eng               || '' );
-    this.DominionSetName        = ( initObj.DominionSetName        || '' );
+    this.expansionName          = ( initObj.expansionName          || [] );
     this.cost                   = new CardCost( initObj.cost );
     this.category               = ( initObj.category               || '' );
     this.cardType               = ( initObj.cardType               || '' );
@@ -66,12 +68,13 @@ export class CardProperty {
     this.buy                    = ( initObj.buy                    || 0 );
     this.coin                   = ( initObj.coin                   || 0 );
     this.VPtoken                = ( initObj.VPtoken                || 0 );
-    this.effect                 = ( initObj.effect                 || '' );
-    this.description            = ( initObj.description            || '' );
-    this.recommendedCombination = ( initObj.recommendedCombination || '' );
-    this.memo                   = ( initObj.memo                   || '' );
+    // this.effect                 = ( initObj.effect                 || '' );
+    // this.description            = ( initObj.description            || '' );
+    // this.recommendedCombination = ( initObj.recommendedCombination || '' );
+    // this.memo                   = ( initObj.memo                   || '' );
     this.implemented            = !!initObj.implemented;
     this.randomizerCandidate    = !!initObj.randomizerCandidate;
+    this.linkId                 = ( initObj.linkId                 || -1 );
   }
 
 
@@ -82,13 +85,13 @@ export class CardProperty {
   costStr(): string {
     let costStr = '';
     if ( this.cost.coin > 0 || ( this.cost.potion === 0 && this.cost.debt === 0 ) ) {
-        costStr += this.cost.coin.toString();
+      costStr += this.cost.coin.toString();
     }
     if ( this.cost.potion > 0 ) {
-        for ( let i = 0; i < this.cost.potion; ++i ) { costStr += 'P'; }
+      for ( let i = 0; i < this.cost.potion; ++i ) { costStr += 'P'; }
     }
     if ( this.cost.debt   > 0 ) {
-        costStr += `<${this.cost.debt.toString()}>`;
+      costStr += `<${this.cost.debt.toString()}>`;
     }
     return costStr;
   }
@@ -96,29 +99,29 @@ export class CardProperty {
 
   transform(): any {
     return {
-      no                     : this.no                     ,
-      cardID                 : this.cardID                 ,
-      name_jp                : this.name_jp                ,
-      name_jp_yomi           : this.name_jp_yomi           ,
-      name_eng               : this.name_eng               ,
-      DominionSetName        : this.DominionSetName        ,
-      cost_coin              : this.cost.coin              ,
-      cost_potion            : this.cost.potion            ,
-      cost_debt              : this.cost.debt              ,
-      costStr                : this.costStr()              ,
-      category               : this.category               ,
-      cardTypesStr           : this.cardTypes.toStr()      ,
-      cardTypes              : this.cardTypes              ,
-      VP                     : this.VP                     ,
-      drawCard               : this.drawCard               ,
-      action                 : this.action                 ,
-      buy                    : this.buy                    ,
-      coin                   : this.coin                   ,
-      VPtoken                : this.VPtoken                ,
-      effect                 : this.effect                 ,
-      description            : this.description            ,
-      recommendedCombination : this.recommendedCombination ,
-      memo                   : this.memo                   ,
+      no                     : this.no,
+      cardID                 : this.cardID,
+      name_jp                : this.name_jp,
+      name_jp_yomi           : this.name_jp_yomi,
+      name_eng               : this.name_eng,
+      expansionName          : this.expansionName.join('，'),
+      cost_coin              : this.cost.coin,
+      cost_potion            : this.cost.potion,
+      cost_debt              : this.cost.debt,
+      costStr                : this.costStr(),
+      category               : this.category,
+      cardTypesStr           : this.cardTypes.toStr(),
+      cardTypes              : this.cardTypes,
+      VP                     : this.VP,
+      drawCard               : this.drawCard,
+      action                 : this.action,
+      buy                    : this.buy,
+      coin                   : this.coin,
+      VPtoken                : this.VPtoken,
+      // effect                 : this.effect,
+      // description            : this.description,
+      // recommendedCombination : this.recommendedCombination,
+      // memo                   : this.memo,
       implemented            : ( this.implemented ?  '実装済み' : '未実装' ),
       randomizerCandidate    : ( this.randomizerCandidate ?  '〇' : '×' ),
     };

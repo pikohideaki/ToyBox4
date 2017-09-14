@@ -27,11 +27,11 @@ import { AppComponent  } from './app.component';
 import { HomeComponent } from './home.component';
 
 /* My library */
-import { UtilitiesService          } from './my-library/utilities.service';
-import { AlertDialogComponent      } from './my-library/alert-dialog/alert-dialog.component';
-import { ConfirmDialogComponent    } from './my-library/confirm-dialog/confirm-dialog.component';
-import { WaitingSpinnerComponent   } from './my-library/waiting-spinner.component';
-import { AppListComponent          } from './my-library/app-list/app-list.component';
+import { UtilitiesService        } from './my-library/utilities.service';
+import { AlertDialogComponent    } from './my-library/alert-dialog/alert-dialog.component';
+import { ConfirmDialogComponent  } from './my-library/confirm-dialog/confirm-dialog.component';
+import { WaitingSpinnerComponent } from './my-library/waiting-spinner.component';
+import { AppListComponent        } from './my-library/app-list/app-list.component';
 // My data table
 import { DataTableComponent    } from './my-library/data-table/data-table.component';
 import { ItemsPerPageComponent } from './my-library/data-table/items-per-page/items-per-page.component';
@@ -44,49 +44,45 @@ import { MyUserInfoService        } from './my-user-info.service';
 import { FireDatabaseMediatorService } from './fire-database-mediator.service';
 import { MyRandomizerGroupService } from './dominion/online-randomizer/my-randomizer-group.service';
 
-// Dominion apps
-import { DominionComponent                } from './dominion/dominion.component';
-
 // user admin
-import { UserAdminComponent               } from './user-admin/user-admin.component';
-import { LoginComponent                   } from './user-admin/login/login.component';
-import { SignUpComponent                  } from './user-admin/sign-up/sign-up.component';
+import { UserAdminComponent } from './user-admin/user-admin.component';
+import { LoginComponent     } from './user-admin/login/login.component';
+import { SignUpComponent    } from './user-admin/sign-up/sign-up.component';
 
 // sub component
-import { DominionCardImageComponent       } from './dominion/pure-components/dominion-card-image/dominion-card-image.component';
-import { CardImageSizeSliderComponent     } from './dominion/pure-components/card-image-size-slider/card-image-size-slider.component';
-import { MyNameSelectorComponent          } from './dominion/my-name-selector.component';
-import { RandomizerComponent              } from './dominion/randomizer/randomizer.component';
+import { DominionCardImageComponent   } from './dominion/pure-components/dominion-card-image/dominion-card-image.component';
+import { CardImageSizeSliderComponent } from './dominion/pure-components/card-image-size-slider/card-image-size-slider.component';
+import { MyNameSelectorComponent      } from './dominion/my-name-selector.component';
+import { RandomizerComponent          } from './dominion/randomizer/randomizer.component';
 // dominion dialog
-import { CardPropertyDialogComponent      } from './dominion/pure-components/card-property-dialog/card-property-dialog.component';
-import { SubmitGameResultDialogComponent  } from './dominion/submit-game-result-dialog/submit-game-result-dialog.component';
-import { GameResultDetailDialogComponent  } from './dominion/game-result/game-result-list/game-result-detail-dialog/game-result-detail-dialog.component';
+import { CardPropertyDialogComponent     } from './dominion/pure-components/card-property-dialog/card-property-dialog.component';
+import { SubmitGameResultDialogComponent } from './dominion/submit-game-result-dialog/submit-game-result-dialog.component';
+import { GameResultDetailDialogComponent } from './dominion/game-result/game-result-list/game-result-detail-dialog/game-result-detail-dialog.component';
 
 // sub apps
-import { RuleBooksComponent               } from './dominion/rule-books.component';
-import { PlayersComponent                 } from './dominion/players.component';
-import { ScoringTableComponent            } from './dominion/scoring-table.component';
-import { CardPropertyListComponent        } from './dominion/card-property-list.component';
+import { RuleBooksComponent        } from './dominion/rule-books.component';
+import { PlayersComponent          } from './dominion/players.component';
+import { ScoringTableComponent     } from './dominion/scoring-table.component';
+import { CardPropertyListComponent } from './dominion/card-property-list.component';
 
 // game result list
-import { GameResultComponent              } from './dominion/game-result/game-result.component';
-import { GameResultListComponent          } from './dominion/game-result/game-result-list/game-result-list.component';
-import { GameResultOfPlayerComponent      } from './dominion/game-result/game-result-of-player/game-result-of-player.component';
+import { GameResultComponent         } from './dominion/game-result/game-result.component';
+import { GameResultListComponent     } from './dominion/game-result/game-result-list/game-result-list.component';
+import { GameResultOfPlayerComponent } from './dominion/game-result/game-result-of-player/game-result-of-player.component';
 
 // online randomizer
-import { OnlineRandomizerComponent        } from './dominion/online-randomizer/online-randomizer.component';
-import { AddGameResultComponent           } from './dominion/online-randomizer/add-game-result/add-game-result.component';
-import { RandomizerCardImageComponent     } from './dominion/online-randomizer/randomizer-card-image/randomizer-card-image.component';
-import { RandomizerSelectCardsComponent   } from './dominion/online-randomizer/randomizer-select-cards.component';
-import { RandomizerGroupListComponent     } from './dominion/online-randomizer/randomizer-group-list/randomizer-group-list.component';
-import { BlackMarketPileComponent         } from './dominion/online-randomizer/black-market-pile/black-market-pile.component';
-import { VictoryPointsCalculatorComponent } from './dominion/online-randomizer/victory-points-calculator/victory-points-calculator.component';
+import { OnlineRandomizerComponent      } from './dominion/online-randomizer/online-randomizer.component';
+import { AddGameResultComponent         } from './dominion/online-randomizer/add-game-result/add-game-result.component';
+import { RandomizerCardImageComponent   } from './dominion/online-randomizer/randomizer-card-image/randomizer-card-image.component';
+import { RandomizerSelectCardsComponent } from './dominion/online-randomizer/randomizer-select-cards.component';
+import { RandomizerGroupListComponent   } from './dominion/online-randomizer/randomizer-group-list/randomizer-group-list.component';
+import { BlackMarketPileComponent       } from './dominion/online-randomizer/black-market-pile/black-market-pile.component';
 
 // dominion online
-import { OnlineGameComponent          } from './dominion/online-game/online-game.component';
-import { GameRoomListComponent            } from './dominion/online-game/game-room-list/game-room-list.component';
-import { AddGameGroupComponent            } from './dominion/online-game/add-game-group/add-game-group.component';
-import { SignInToGameRoomDialogComponent  } from './dominion/online-game/sign-in-to-game-room-dialog/sign-in-to-game-room-dialog.component';
+import { OnlineGameComponent             } from './dominion/online-game/online-game.component';
+import { GameRoomListComponent           } from './dominion/online-game/game-room-list/game-room-list.component';
+import { AddGameGroupComponent           } from './dominion/online-game/add-game-group/add-game-group.component';
+import { SignInToGameRoomDialogComponent } from './dominion/online-game/sign-in-to-game-room-dialog/sign-in-to-game-room-dialog.component';
 import { GameMainComponent } from './dominion/online-game/game-main/game-main.component';
 import { ChatComponent } from './dominion/online-game/game-main/chat/chat.component';
 import { ManipDataComponent } from './manip-data.component';
@@ -95,6 +91,11 @@ import { CardsPileComponent } from './dominion/online-game/game-main/cards-pile.
 import { TurnPlayerAreaComponent } from './dominion/online-game/game-main/turn-player-area/turn-player-area.component';
 import { OtherPlayerAreaComponent } from './dominion/online-game/game-main/other-player-area/other-player-area.component';
 import { TurnInfoComponent } from './dominion/online-game/game-main/turn-info/turn-info.component';
+import { OnlineVictoryPointsCalculatorComponent } from './dominion/online-randomizer/online-victory-points-calculator.component';
+import { SelectedCardsListComponent } from './dominion/selected-cards-list/selected-cards-list.component';
+import { SelectedExpansionsComponent } from './dominion/selected-expansions.component';
+import { ExpansionsToggleComponent } from './dominion/expansions-toggle.component';
+import { VictoryPointsCalculatorComponent } from './dominion/victory-points-calculator/victory-points-calculator.component';
 
 
 
@@ -111,7 +112,6 @@ import { TurnInfoComponent } from './dominion/online-game/game-main/turn-info/tu
     PagenationComponent,
     ResetButtonComponent,
     AppListComponent,
-    DominionComponent,
     CardPropertyDialogComponent,
     CardPropertyListComponent,
     DominionCardImageComponent,
@@ -133,7 +133,6 @@ import { TurnInfoComponent } from './dominion/online-game/game-main/turn-info/tu
     LoginComponent,
     SignUpComponent,
     AlertDialogComponent,
-    VictoryPointsCalculatorComponent,
     CardImageSizeSliderComponent,
     GameResultDetailDialogComponent,
     OnlineGameComponent,
@@ -150,6 +149,11 @@ import { TurnInfoComponent } from './dominion/online-game/game-main/turn-info/tu
     TurnPlayerAreaComponent,
     OtherPlayerAreaComponent,
     TurnInfoComponent,
+    OnlineVictoryPointsCalculatorComponent,
+    SelectedCardsListComponent,
+    SelectedExpansionsComponent,
+    ExpansionsToggleComponent,
+    VictoryPointsCalculatorComponent,
   ],
   imports: [
     BrowserModule,
@@ -159,15 +163,14 @@ import { TurnInfoComponent } from './dominion/online-game/game-main/turn-info/tu
     HttpModule,
     RouterModule.forRoot( [
       { component: HomeComponent             , path: '' },
-      { component: DominionComponent         , path: 'dominion' },
-      { component: CardPropertyListComponent , path: 'dominion/cardlist' },
-      { component: RuleBooksComponent        , path: 'dominion/rulebooks' },
-      { component: GameResultComponent       , path: 'dominion/gameresult' },
-      { component: PlayersComponent          , path: 'dominion/players' },
-      { component: ScoringTableComponent     , path: 'dominion/scoring' },
-      { component: OnlineRandomizerComponent , path: 'dominion/online-randomizer' },
-      { component: OnlineGameComponent   , path: 'dominion/online-game' },
-      { component: GameMainComponent         , path: 'dominion/online-game-main/:id' },
+      { component: CardPropertyListComponent , path: 'cardlist' },
+      { component: RuleBooksComponent        , path: 'rulebooks' },
+      { component: GameResultComponent       , path: 'gameresult' },
+      { component: PlayersComponent          , path: 'players' },
+      { component: ScoringTableComponent     , path: 'scoring' },
+      { component: OnlineRandomizerComponent , path: 'online-randomizer' },
+      { component: OnlineGameComponent       , path: 'online-game' },
+      { component: GameMainComponent         , path: 'online-game-main/:id' },
       { component: UserAdminComponent        , path: 'user_admin' },
       { component: ManipDataComponent        , path: 'manip-data' },
     ], { useHash: true } ),

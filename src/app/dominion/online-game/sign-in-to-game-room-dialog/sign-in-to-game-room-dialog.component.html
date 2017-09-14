@@ -16,11 +16,10 @@
         <span>参加中：{{(players$ | async).join(', ')}}</span>
       </div>
 
-      <app-randomizer
-          [(selectedCards)]="newRoom.selectedCards"
-          forViewing="true"
-          [DominionSetToggleValues]="newRoom.DominionSetToggleValues" >  <!-- not tabbable -->
-      </app-randomizer>
+      <app-selected-expansions [selectedExpansions]="newRoom.selectedExpansions" >
+      </app-selected-expansions>
+      <app-selected-cards-list [(selectedCards)]="newRoom.selectedCards" >
+      </app-selected-cards-list>
     </ng-container>
   </div>
 

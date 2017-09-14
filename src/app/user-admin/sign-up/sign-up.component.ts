@@ -47,17 +47,17 @@ export class SignUpComponent implements OnInit {
       this.waitingForResponse = false;
       this.setDisplayName();
 
-      this.database.userInfo.set(
+      this.database.userInfo.setUserInfo(
           afUser.uid,
-          new UserInfo( {
-            databaseKey:                       afUser.uid,
-            id:                                afUser.uid,
-            name:                              this.displayName,
-            randomizerGroupID:                 '',
-            DominionSetsSelectedForOnlineGame: [],
-            numberOfPlayersForOnlineGame:      2,
-            onlineGameRoomID:                  '',
-            onlineGameStateID:                 ''
+          new UserInfo( afUser.uid, {
+            name:              this.displayName,
+            randomizerGroupID: '',
+            onlineGame: {
+              isSelectedExpansions: [],
+              numberOfPlayers:       2,
+              roomID:               '',
+              gameStateID:          '',
+            }
           } ) );
 
       this.location.back();

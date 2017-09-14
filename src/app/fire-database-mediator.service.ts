@@ -8,15 +8,16 @@ import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/databa
 import * as firebase from 'firebase/app';
 
 
-import { UserInfo                    } from './classes/user-info';
-import { CardProperty                } from './classes/card-property';
-import { SelectedCards               } from './classes/selected-cards';
-import { selectedCardsCheckbox } from './classes/selected-cards-checkbox-values';
-import { GameResult                  } from './classes/game-result';
-import { PlayerName                  } from './classes/player-name';
-import { RandomizerGroup             } from './classes/randomizer-group';
-import { GameRoom                    } from './classes/game-room';
-import { GameState                   } from './classes/game-state';
+import { UserInfo              } from './classes/user-info';
+import { CardProperty          } from './classes/card-property';
+import { SelectedCards         } from './classes/selected-cards';
+import { SelectedCardsCheckbox } from './classes/selected-cards-checkbox-values';
+import { GameResult            } from './classes/game-result';
+import { PlayerName            } from './classes/player-name';
+import { RandomizerGroup       } from './classes/randomizer-group';
+import { GameRoom              } from './classes/game-room';
+import { GameState             } from './classes/game-state';
+import { BlackMarketPileCard   } from './classes/black-market-pile-card';
 
 
 
@@ -24,7 +25,7 @@ import { GameState                   } from './classes/game-state';
 export class FireDatabaseMediatorService {
   private fdPath = {
     userInfoList        : '/userInfoList',
-    DominionSetNameList : '/data/DominionSetNameList',
+    expansionsNameList  : '/data/expansionsNameList',
     cardPropertyList    : '/data/cardPropertyList',
     playersNameList     : '/data/playersNameList',
     scoringList         : '/data/scoringList',
@@ -36,7 +37,7 @@ export class FireDatabaseMediatorService {
 
   /* observables */
   userInfoList$:        Observable<UserInfo[]>;
-  DominionSetNameList$: Observable<string[]>;
+  expansionsNameList$:  Observable<string[]>;
   cardPropertyList$:    Observable<CardProperty[]>;
   playersNameList$:     Observable<PlayerName[]>;
   scoringList$:         Observable<number[][]>;
@@ -49,9 +50,17 @@ export class FireDatabaseMediatorService {
 
   /* methods */
   userInfo: {
-    set: ( uid, newUser ) => firebase.Promise<void>,
-    setProperty: ( uid: string, propertyName: string, value ) => firebase.Promise<void>,
-    setGroupID: ( uid, groupID ) => firebase.Promise<void>,
+    setUserInfo: ( uid: string, newUser: UserInfo ) => firebase.Promise<void>,
+    set: {
+      name:              ( uid: string, value: string ) => firebase.Promise<void>,
+      randomizerGroupID: ( uid: string, value: string ) => firebase.Promise<void>,
+      onlineGame: {
+        isSelectedExpansions: ( uid: string, value: boolean[] ) => firebase.Promise<void>,
+        numberOfPlayers:      ( uid: string, value: number    ) => firebase.Promise<void>,
+        roomID:               ( uid: string, value: string    ) => firebase.Promise<void>,
+        gameStateID:          ( uid: string, value: string    ) => firebase.Promise<void>,
+      }
+    }
   };
 
   // playersNameList: {};
@@ -59,45 +68,49 @@ export class FireDatabaseMediatorService {
   // scoringList: {};
 
   gameResult: {
-    add: ( gameResult: GameResult ) => firebase.database.ThenableReference,
-    remove: ( key: string ) => firebase.Promise<void>,
+    add:    ( gameResult: GameResult ) => firebase.database.ThenableReference,
+    remove: ( key: string )            => firebase.Promise<void>,
   };
 
   randomizerGroup: {
-    addGroup: ( newGroup: RandomizerGroup ) => firebase.database.ThenableReference,
-    removeGroup: ( groupID: string ) => firebase.Promise<void>,
-    setValue: ( groupID: string, pathSuffix: string, value ) => firebase.Promise<void>,
-    addValue: ( groupID: string, pathSuffix: string, value ) => firebase.database.ThenableReference,
+    addGroup:    ( newGroup: RandomizerGroup ) => firebase.database.ThenableReference,
+    removeGroup: ( groupID: string )           => firebase.Promise<void>,
     set: {
-      randomizerButtonLocked:       ( groupID: string, value: boolean ) => firebase.Promise<void>,
-      DominionSetSelected:          ( groupID: string, index: number, value: boolean ) => firebase.Promise<void>,
-      selectedCards:                ( groupID: string, value: SelectedCards ) => firebase.Promise<void>,
-      selectedCardsCheckbox:        ( groupID: string, arrayName: string, index: number, value: boolean ) => firebase.Promise<void>,
-      resetSelectedCardsCheckbox:   ( groupID: string ) => firebase.Promise<void>,
-      BlackMarketPileShuffled:      ( groupID: string, value: { cardIndex: number, faceUp: boolean }[] ) => firebase.Promise<void>,
-      BlackMarketPhase:             ( groupID: string, value: number ) => firebase.Promise<void>,
-      newGameResultPlayerSelected:  ( groupID: string, playerIndex: number, value: boolean ) => firebase.Promise<void>,
-      newGameResultPlayerVP:        ( groupID: string, playerIndex: number, value: number ) => firebase.Promise<void>,
-      newGameResultPlayerWinByTurn: ( groupID: string, playerIndex: number, value: boolean ) => firebase.Promise<void>,
-      resetVPCalculatorOfPlayer:    ( groupID: string, playerIndex: number, value: boolean ) => firebase.Promise<void>,
-      newGameResultPlace:           ( groupID: string, value: string ) => firebase.Promise<void>,
-      newGameResultMemo:            ( groupID: string, value: string ) => firebase.Promise<void>,
-      startPlayerName:              ( groupID: string, value: string ) => firebase.Promise<void>,
-      newGameResultDialogOpened:    ( groupID: string, value: boolean ) => firebase.Promise<void>,
+      randomizerButtonLocked:  ( groupID: string, value: boolean )                                   => firebase.Promise<void>,
+      isSelectedExpansions:    ( groupID: string, index: number, value: boolean )                    => firebase.Promise<void>,
+      selectedCards:           ( groupID: string, value: SelectedCards )                             => firebase.Promise<void>,
+      selectedCardsCheckbox:   ( groupID: string, arrayName: string, index: number, value: boolean ) => firebase.Promise<void>,
+      BlackMarketPileShuffled: ( groupID: string, value: BlackMarketPileCard[] )                     => firebase.Promise<void>,
+      BlackMarketPhase:        ( groupID: string, value: number )                                    => firebase.Promise<void>,
+      startPlayerName:           ( groupID: string, value: string  ) => firebase.Promise<void>,
+      newGameResultDialogOpened: ( groupID: string, value: boolean ) => firebase.Promise<void>,
+      newGameResult: {
+        players: {
+          selected:  ( groupID: string, playerId: string, value: boolean ) => firebase.Promise<void>,
+          VP:        ( groupID: string, playerId: string, value: number  ) => firebase.Promise<void>,
+          winByTurn: ( groupID: string, playerId: string, value: boolean ) => firebase.Promise<void>,
+        },
+        place: ( groupID: string, value: string ) => firebase.Promise<void>,
+        memo:  ( groupID: string, value: string ) => firebase.Promise<void>,
+      },
     },
+    addToSelectedCardsHistory: ( groupID: string, value: SelectedCards ) => firebase.database.ThenableReference,
+    resetSelectedCards: ( groupID: string ) => firebase.Promise<void>,
+    resetSelectedCardsCheckbox: ( groupID: string ) => firebase.Promise<void>,
+    resetVPCalculator: ( groupID: string ) => firebase.Promise<void>,
   };
 
   onlineGameRoom: {
-    add: ( newGameRoom: GameRoom ) => firebase.database.ThenableReference,
-    remove: ( roomID: string ) => firebase.Promise<void>,
-    addMember: ( roomID: string, playerName: string ) => firebase.database.ThenableReference,
-    removeMember: ( roomID: string, playerID: string ) => firebase.Promise<void>,
-    setWaitingForPlayersValue: ( roomID: string, value: boolean ) => firebase.Promise<void>,
+    add:                       ( newGameRoom: GameRoom )              => firebase.database.ThenableReference,
+    remove:                    ( roomID: string )                     => firebase.Promise<void>,
+    addMember:                 ( roomID: string, playerName: string ) => firebase.database.ThenableReference,
+    removeMember:              ( roomID: string, playerID: string )   => firebase.Promise<void>,
+    setWaitingForPlayersValue: ( roomID: string, value: boolean )     => firebase.Promise<void>,
   }
 
   onlineGameState: {
     add: ( gameState: GameState ) => firebase.database.ThenableReference,
-    remove: ( id ) => firebase.Promise<void>,
+    remove: ( id: string ) => firebase.Promise<void>,
   };
 
 
@@ -110,11 +123,11 @@ export class FireDatabaseMediatorService {
     private afdb: AngularFireDatabase,
   ) {
     this.userInfoList$
-      = this.afdb.list( this.fdPath.userInfoList )
-          .map( list => list.map( e => new UserInfo(e) ) );
+      = this.afdb.list( this.fdPath.userInfoList, { preserveSnapshot: true } )
+          .map( snapshots => snapshots.map( e => new UserInfo( e.key, e.val() ) ) );
 
-    this.DominionSetNameList$
-      = this.afdb.list( this.fdPath.DominionSetNameList )
+    this.expansionsNameList$
+      = this.afdb.list( this.fdPath.expansionsNameList )
           .map( list => list.map( e => e.$value ) );
 
     this.cardPropertyList$
@@ -122,8 +135,8 @@ export class FireDatabaseMediatorService {
           .map( list => list.map( e => new CardProperty(e) ) );
 
     this.playersNameList$
-      = this.afdb.list( this.fdPath.playersNameList )
-          .map( list => list.map( e => new PlayerName(e) ) );
+      = this.afdb.list( this.fdPath.playersNameList, { preserveSnapshot: true } )
+          .map( snapshots => snapshots.map( e => new PlayerName( e.key, e.val() ) ) );
 
     this.scoringList$
       = this.afdb.list( this.fdPath.scoringList );
@@ -157,94 +170,143 @@ export class FireDatabaseMediatorService {
 
     /*** methods ***/
 
+    const userInfoSetProperty = ( uid: string, pathPrefix: string, value: any ) => {
+      if ( !uid ) throw new Error('uid is empty')
+      return this.afdb.object( `${this.fdPath.userInfoList}/${uid}/${pathPrefix}` )
+                      .set( value );
+    };
+
     this.userInfo = {
-      set: ( uid, newUser ) =>
-        this.afdb.object(`${this.fdPath.userInfoList}/${uid}`).set( newUser ),
+      setUserInfo: ( uid: string, newUser: UserInfo ) => {
+        const newUserObj = JSON.parse( JSON.stringify(newUser) );
+        delete newUserObj.databaseKey;
+        return this.afdb.object(`${this.fdPath.userInfoList}/${uid}`).set( newUserObj );
+      },
 
-      setProperty: ( uid: string, propertyName: string, value ) =>
-        this.afdb.object( `${this.fdPath.userInfoList}/${uid}/${propertyName}` ).set( value ),
+      set: {
+        name: ( uid: string, value: string ) =>
+          userInfoSetProperty( uid, 'name', value ),
 
-      setGroupID: ( uid, groupID ) =>
-        this.afdb.object( `${this.fdPath.userInfoList}/${uid}/myRandomizerGroupID` ).set( groupID ),
+        randomizerGroupID: ( uid: string, value: string ) =>
+          userInfoSetProperty( uid, 'randomizerGroupID', value ),
+
+        onlineGame: {
+          isSelectedExpansions: ( uid: string, value: boolean[] ) =>
+            userInfoSetProperty( uid, 'onlineGame/isSelectedExpansions', value ),
+
+          numberOfPlayers: ( uid: string, value: number ) =>
+            userInfoSetProperty( uid, 'onlineGame/numberOfPlayers', value ),
+
+          roomID: ( uid: string, value: string ) =>
+            userInfoSetProperty( uid, 'onlineGame/roomID', value ),
+
+          gameStateID: ( uid: string, value: string ) =>
+            userInfoSetProperty( uid, 'onlineGame/gameStateID', value ),
+        }
+      }
     }
 
 
+
+    const randomizerGroupSetValue = ( groupID: string, pathPrefix: string, value: any ) => {
+      if ( !groupID ) throw new Error('groupID is empty');
+      return this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/${pathPrefix}` )
+                      .set( value );
+    };
+    const randomizerGroupPushValue = ( groupID: string, pathPrefix: string, value: any ) => {
+      if ( !groupID ) throw new Error('groupID is empty');
+      return this.afdb.list( `${this.fdPath.randomizerGroupList}/${groupID}/${pathPrefix}` )
+                      .push( value );
+    };
+
     this.randomizerGroup = {
-      addGroup: newGroup =>
-        this.afdb.list( this.fdPath.randomizerGroupList ).push( newGroup ),
+      addGroup: ( newGroup: RandomizerGroup ) => {
+        const newGroupObj = JSON.parse( JSON.stringify( newGroup ) );  // deep copy
+        newGroupObj.dateString = newGroup.date.toString();
+        delete newGroupObj.date;
+        delete newGroupObj.databaseKey;
+        newGroupObj.newGameResult.players = {};
+        console.log(newGroup.newGameResult.players)
+        newGroup.newGameResult.players.forEach( e =>
+            newGroupObj.newGameResult.players[e.id] = {
+              name      : e.name,
+              selected  : e.selected,
+              VP        : e.VP,
+              winByTurn : e.winByTurn,
+            } );
+        return this.afdb.list( this.fdPath.randomizerGroupList ).push( newGroupObj );
+      },
 
-      removeGroup: groupID =>
+      removeGroup: ( groupID: string ) =>
         this.afdb.list( this.fdPath.randomizerGroupList ).remove( groupID ),
-
-      setValue: ( groupID: string, pathSuffix: string, value ) =>
-        this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/${pathSuffix}` ).set( value ),
-
-      addValue: ( groupID: string, pathSuffix: string, value ) =>
-        this.afdb.list( `${this.fdPath.randomizerGroupList}/${groupID}/${pathSuffix}` ).push( value ),
 
       set: {
         randomizerButtonLocked: ( groupID: string, locked: boolean ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/randomizerButtonLocked` )
-            .set( locked ),
+          randomizerGroupSetValue( groupID, 'randomizerButtonLocked', locked ),
 
-        DominionSetSelected: ( groupID: string, index: number, value: boolean ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/selectedDominionSet/${index}` )
-            .set( value ),
+        isSelectedExpansions: ( groupID: string, index: number, value: boolean ) =>
+          randomizerGroupSetValue( groupID, `isSelectedExpansions/${index}`, value ),
 
         selectedCards: ( groupID: string, value: SelectedCards ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/selectedCards` )
-            .set( value ),
+          randomizerGroupSetValue( groupID, 'selectedCards', value ),
 
-        selectedCardsCheckbox: ( groupID: string, arrayName: string, index: number, value: boolean ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/selectedCardsCheckbox/${arrayName}/${index}` )
-            .set( value ),
+        selectedCardsCheckbox: ( groupID: string, arrayName: string, index: number, value: boolean ) => {
+          switch (arrayName) {
+            case 'KingdomCards10' :
+            case 'BaneCard' :
+            case 'EventCards' :
+            case 'LandmarkCards' :
+            case 'Obelisk' :
+            case 'BlackMarketPile' :
+              return randomizerGroupSetValue( groupID, `selectedCardsCheckbox/${arrayName}/${index}`, value );
 
-        resetSelectedCardsCheckbox: ( groupID: string ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/selectedCardsCheckbox` )
-            .set( new selectedCardsCheckbox() ),
+            default :
+              console.error( `at fire-database-mediator.service::randomizerGroup::selectedCardsCheckbox : '${arrayName}' is not allowed `);
+              return Promise.resolve();
+          }
+        },
 
-        BlackMarketPileShuffled: ( groupID: string, value: { cardIndex: number, faceUp: boolean }[] ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/BlackMarketPileShuffled` )
-            .set( value ),
+        BlackMarketPileShuffled: ( groupID: string, value: BlackMarketPileCard[] ) =>
+          randomizerGroupSetValue( groupID, 'BlackMarketPileShuffled', value ),
 
         BlackMarketPhase: ( groupID: string, value: number ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/BlackMarketPhase` )
-            .set( value ),
-
-        newGameResultPlayerSelected: ( groupID: string, playerIndex: number, value: boolean ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/newGameResult/players/${playerIndex}/selected` )
-            .set( value ),
-
-        newGameResultPlayerVP: ( groupID: string, playerIndex: number, value: number ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/newGameResult/players/${playerIndex}/VP` )
-            .set( value ),
-
-        newGameResultPlayerWinByTurn: ( groupID: string, playerIndex: number, value: boolean ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/newGameResult/players/${playerIndex}/winByTurn` )
-            .set( value ),
-
-        newGameResultPlace: ( groupID: string, value: string ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/newGameResult/place` )
-            .set( value ),
-
-        newGameResultMemo: ( groupID: string, value: string ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/newGameResult/memo` )
-            .set( value ),
-
-        resetVPCalculatorOfPlayer: ( groupID: string, playerIndex: number, value: boolean ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/resetVPCalculator/${playerIndex}` )
-            .set( value ),
+          randomizerGroupSetValue( groupID, 'BlackMarketPhase', value ),
 
         startPlayerName: ( groupID: string, value: string ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/startPlayerName` )
-            .set( value ),
+          randomizerGroupSetValue( groupID, `startPlayerName`, value ),
 
         newGameResultDialogOpened: ( groupID: string, value: boolean ) =>
-          this.afdb.object( `${this.fdPath.randomizerGroupList}/${groupID}/newGameResultDialogOpened` )
-            .set( value ),
+          randomizerGroupSetValue( groupID, `newGameResultDialogOpened`, value ),
 
-        }
+        newGameResult: {
+          players: {
+            selected: ( groupID: string, playerId: string, value: boolean ) =>
+              randomizerGroupSetValue( groupID, `newGameResult/players/${playerId}/selected`, value ),
 
+            VP: ( groupID: string, playerId: string, value: number ) =>
+              randomizerGroupSetValue( groupID, `newGameResult/players/${playerId}/VP`, value ),
+
+            winByTurn: ( groupID: string, playerId: string, value: boolean ) =>
+              randomizerGroupSetValue( groupID, `newGameResult/players/${playerId}/winByTurn`, value ),
+          },
+          place: ( groupID: string, value: string ) =>
+            randomizerGroupSetValue( groupID, `newGameResult/place`, value ),
+          memo:  ( groupID: string, value: string ) =>
+            randomizerGroupSetValue( groupID, `newGameResult/memo`, value ),
+        },
+      },
+
+      addToSelectedCardsHistory: ( groupID: string, value: SelectedCards ) =>
+        randomizerGroupPushValue( groupID, 'selectedCardsHistory', value ),
+
+      resetSelectedCards: ( groupID: string ) =>
+        randomizerGroupSetValue( groupID, 'selectedCards', new SelectedCards() ),
+
+      resetSelectedCardsCheckbox: ( groupID: string ) =>
+        randomizerGroupSetValue( groupID, 'selectedCardsCheckbox', new SelectedCardsCheckbox() ),
+
+      resetVPCalculator: ( groupID: string ) =>
+        randomizerGroupSetValue( groupID, 'resetVPCalculator', Date.now() ),
     }
 
 
@@ -258,9 +320,9 @@ export class FireDatabaseMediatorService {
               VP        : pl.VP,
               winByTurn : pl.winByTurn,
             }) ),
-          memo                : gameResult.memo,
-          selectedDominionSet : gameResult.selectedDominionSet,
-          selectedCardsID     : {
+          memo               : gameResult.memo,
+          selectedExpansions : gameResult.selectedExpansions,
+          selectedCardsID    : {
             Prosperity      : gameResult.selectedCardsID.Prosperity,
             DarkAges        : gameResult.selectedCardsID.DarkAges,
             KingdomCards10  : gameResult.selectedCardsID.KingdomCards10,
@@ -277,12 +339,13 @@ export class FireDatabaseMediatorService {
     }
 
 
+
     this.onlineGameRoom = {
       add: ( newGameRoom: GameRoom ) => {
-        const newGameRoomObject = Object(newGameRoom);
-        newGameRoomObject.timeStamp = newGameRoomObject.timeStamp.toString();
-        delete newGameRoomObject.id;
-        return this.afdb.list( this.fdPath.onlineGameRoomsList ).push( newGameRoom );
+        const newGameRoomObj = JSON.parse( JSON.stringify(newGameRoom) );  // deep copy
+        newGameRoomObj.timeStamp = newGameRoomObj.timeStamp.toString();
+        delete newGameRoomObj.databaseKey;
+        return this.afdb.list( this.fdPath.onlineGameRoomsList ).push( newGameRoomObj );
       },
 
       remove: ( roomID: string ) =>
@@ -298,11 +361,17 @@ export class FireDatabaseMediatorService {
         this.afdb.object( `${this.fdPath.onlineGameRoomsList}/${roomID}/waitingForPlayers` ).set( value ),
     }
 
-    this.onlineGameState = {
-      add: ( gameState: GameState ) =>
-        this.afdb.list( this.fdPath.onlineGameStateList ).push( Object(gameState) ),
 
-      remove: ( id ) =>
+
+    this.onlineGameState = {
+      add: ( newGameState: GameState ) => {
+        const newGameStateObj = JSON.parse( JSON.stringify(newGameState) );  // deep copy
+        newGameStateObj.timeStamp = newGameStateObj.timeStamp.toString();
+        delete newGameStateObj.databaseKey;
+        return this.afdb.list( this.fdPath.onlineGameStateList ).push( newGameStateObj );
+      },
+
+      remove: ( id: string ) =>
         this.afdb.list( this.fdPath.onlineGameStateList ).remove( id ),
     }
 

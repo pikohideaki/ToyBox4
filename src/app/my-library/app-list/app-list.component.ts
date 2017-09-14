@@ -1,4 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
+
 
 @Component({
   selector: 'app-list',
@@ -7,13 +9,14 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class AppListComponent implements OnInit {
 
-  @Input() AppName: string;
-  @Input() Apps: {
-          routerLink: string,
-          inService:  boolean,
-          title:      string,
-          subtitle:   string
-      }[] = [];
+  @Input() appName: string;
+  @Input() apps$: Observable<{
+          routerLink:  string,
+          inService:   boolean,
+          title:       string,
+          subtitle:    string,
+          description?: string
+      }[]>;
 
   constructor() { }
 

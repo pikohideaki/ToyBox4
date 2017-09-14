@@ -4,43 +4,40 @@ import { Observable } from 'rxjs/Observable';
 import { MyUserInfoService } from '../../my-user-info.service';
 
 import { MyRandomizerGroupService } from './my-randomizer-group.service';
-import { SelectedDominionSetService } from './selected-dominion-set.service';
-import { SelectedCardsService } from './selected-cards.service';
-import { BlackMarketPileShuffledService } from './black-market-pile-shuffled.service';
-import { NewGameResultService } from './new-game-result.service';
 
 import { SelectedCards } from '../../classes/selected-cards';
 
 
 @Component({
-  providers: [
-    MyRandomizerGroupService,
-    SelectedDominionSetService,
-    SelectedCardsService,
-    BlackMarketPileShuffledService,
-    NewGameResultService,
-  ],
+  providers: [ MyRandomizerGroupService ],
   selector: 'app-online-randomizer',
   templateUrl: './online-randomizer.component.html',
   styleUrls: ['./online-randomizer.component.css']
 })
 export class OnlineRandomizerComponent implements OnInit {
   signedIn$: Observable<boolean>;
+  signedInToRandomizerGroup$: Observable<boolean>;
   myRandomizerGroupName$: Observable<string>;
-  BlackMarketUsed$: Observable<boolean>;
+  BlackMarketIsUsed$: Observable<boolean>;
 
+  selectedTabIndex: number;
 
   constructor(
     private myUserInfo: MyUserInfoService,
     private myRandomizerGroup: MyRandomizerGroupService,
-    private selectedCardsService: SelectedCardsService,
   ) {
     this.signedIn$ = this.myUserInfo.signedIn$;
-    this.myRandomizerGroupName$ = this.myRandomizerGroup.myRandomizerGroup$.map( e => e.name );
-    this.BlackMarketUsed$
-      = this.selectedCardsService.selectedCards$.map( e => e.BlackMarketPile.length > 0 );
+    this.signedInToRandomizerGroup$ = this.myUserInfo.signedInToRandomizerGroup$;
+    this.myRandomizerGroupName$ = this.myRandomizerGroup.name$;
+    this.BlackMarketIsUsed$
+      = this.myRandomizerGroup.selectedCards$.map( e => e.BlackMarketPile.length > 0 )
+          .distinctUntilChanged();
   }
 
   ngOnInit() {
+  }
+
+  goToNextTab() {
+    this.selectedTabIndex++;
   }
 }

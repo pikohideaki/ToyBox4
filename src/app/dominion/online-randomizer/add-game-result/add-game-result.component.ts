@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { MdDialog, MdSnackBar } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 
@@ -7,14 +7,12 @@ import { UtilitiesService } from '../../../my-library/utilities.service';
 import { FireDatabaseMediatorService } from '../../../fire-database-mediator.service';
 
 import { MyRandomizerGroupService } from '../my-randomizer-group.service';
-import { SelectedDominionSetService } from '../selected-dominion-set.service';
-import { SelectedCardsService } from '../selected-cards.service';
-import { NewGameResultService } from '../new-game-result.service';
 
 import { CardProperty  } from '../../../classes/card-property';
 import { GameResult    } from '../../../classes/game-result';
 import { PlayerResult  } from '../../../classes/player-result';
 import { SelectedCards } from '../../../classes/selected-cards';
+import { SelectedCardsCheckbox } from '../../../classes/selected-cards-checkbox-values';
 
 import { SubmitGameResultDialogComponent } from '../../submit-game-result-dialog/submit-game-result-dialog.component';
 
@@ -28,11 +26,10 @@ import { SubmitGameResultDialogComponent } from '../../submit-game-result-dialog
   ]
 })
 export class AddGameResultComponent implements OnInit, OnDestroy {
-
   private alive = true;
   receiveDataDone = false;
 
-  private DominionSetToggleValues: boolean[] = [];
+  private selectedExpansions: string[] = [];
   private cardPropertyList: CardProperty[];
   private selectedCards: SelectedCards = new SelectedCards();
 
@@ -40,11 +37,16 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
   place = '';
   memo = '';
   startPlayerName = '';
-  playersGameResult: PlayerResult[] = [];
+  playerResults: PlayerResult[] = [];
+  private selectedPlayers: PlayerResult[] = [];
 
   places: string[] = [];
 
+  numberOfPlayersOK$: Observable<boolean>;
+
   newGameResultDialogOpened$: Observable<boolean>;
+
+  @Output() goToVPcalcTab = new EventEmitter<void>();
 
 
   constructor(
@@ -53,85 +55,60 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
     public snackBar: MdSnackBar,
     private database: FireDatabaseMediatorService,
     private myRandomizerGroup: MyRandomizerGroupService,
-    private selectedCardsService: SelectedCardsService,
-    private selectedDominionSetService: SelectedDominionSetService,
-    private newGameResultService: NewGameResultService
   ) {
-    const playersGameResult$ = this.database.playersNameList$
-      .map( list => list.map( player => new PlayerResult( player.name ) ) );
-
     Observable.combineLatest(
-        this.selectedCardsService.selectedCards$,
+        this.myRandomizerGroup.selectedCards$,
         this.database.cardPropertyList$,
         this.database.gameResultList$,
-        playersGameResult$,
-        ( selectedCards, cardPropertyList, gameResultList, playersGameResult ) => ({
+        ( selectedCards, cardPropertyList, gameResultList ) => ({
             selectedCards             : selectedCards,
             cardPropertyList          : cardPropertyList,
             gameResultList            : gameResultList,
-            playersGameResult         : playersGameResult,
         }))
       .takeWhile( () => this.alive )
       .subscribe( value => {
         this.selectedCards = value.selectedCards;
         this.cardPropertyList = value.cardPropertyList;
-
-        this.places = this.utils.uniq( value.gameResultList.map( e => e.place ) )
-                                .filter( e => e !== '' );
-
-        this.playersGameResult = value.playersGameResult;
-
-        // this.newGameResultService.playerResultsSelectedMerged$
-        //   .takeWhile( () => this.alive )
-        //   .subscribe( val => this.playersGameResult[ val.playerIndex ].selected = val.value );
-
-        // this.newGameResultService.playerResultsVPMerged$
-        //   .takeWhile( () => this.alive )
-        //   .subscribe( val => this.playersGameResult[ val.playerIndex ].VP = val.value );
-
-        // this.newGameResultService.playerResultsWinByTurnMerged$
-        //   .takeWhile( () => this.alive )
-        //   .subscribe( val => this.playersGameResult[ val.playerIndex ].winByTurn = val.value );
-
+        this.places = this.utils.uniq( value.gameResultList.map( e => e.place ).filter( e => e !== '' ) );
         this.receiveDataDone = true;
       });
 
-    this.newGameResultService.playerResultsSelectedMerged$.combineLatest(
-          playersGameResult$,
-          (playerResultsSelectedMerged, _) => playerResultsSelectedMerged )
+    Observable.combineLatest(
+        this.database.expansionsNameList$,
+        this.myRandomizerGroup.isSelectedExpansions$,
+        (expansionsNameList, isSelectedExpansions) =>
+          expansionsNameList.filter( (_, i) => isSelectedExpansions[i] ) )
       .takeWhile( () => this.alive )
-      .subscribe( val => this.playersGameResult[ val.playerIndex ].selected = val.value );
+      .subscribe( val => this.selectedExpansions = val );
 
-    this.newGameResultService.playerResultsVPMerged$.combineLatest(
-          playersGameResult$,
-          (playerResultsVPMerged, _) => playerResultsVPMerged )
-      .takeWhile( () => this.alive )
-      .subscribe( val => this.playersGameResult[ val.playerIndex ].VP = val.value );
-
-    this.newGameResultService.playerResultsWinByTurnMerged$.combineLatest(
-        playersGameResult$,
-        (playerResultsWinByTurnMerged, _) => playerResultsWinByTurnMerged )
-      .takeWhile( () => this.alive )
-      .subscribe( val => this.playersGameResult[ val.playerIndex ].winByTurn = val.value );
-
-
-    this.selectedDominionSetService.selectedDominionSetMerged$
-      .takeWhile( () => this.alive )
-      .subscribe( value => this.DominionSetToggleValues[ value.index ] = value.checked );
-
-    this.newGameResultService.place$
+    this.myRandomizerGroup.newGameResult.place$
       .takeWhile( () => this.alive )
       .subscribe( val => this.place = val );
 
-    this.newGameResultService.memo$
+    this.myRandomizerGroup.newGameResult.memo$
       .takeWhile( () => this.alive )
       .subscribe( val => this.memo = val );
 
-    this.newGameResultService.startPlayerName$
+    this.myRandomizerGroup.startPlayerName$
       .takeWhile( () => this.alive )
       .subscribe( val => this.startPlayerName = val );
 
-    this.newGameResultDialogOpened$ = this.myRandomizerGroup.myRandomizerGroup$.map( e => e.newGameResultDialogOpened );
+    this.myRandomizerGroup.newGameResult.players$
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.playerResults = val );
+
+    const selectedPlayers$
+      = this.myRandomizerGroup.newGameResult.players$.map( list => list.filter( e => e.selected ) );
+    selectedPlayers$
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.selectedPlayers = val );
+
+
+    this.numberOfPlayersOK$
+      = selectedPlayers$.map( selectedPlayers =>
+          ( 2 <= selectedPlayers.length && selectedPlayers.length <= 6 ) );
+
+    this.newGameResultDialogOpened$ = this.myRandomizerGroup.newGameResultDialogOpened$;
   }
 
 
@@ -142,77 +119,64 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
     this.alive = false;
   }
 
-  private selectedPlayers(): any[] {
-    return this.playersGameResult.filter( player => player.selected );
-  }
-
-  private playerIndexFromName( playerName: string ) {
-    return this.playersGameResult.findIndex( e => e.name === playerName );
-  }
-
   changePlace( place: string ) {
-    this.newGameResultService.changePlace( place );
+    this.myRandomizerGroup.setNewGameResultPlace( place );
   }
 
   changeMemo( memo: string ) {
-    this.newGameResultService.changeMemo( memo );
+    this.myRandomizerGroup.setNewGameResultMemo( memo );
   }
 
   changeStartPlayerName( playerName: string ) {
-    this.newGameResultService.changeStartPlayerName( playerName );
+    this.myRandomizerGroup.setStartPlayerName( playerName );
   }
 
 
-  changePlayersResultSelected( playerName: string, value: boolean ) {
-    this.changeStartPlayerName( '' );
-    this.newGameResultService.changePlayerResultSelected( this.playerIndexFromName( playerName ), value )
+  changePlayersResultSelected( playerId: string, value: boolean ) {
+    this.myRandomizerGroup.setStartPlayerName('');
+    this.myRandomizerGroup.setNewGameResultPlayerSelected( playerId, value );
   }
 
-  changePlayersResultVP( playerName: string, value: number ) {
-    this.newGameResultService.changePlayerResultVP( this.playerIndexFromName( playerName ), value )
-  }
+  // changePlayersResultVP( playerId: string, value: number ) {
+  //   this.myRandomizerGroup.setNewGameResultPlayerVP( playerId, value );
+  // }
 
-  changePlayersResultWinByTurn( playerName: string, value: boolean ) {
-    this.newGameResultService.changePlayerResultWinByTurn( this.playerIndexFromName( playerName ), value )
+  changePlayersResultWinByTurn( playerId: string, value: boolean ) {
+    this.myRandomizerGroup.setNewGameResultPlayerWinByTurn( playerId, value );
   }
 
 
 
 
   selectStartPlayer(): void {
-    if ( this.selectedPlayers().length === 0 ) return;
-    this.startPlayerName = this.utils.getRandomValue( this.selectedPlayers() ).name;
-    this.changeStartPlayerName( this.startPlayerName );
-  }
-
-
-  numberOfPlayersOK(): boolean {
-    return ( 2 <= this.selectedPlayers().length && this.selectedPlayers().length <= 6 );
+    if ( this.selectedPlayers.length === 0 ) return;
+    this.startPlayerName = this.utils.getRandomValue( this.selectedPlayers ).name;
+    this.myRandomizerGroup.setStartPlayerName( this.startPlayerName );
   }
 
 
   submitGameResult(): void {
-    if ( !this.numberOfPlayersOK() ) return;
-
     this.myRandomizerGroup.setNewGameResultDialogOpened(true);
     const dialogRef = this.dialog.open( SubmitGameResultDialogComponent );
 
-    const newGameResult = new GameResult({
-      date   : this.date,
-      place  : this.place,
-      memo   : this.memo,
-      selectedDominionSet : this.DominionSetToggleValues,
-      selectedCardsID      : {
+    const indexToID = cardIndex => this.cardPropertyList[cardIndex].cardID;
+    const newGameResult = new GameResult( null, {
+      no         :  0,
+      dateString : this.date.toString(),
+      place      : this.place,
+      memo       : this.memo,
+      selectedExpansions : this.selectedExpansions,
+      selectedCardsID : {
         Prosperity      : this.selectedCards.Prosperity,
         DarkAges        : this.selectedCards.DarkAges,
-        KingdomCards10  : this.selectedCards.KingdomCards10 .map( cardIndex => this.cardPropertyList[cardIndex].cardID ),
-        BaneCard        : this.selectedCards.BaneCard       .map( cardIndex => this.cardPropertyList[cardIndex].cardID ),
-        EventCards      : this.selectedCards.EventCards     .map( cardIndex => this.cardPropertyList[cardIndex].cardID ),
-        Obelisk         : this.selectedCards.Obelisk        .map( cardIndex => this.cardPropertyList[cardIndex].cardID ),
-        LandmarkCards   : this.selectedCards.LandmarkCards  .map( cardIndex => this.cardPropertyList[cardIndex].cardID ),
-        BlackMarketPile : this.selectedCards.BlackMarketPile.map( cardIndex => this.cardPropertyList[cardIndex].cardID ),
+        KingdomCards10  : this.selectedCards.KingdomCards10 .map( indexToID ),
+        BaneCard        : this.selectedCards.BaneCard       .map( indexToID ),
+        EventCards      : this.selectedCards.EventCards     .map( indexToID ),
+        Obelisk         : this.selectedCards.Obelisk        .map( indexToID ),
+        LandmarkCards   : this.selectedCards.LandmarkCards  .map( indexToID ),
+        BlackMarketPile : this.selectedCards.BlackMarketPile.map( indexToID ),
       },
-      players : this.selectedPlayers().map( pl => ({
+      players : this.selectedPlayers.map( pl => ({
                 name      : pl.name,
                 VP        : pl.VP,
                 winByTurn : pl.winByTurn,
@@ -226,15 +190,15 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe( result => {
       this.myRandomizerGroup.setNewGameResultDialogOpened(false);
       if ( result === 'OK Clicked' ) {
-        this.playersGameResult.forEach( player => {
-          this.changePlayersResultVP( player.name, 0 );
-          this.changePlayersResultWinByTurn( player.name, false );
+        this.myRandomizerGroup.resetSelectedCards();
+        this.myRandomizerGroup.resetSelectedCardsCheckbox();
+        this.playerResults.forEach( player => {
+          this.myRandomizerGroup.setNewGameResultPlayerVP( player.id, 0 );
+          this.myRandomizerGroup.setNewGameResultPlayerWinByTurn( player.id, false );
         });
-
-        this.changeMemo('');
-        this.changeStartPlayerName('');
-        this.playersGameResult.forEach( (_, playerIndex) =>
-          this.newGameResultService.changeresetVPCalculatorOfPlayerMerged( playerIndex, true ) );
+        this.myRandomizerGroup.setNewGameResultMemo('');
+        this.myRandomizerGroup.setStartPlayerName('');
+        this.myRandomizerGroup.resetVPCalculator();
         this.openSnackBar();
       }
     });
@@ -245,4 +209,8 @@ export class AddGameResultComponent implements OnInit, OnDestroy {
     this.snackBar.open( 'Successfully Submitted!', undefined, { duration: 3000 } );
   }
 
+
+  goToVPcalcTabClicked() {
+    this.goToVPcalcTab.emit();
+  }
 }

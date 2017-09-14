@@ -1,15 +1,10 @@
-.Prosperity_DarkAges {
-  margin: 10px;
-}
-
-#randomizerOptions,
-#DominionSetList,
-#supplyTable {
+.randomizerOptions,
+.expansionsNameList {
   padding: 20px;
   flex-basis: auto;
 }
 
-.container {
+.two-column {
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;

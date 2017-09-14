@@ -11,7 +11,7 @@ import { PlayerName } from '../classes/player-name';
   selector: 'app-my-name-selector',
   template: `
     <div class="margin20">
-      <md-select placeholder="自分の名前" [(ngModel)]="myName" (change)="changeMyName( $event.value )">
+      <md-select placeholder="自分の名前を選択" [(ngModel)]="myName" (change)="changeMyName( $event.value )" required>
         <md-option *ngFor="let player of playersNameList$ | async" [value]="player.name">
           {{ player.name }}
         </md-option>
@@ -34,7 +34,7 @@ export class MyNameSelectorComponent implements OnInit, OnDestroy {
   ) {
     this.playersNameList$ = this.database.playersNameList$;
 
-    this.myUserInfo.myName$
+    this.myUserInfo.name$
       .takeWhile( () => this.alive )
       .subscribe( val => {
         this.myName = val;

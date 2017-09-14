@@ -29,7 +29,7 @@
       implementedOnly="true"
       [(selectedCards)]="newRoom.selectedCards"
       [(BlackMarketPileShuffled)]="newRoom.BlackMarketPileShuffled"
-      [DominionSetToggleValues]="newRoom.DominionSetToggleValues"
-      (DominionSetToggleIndexValuePairEmitter)="DominionSetToggleValuesOnChange( $event )" >
+      [isSelectedExpansions]="newRoom.isSelectedExpansions"
+      (isSelectedExpansionsPartEmitter)="isSelectedExpansionsOnChange( $event )" >
   </app-randomizer>
 </div>

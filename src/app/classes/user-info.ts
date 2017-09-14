@@ -1,31 +1,39 @@
 export class UserInfo {
-  databaseKey: string;
-  id: string = '';
-  name: string = '';
+  databaseKey:       string;
+
+  name:              string = '';
   randomizerGroupID: string = '';
-  DominionSetsSelectedForOnlineGame: boolean[] = [];
-  numberOfPlayersForOnlineGame: number = 2;
-  onlineGameRoomID: string = '';
-  onlineGameStateID: string = '';
 
+  onlineGame: {
+    isSelectedExpansions: boolean[],
+    numberOfPlayers:      number,
+    roomID:               string,
+    gameStateID:          string,
+  } = {
+    isSelectedExpansions: [],
+    numberOfPlayers:      2,
+    roomID:               '',
+    gameStateID:          '',
+  }
 
-  constructor( initObj?: {
-      databaseKey:                       string,
-      id:                                string,
-      name:                              string,
-      randomizerGroupID:                 string,
-      DominionSetsSelectedForOnlineGame: boolean[],
-      numberOfPlayersForOnlineGame:      number,
-      onlineGameRoomID:                  string,
-      onlineGameStateID:                 string,
+  constructor( databaseKey?: string, initObj?: {
+      name:              string,
+      randomizerGroupID: string,
+      onlineGame: {
+        isSelectedExpansions: boolean[],
+        numberOfPlayers:      number,
+        roomID:               string,
+        gameStateID:          string,
+      }
   }) {
-    this.databaseKey                       = ( initObj.databaseKey || '' );
-    this.id                                = ( initObj.id || '' );
-    this.name                              = ( initObj.name || '' );
-    this.randomizerGroupID                 = ( initObj.randomizerGroupID || '' );
-    this.DominionSetsSelectedForOnlineGame = ( initObj.DominionSetsSelectedForOnlineGame || [] );
-    this.numberOfPlayersForOnlineGame      = ( initObj.numberOfPlayersForOnlineGame || 2 );
-    this.onlineGameRoomID                  = ( initObj.onlineGameRoomID || '' );
-    this.onlineGameStateID                 = ( initObj.onlineGameStateID || '' );
+    this.databaseKey = ( databaseKey || '' );
+
+    if ( !initObj ) return;
+    this.name                            = ( initObj.name || '' );
+    this.randomizerGroupID               = ( initObj.randomizerGroupID || '' );
+    this.onlineGame.isSelectedExpansions = ( initObj.onlineGame.isSelectedExpansions || [] );
+    this.onlineGame.numberOfPlayers      = ( initObj.onlineGame.numberOfPlayers      || 2  );
+    this.onlineGame.roomID               = ( initObj.onlineGame.roomID               || '' );
+    this.onlineGame.gameStateID          = ( initObj.onlineGame.gameStateID          || '' );
   }
 }

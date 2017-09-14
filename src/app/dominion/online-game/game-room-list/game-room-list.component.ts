@@ -24,7 +24,7 @@ export class GameRoomListComponent implements OnInit, OnDestroy {
   constructor(
     public snackBar: MdSnackBar,
     public dialog: MdDialog,
-    public utils: UtilitiesService,
+    private utils: UtilitiesService,
     private database: FireDatabaseMediatorService,
   ) {
     this.database.onlineGameRoomList$

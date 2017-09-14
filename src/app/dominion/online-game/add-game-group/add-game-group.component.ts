@@ -8,10 +8,11 @@ import { FireDatabaseMediatorService } from '../../../fire-database-mediator.ser
 
 import { SignInToGameRoomDialogComponent } from '../sign-in-to-game-room-dialog/sign-in-to-game-room-dialog.component';
 
-import { CardProperty  } from '../../../classes/card-property';
-import { SelectedCards } from '../../../classes/selected-cards';
-import { GameRoom      } from '../../../classes/game-room';
-import { GameState     } from '../../../classes/game-state';
+import { CardProperty        } from '../../../classes/card-property';
+import { SelectedCards       } from '../../../classes/selected-cards';
+import { GameRoom            } from '../../../classes/game-room';
+import { GameState           } from '../../../classes/game-state';
+import { BlackMarketPileCard } from '../../../classes/black-market-pile-card';
 
 
 @Component({
@@ -30,7 +31,7 @@ export class AddGameGroupComponent implements OnInit, OnDestroy {
   private cardPropertyList: CardProperty[] = [];
   newRoom: GameRoom = new GameRoom();
   selectedCards: SelectedCards = new SelectedCards();
-  BlackMarketPileShuffled: { cardIndex: number, faceUp: boolean }[] = [];
+  BlackMarketPileShuffled: BlackMarketPileCard[] = [];
 
   constructor(
     private utils: UtilitiesService,
@@ -39,11 +40,11 @@ export class AddGameGroupComponent implements OnInit, OnDestroy {
     public dialog: MdDialog,
     private myUserInfo: MyUserInfoService
   ) {
-    this.myUserInfo.DominionSetToggleValuesForOnlineGame$
+    this.myUserInfo.onlineGame.isSelectedExpansions$
       .takeWhile( () => this.alive )
-      .subscribe( val => this.newRoom.DominionSetToggleValues = val );
+      .subscribe( val => this.newRoom.isSelectedExpansions = val );
 
-    this.myUserInfo.numberOfPlayersForOnlineGame$
+    this.myUserInfo.onlineGame.numberOfPlayers$
       .takeWhile( () => this.alive )
       .subscribe( val => this.newRoom.numberOfPlayers = val );
 
@@ -68,16 +69,16 @@ export class AddGameGroupComponent implements OnInit, OnDestroy {
 
   increment() {
     this.newRoom.numberOfPlayers++;
-    this.myUserInfo.setNumberOfPlayersForOnlineGame( this.newRoom.numberOfPlayers );
+    this.myUserInfo.setOnlineGameNumberOfPlayers( this.newRoom.numberOfPlayers );
   }
   decrement() {
     this.newRoom.numberOfPlayers--;
-    this.myUserInfo.setNumberOfPlayersForOnlineGame( this.newRoom.numberOfPlayers );
+    this.myUserInfo.setOnlineGameNumberOfPlayers( this.newRoom.numberOfPlayers );
   }
 
-  DominionSetToggleValuesOnChange( value: { index: number, checked: boolean } ) {
-    this.newRoom.DominionSetToggleValues[ value.index ] = value.checked;
-    this.myUserInfo.setDominionSetsSelectedForOnlineGame( this.newRoom.DominionSetToggleValues );
+  isSelectedExpansionsOnChange( value: { index: number, checked: boolean } ) {
+    this.newRoom.isSelectedExpansions[ value.index ] = value.checked;
+    this.myUserInfo.setOnlineGameIsSelectedExpansions( this.newRoom.isSelectedExpansions );
   }
 
   newGame() {

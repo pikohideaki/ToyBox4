@@ -12,7 +12,6 @@ import { CardProperty } from '../../../classes/card-property';
 
 
 @Component({
-  providers: [MyUserInfoService],
   selector: 'app-game-main',
   templateUrl: './game-main.component.html',
   styleUrls: ['./game-main.component.css']
@@ -31,6 +30,7 @@ export class GameMainComponent implements OnInit, OnDestroy {
   myGameState$: Observable<GameState>;
   myGameState: GameState;
 
+  cardPropertyList$ = this.database.cardPropertyList$;
   cardPropertyList: CardProperty[];
 
   json: string;
@@ -39,8 +39,8 @@ export class GameMainComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    public utils: UtilitiesService,
-    public database: FireDatabaseMediatorService,
+    private utils: UtilitiesService,
+    private database: FireDatabaseMediatorService,
     private myUserInfo: MyUserInfoService
   ) {
   }
@@ -80,7 +80,7 @@ export class GameMainComponent implements OnInit, OnDestroy {
 
     this.myIndex$ = Observable.combineLatest(
         this.myGameRoom$,
-        this.myUserInfo.myName$,
+        this.myUserInfo.name$,
         (myGameRoom, myName) => myGameRoom.players.findIndex( e => e === myName ) )
       .first();
 

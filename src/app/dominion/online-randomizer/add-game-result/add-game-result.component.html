@@ -36,9 +36,9 @@
 
     <div *ngIf="receiveDataDone">
       <p>参加者を選択（2~6人）：</p>
-      <ng-container *ngFor="let player of playersGameResult; let idx = index" >
+      <ng-container *ngFor="let player of playerResults" >
         <md-checkbox class="playerChbox" [checked]="player.selected"
-            (change)="changePlayersResultSelected( player.name, $event.checked )" >
+            (change)="changePlayersResultSelected( player.id, $event.checked )" >
           {{player.name}}
         </md-checkbox>
       </ng-container>
@@ -57,24 +57,19 @@
         </tr>
       </thead>
       <tbody>
-        <ng-container *ngFor="let player of playersGameResult; let idx = index">
+        <ng-container *ngFor="let player of playerResults">
           <tr *ngIf="player.selected">
             <td>
               <md-radio-button [value]="player.name" (change)="changeStartPlayerName( $event.value )"></md-radio-button>
             </td>
             <td>{{player.name}}</td>
             <td>
-              <md-input-container>
-                <input mdInput type="number"
-                  onclick="this.select(0, this.value.length)"
-                  [value]="player.VP"
-                  (change)="changePlayersResultVP( player.name, $event.target.valueAsNumber )" >
-              </md-input-container>
+              <button md-button (click)="goToVPcalcTabClicked()">{{player.VP}}</button>
             </td>
             <td>
               <md-checkbox
                 [checked]="player.winByTurn"
-                (change)="changePlayersResultWinByTurn( player.name, $event.checked )" >
+                (change)="changePlayersResultWinByTurn( player.id, $event.checked )" >
               </md-checkbox>
             </td>
           </tr>
@@ -97,11 +92,11 @@
   <ng-container data-comment="登録ボタン"></ng-container>
   <div class="marginedElement">
     <button md-raised-button color='primary'
-        [disabled]="newGameResultDialogOpened$ | async"
+        [disabled]="(newGameResultDialogOpened$ | async) || !(numberOfPlayersOK$ | async)"
         (click)='submitGameResult()' >
       Submit
     </button>
-    <span *ngIf="!numberOfPlayersOK()">プレイヤーを2~6人選択してください！</span>
+    <span *ngIf="!numberOfPlayersOK$ | async">プレイヤーを2~6人選択してください！</span>
   </div>
 
 </div>

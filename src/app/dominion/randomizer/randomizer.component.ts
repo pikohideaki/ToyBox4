@@ -1,19 +1,22 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
 import { MdDialog } from '@angular/material';
 
-import { UtilitiesService     } from '../../my-library/utilities.service';
-import { AlertDialogComponent } from '../../my-library/alert-dialog/alert-dialog.component';
-
+import { UtilitiesService } from '../../my-library/utilities.service';
 import { FireDatabaseMediatorService } from '../../fire-database-mediator.service';
+import { RandomizerService } from './randomizer.service';
+
+import { AlertDialogComponent } from '../../my-library/alert-dialog/alert-dialog.component';
 import { CardPropertyDialogComponent } from '../pure-components/card-property-dialog/card-property-dialog.component';
 
-import { CardProperty                } from '../../classes/card-property';
-import { SelectedCards               } from '../../classes/selected-cards';
-import { selectedCardsCheckbox } from '../../classes/selected-cards-checkbox-values';
+import { CardProperty          } from '../../classes/card-property';
+import { SelectedCards         } from '../../classes/selected-cards';
+import { SelectedCardsCheckbox } from '../../classes/selected-cards-checkbox-values';
+import { BlackMarketPileCard   } from '../../classes/black-market-pile-card';
 
 
 @Component({
+  providers: [RandomizerService],
   selector: 'app-randomizer',
   templateUrl: './randomizer.component.html',
   styleUrls: [
@@ -21,108 +24,71 @@ import { selectedCardsCheckbox } from '../../classes/selected-cards-checkbox-val
     './randomizer.component.css'
   ]
 })
-export class RandomizerComponent implements OnInit, OnDestroy {
-  private alive = true;
-  receiveDataDone = false;
+export class RandomizerComponent implements OnInit {
 
-  DominionSetNameList;
-  cardPropertyList;
-
-  @Input() forViewing: boolean = false;
+  /* settings */
   @Input() showSelectedCardsCheckbox: boolean = false;
   @Input() implementedOnly: boolean = false;
+
 
   @Input()  randomizerButtonLocked: boolean;
   @Output() randomizerButtonLockedChange = new EventEmitter<boolean>();
 
-  @Input()  DominionSetToggleValues: boolean[] = [];
-  @Output() DominionSetToggleIndexValuePairEmitter
+  @Input()  isSelectedExpansions: boolean[] = [];
+  @Output() isSelectedExpansionsPartEmitter
     = new EventEmitter<{ index: number, checked: boolean }>();
 
   @Input()  selectedCards: SelectedCards;
   @Output() selectedCardsChange = new EventEmitter<SelectedCards>();
 
-  @Input()  selectedCardsCheckbox: selectedCardsCheckbox
-    = new selectedCardsCheckbox();
-  @Output() selectedCardsCheckboxIndexValuePairEmitter
+  @Input()  selectedCardsCheckbox: SelectedCardsCheckbox
+    = new SelectedCardsCheckbox();
+  @Output() selectedCardsCheckboxPartEmitter
     = new EventEmitter<{ category: string, index: number, checked: boolean }>();
   @Output() selectedCardsCheckboxOnReset = new EventEmitter<void>();
 
-  @Input()  BlackMarketPileShuffled: { cardIndex: number, faceUp: boolean }[] = [];
+  @Input()  BlackMarketPileShuffled: BlackMarketPileCard[] = [];
   @Output() BlackMarketPileShuffledChange
-    = new EventEmitter<{ cardIndex: number, faceUp: boolean }[]>();
+    = new EventEmitter<BlackMarketPileCard[]>();
 
-
-  selectedCardsCategories = [
-    { name: 'KingdomCards10' , description: '王国カード' },
-    { name: 'BaneCard'       , description: '災いカード（魔女娘用）' },
-    { name: 'EventCards'     , description: 'EventCards' },
-    { name: 'LandmarkCards'  , description: 'LandmarkCards' },
-    { name: 'Obelisk'        , description: 'Obelisk 指定カード' },
-    { name: 'BlackMarketPile', description: '闇市場デッキ' },
-  ];
 
 
   constructor(
     private utils: UtilitiesService,
     public dialog: MdDialog,
-    private database: FireDatabaseMediatorService,
+    private randomizer: RandomizerService,
   ) {
-    Observable.combineLatest(
-        this.database.cardPropertyList$,
-        this.database.DominionSetNameList$,
-        (cardPropertyList, DominionSetNameList) => ({
-          cardPropertyList    : cardPropertyList,
-          DominionSetNameList : DominionSetNameList
-        }) )
-      .takeWhile( () => this.alive )
-      .subscribe( val => {
-        this.cardPropertyList    = val.cardPropertyList;
-        this.DominionSetNameList = val.DominionSetNameList;
-        this.receiveDataDone = true;
-      });
   }
 
   ngOnInit() {
   }
 
-  ngOnDestroy() {
-    this.alive = false;
-  }
 
-
-  cardInfoButtonClicked( cardIndex: number ) {
-    const dialogRef = this.dialog.open( CardPropertyDialogComponent );
-    dialogRef.componentInstance.card = this.cardPropertyList[cardIndex];
-  }
-
-  toggleDominionSetList( checked: boolean, index: number ) {
-    this.DominionSetToggleValues[ index ] = checked;
-    this.DominionSetToggleIndexValuePairEmitter.emit({ checked: checked, index: index });
-  }
-
-  toggleRandomizerButton( lock: boolean ) {
+  lockRandomizerButton( lock: boolean ) {
     this.randomizerButtonLocked = lock;
     this.randomizerButtonLockedChange.emit( lock );
   }
 
-  selectedCardsCheckboxOnChange( category, index: number ) {
-    const checked = this.selectedCardsCheckbox[category][index];
-    this.selectedCardsCheckboxIndexValuePairEmitter
-      .emit({ category: category, index: index, checked: checked });
+
+  selectedCardsCheckboxOnChange( value: { category: string, index: number, checked: boolean } ) {
+    this.selectedCardsCheckboxPartEmitter.emit( value );
   }
 
-  DominionSetToggleIsEmpty(): boolean {
-    return this.DominionSetToggleValues.every( selected => !selected );
+  expansionToggleOnChange( value: { index: number, checked: boolean } ) {
+    this.isSelectedExpansionsPartEmitter.next( value );
+  }
+
+  expansionsToggleIsEmpty(): boolean {
+    return this.isSelectedExpansions.every( selected => !selected );
   }
 
 
   randomizerClicked() {
-    if ( this.DominionSetToggleIsEmpty() ) return;
+    if ( this.expansionsToggleIsEmpty() ) return;
 
-    this.toggleRandomizerButton(true);
+    this.lockRandomizerButton(true);
 
-    const result = this.randomizer();
+    const result = this.randomizer.selectCards( this.implementedOnly, this.isSelectedExpansions );
     if ( !result.valid ) {
       const dialogRef = this.dialog.open( AlertDialogComponent );
       dialogRef.componentInstance.message = `サプライが足りません．セットの選択数を増やしてください．`;
@@ -139,94 +105,6 @@ export class RandomizerComponent implements OnInit, OnDestroy {
       = this.utils.getShuffled( this.selectedCards.BlackMarketPile )
                   .map( e => ({ cardIndex: e, faceUp: false }) );
     this.BlackMarketPileShuffledChange.emit( BlackMarketPileShuffled );
-  }
-
-
-  private randomizer() {
-    const selectedCardsTemp = new SelectedCards();
-
-    // 選択されている拡張セットに含まれているカードすべてをシャッフルし，indexとペアにしたリスト
-    const CardsInSelectedSets_Shuffled: { index: number, data: CardProperty }[]
-     = this.utils.getShuffled(
-        this.cardPropertyList
-          .map( (val: CardProperty, index) => ({ index: index, data: val }) )
-          .filter( e => e.data.randomizerCandidate )
-          .filter( e => !this.implementedOnly || e.data.implemented )
-          .filter( e => this.DominionSetNameList
-                        .filter( (name, index) => this.DominionSetToggleValues[index] )
-                        .findIndex( val => val === e.data.DominionSetName ) >= 0 )
-      );
-
-    // 10 Supply KingdomCards10 and Event, LandmarkCards
-    while ( selectedCardsTemp.KingdomCards10.length < 10 ) {
-      const card = CardsInSelectedSets_Shuffled.pop();
-      if ( !card ) return { valid: false, selectedCards: selectedCardsTemp };
-      if ( card.data.category === '王国' ) {
-        selectedCardsTemp.KingdomCards10.push( card.index );
-      }
-      if ( (selectedCardsTemp.EventCards.length + selectedCardsTemp.LandmarkCards.length ) < 2 ) {
-        if ( card.data.cardType === 'イベント' ) {
-          selectedCardsTemp.EventCards.push( card.index );
-        }
-        if ( card.data.cardType === 'ランドマーク' ) {
-          selectedCardsTemp.LandmarkCards.push( card.index );
-        }
-      }
-    }
-
-
-    // 繁栄場・避難所場の決定
-    selectedCardsTemp.Prosperity = ( this.cardPropertyList[ selectedCardsTemp.KingdomCards10[0] ].DominionSetName === '繁栄' );
-    selectedCardsTemp.DarkAges   = ( this.cardPropertyList[ selectedCardsTemp.KingdomCards10[9] ].DominionSetName === '暗黒時代' );
-
-
-    // 災いカード（収穫祭：魔女娘）
-    if ( selectedCardsTemp.KingdomCards10
-        .findIndex( e => this.cardPropertyList[e].name_jp === '魔女娘' ) >= 0 ) {
-      if ( CardsInSelectedSets_Shuffled.length <= 0 ) {
-        return { valid: false, selectedCards: selectedCardsTemp };
-      }
-      const cardIndex = this.utils.removeIf( CardsInSelectedSets_Shuffled, e => (
-               e.data.cost.debt   === 0
-            && e.data.cost.potion === 0
-            && e.data.cost.coin   >=  2
-            && e.data.cost.coin   <=  3 ) ).index;
-      selectedCardsTemp.BaneCard = [cardIndex];
-    }
-
-    // Black Market (one copy of each Kingdom card not in the supply. 15種類選択を推奨)
-    if ( [].concat( selectedCardsTemp.KingdomCards10, selectedCardsTemp.BaneCard )
-           .findIndex( e => this.cardPropertyList[e].name_jp === '闇市場' ) >= 0 ) {
-      while ( selectedCardsTemp.BlackMarketPile.length < 15 ) {
-        const card = CardsInSelectedSets_Shuffled.pop();
-        if ( !card ) return { valid: false, selectedCards: selectedCardsTemp }
-        if ( card.data.category === '王国' ) {
-          selectedCardsTemp.BlackMarketPile.push( card.index );
-        }
-      }
-    }
-
-    // Obelisk (Choose 1 Action Supply Pile)
-    if ( selectedCardsTemp.LandmarkCards
-        .findIndex( e => this.cardPropertyList[e].name_eng === 'Obelisk' ) >= 0 ) {
-      const cardIndex: number = ( () => {
-        const supplyUsed: number[] = [].concat( selectedCardsTemp.KingdomCards10, selectedCardsTemp.BaneCard );
-        const ObeliskCandidatesActionCards: number[] = this.utils.copy( supplyUsed );
-        if ( supplyUsed.findIndex( e => this.cardPropertyList[e].cardType.includes('略奪者') ) >= 0 ) {
-          const ruinsIndex: number = this.cardPropertyList.findIndex( e => e.name_jp === '廃墟' );
-          ObeliskCandidatesActionCards.unshift( ruinsIndex );
-        }
-        return this.utils.getRandomValue( supplyUsed );
-      } )();
-      selectedCardsTemp.Obelisk = [cardIndex];
-    }
-
-    selectedCardsTemp.KingdomCards10 .sort( (a, b) => a - b );   // 繁栄場・避難所場の決定後にソート
-    selectedCardsTemp.EventCards     .sort( (a, b) => a - b );
-    selectedCardsTemp.LandmarkCards  .sort( (a, b) => a - b );
-    selectedCardsTemp.BlackMarketPile.sort( (a, b) => a - b );
-
-    return { valid: true, selectedCards: selectedCardsTemp };
   }
 
 }

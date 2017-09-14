@@ -1,4 +1,5 @@
 import { SelectedCards } from './selected-cards';
+import { BlackMarketPileCard } from './black-market-pile-card';
 
 export class GameRoom {
   databaseKey:             string;
@@ -8,22 +9,22 @@ export class GameRoom {
   waitingForPlayers:       boolean = true;
   players:                 string[] = [];
   numberOfPlayers:         number = 2;
-  DominionSetToggleValues: boolean[] = [];
+  isSelectedExpansions:    boolean[] = [];
   selectedCards:           SelectedCards = new SelectedCards();
-  BlackMarketPileShuffled: { cardIndex: number, faceUp: boolean }[] = [];
+  BlackMarketPileShuffled: BlackMarketPileCard[] = [];
   gameStateID:             string;
 
 
-  constructor( databaseKey?, dataObj?: {
+  constructor( databaseKey?: string, dataObj?: {
       timeStamp:               string,
       name:                    string,
       memo:                    string,
       waitingForPlayers:       boolean,
       players:                 string[],
       numberOfPlayers:         number,
-      DominionSetToggleValues: boolean[],
+      isSelectedExpansions:    boolean[],
       selectedCards:           SelectedCards,
-      BlackMarketPileShuffled: { cardIndex: number, faceUp: boolean }[],
+      BlackMarketPileShuffled: BlackMarketPileCard[],
       gameStateID:             string,
     }
   ) {
@@ -35,7 +36,7 @@ export class GameRoom {
     this.waitingForPlayers       = !!dataObj.waitingForPlayers;
     this.players                 = Object.keys( dataObj.players || {} ).map( key => dataObj.players[key] );
     this.numberOfPlayers         = ( dataObj.numberOfPlayers || 0 );
-    this.DominionSetToggleValues = ( dataObj.DominionSetToggleValues || [] );
+    this.isSelectedExpansions    = ( dataObj.isSelectedExpansions || [] );
     this.selectedCards           = new SelectedCards( dataObj.selectedCards );
     this.BlackMarketPileShuffled = ( dataObj.BlackMarketPileShuffled || [] );
     this.gameStateID             = ( dataObj.gameStateID || '' );
