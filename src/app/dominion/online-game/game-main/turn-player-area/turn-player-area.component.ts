@@ -1,9 +1,11 @@
 import { Component, OnInit, OnDestroy, Inject, Input, Output, EventEmitter } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
 
-import { CardProperty          } from '../../../../classes/card-property';
-import { GameState, GameCardID } from '../../../../classes/game-state';
-import { GameRoom              } from '../../../../classes/game-room';
+import { MyGameStateService } from '../my-game-state.service';
+
+import { CardProperty } from '../../../../classes/card-property';
+import { PlayersCards } from '../../../../classes/game-state';
+
 
 @Component({
   selector: 'app-turn-player-area',
@@ -12,37 +14,23 @@ import { GameRoom              } from '../../../../classes/game-room';
 })
 export class TurnPlayerAreaComponent implements OnInit, OnDestroy {
   private alive: boolean = true;
-
-  receiveDataDone: boolean = false;
-
-  @Input() private cardPropertyList$: Observable<CardProperty[]>;
-  @Input() private myGameState$: Observable<GameState>;
-  @Input() private myGameRoom$: Observable<GameRoom>;
-  cardPropertyList: CardProperty[];
-  myGameState: GameState;
-  myGameRoom: GameRoom;
-
+  dataIsReady = false;
+  turnPlayersCards: PlayersCards = new PlayersCards();
   @Output() private cardClicked = new EventEmitter<any>();
 
-  constructor() { }
 
-  ngOnInit() {
-    Observable.combineLatest(
-        this.cardPropertyList$,
-        this.myGameState$,
-        this.myGameRoom$,
-        (cardPropertyList, myGameState, myGameRoom) => ({
-          cardPropertyList: cardPropertyList,
-          myGameState: myGameState,
-          myGameRoom: myGameRoom
-        }) )
+  constructor(
+    private myGameStateService: MyGameStateService,
+  ) {
+    this.myGameStateService.turnPlayersCards$
       .takeWhile( () => this.alive )
       .subscribe( val => {
-        this.cardPropertyList = val.cardPropertyList;
-        this.myGameState = val.myGameState;
-        this.myGameRoom = val.myGameRoom;
-        this.receiveDataDone = true;
+        this.turnPlayersCards = val;
+        this.dataIsReady = true;
       });
+  }
+
+  ngOnInit() {
   }
 
   ngOnDestroy() {

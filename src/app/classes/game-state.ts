@@ -1,109 +1,157 @@
 import { Inject } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
 
-import { permutation, shuffle, filterRemove } from '../my-library/utilities';
+import { permutation, shuffle, filterRemove, objectKeysAsNumber } from '../my-library/utilities';
 
 import { SelectedCards } from './selected-cards';
 import { CardProperty, numberToPrepare, toListIndex } from './card-property';
+import { ChatMessage } from './chat-message';
 
 
+export class CommonCardData$$ {
+  cardListIndex$: Observable<number[]>;
+}
 
-export class GameCardData {
-  cardPropertyListIndex: number = 0;
-  visible: boolean = true;
-  visibleToMe: boolean = true;
+export class CommonCardData {
+  cardListIndex: number[]  = [];
 
   constructor( initObj?: {
-      cardPropertyListIndex: number,
-      visible: boolean,
-      visibleToMe: boolean,
+    cardListIndex: number[],
   }) {
     if ( !initObj ) return;
-    this.cardPropertyListIndex = initObj.cardPropertyListIndex;
-    this.visible               = initObj.visible;
-    this.visibleToMe           = initObj.visibleToMe;
+    this.cardListIndex = ( initObj.cardListIndex || [] );
   }
 }
 
 
-export type GameCardID = number;
+export class CardDataForPlayer$$ {
+  faceUp$:   Observable<boolean[]>;
+  isButton$: Observable<boolean[]>;
+}
 
-
-class BasicCards {
-  Curse:    GameCardID[] = [];
-  Copper:   GameCardID[] = [];
-  Silver:   GameCardID[] = [];
-  Gold:     GameCardID[] = [];
-  Estate:   GameCardID[] = [];
-  Duchy:    GameCardID[] = [];
-  Province: GameCardID[] = [];
-  Platinum: GameCardID[] = [];
-  Colony:   GameCardID[] = [];
-  Potion:   GameCardID[] = [];
+export class CardDataForPlayer {
+  faceUp:   boolean[] = [];
+  isButton: boolean[] = [];
 
   constructor( initObj?: {
-      Curse:    GameCardID[],
-      Copper:   GameCardID[],
-      Silver:   GameCardID[],
-      Gold:     GameCardID[],
-      Estate:   GameCardID[],
-      Duchy:    GameCardID[],
-      Province: GameCardID[],
-      Platinum: GameCardID[],
-      Colony:   GameCardID[],
-      Potion:   GameCardID[],
+      faceUp:   boolean[],
+      isButton: boolean[],
   }) {
     if ( !initObj ) return;
-    this.Curse    = ( initObj.Curse    || [] );
-    this.Copper   = ( initObj.Copper   || [] );
-    this.Silver   = ( initObj.Silver   || [] );
-    this.Gold     = ( initObj.Gold     || [] );
-    this.Estate   = ( initObj.Estate   || [] );
-    this.Duchy    = ( initObj.Duchy    || [] );
-    this.Province = ( initObj.Province || [] );
-    this.Platinum = ( initObj.Platinum || [] );
-    this.Colony   = ( initObj.Colony   || [] );
-    this.Potion   = ( initObj.Potion   || [] );
+    this.faceUp   = ( initObj.faceUp   || [] );
+    this.isButton = ( initObj.isButton || [] );
   }
 }
 
-export class GamePlayer {
-  name: string = '';
-  itsMyTurn: boolean = false;
-  Deck:        GameCardID[] = [];
-  DiscardPile: GameCardID[] = [];
-  HandCards:   GameCardID[] = [];
-  PlayArea:    GameCardID[] = [];
-  Aside:       GameCardID[] = [];
-  Open:        GameCardID[] = [];
-  VPtoken:    number = 0;
-  VPtotal:    number = 0;
-  TurnCount:  number = 0;
-  Connection: boolean = true;
+
+
+
+
+export class BasicCards {
+  Curse:    number[] = [];
+  Copper:   number[] = [];
+  Silver:   number[] = [];
+  Gold:     number[] = [];
+  Estate:   number[] = [];
+  Duchy:    number[] = [];
+  Province: number[] = [];
+  Platinum: number[] = [];
+  Colony:   number[] = [];
+  Potion:   number[] = [];
+
+  constructor( initObj?: {
+      Curse:    any[],
+      Copper:   any[],
+      Silver:   any[],
+      Gold:     any[],
+      Estate:   any[],
+      Duchy:    any[],
+      Province: any[],
+      Platinum: any[],
+      Colony:   any[],
+      Potion:   any[],
+  }) {
+    if ( !initObj ) return;
+    this.Curse    = ( objectKeysAsNumber( initObj.Curse    || {} ) || [] );
+    this.Copper   = ( objectKeysAsNumber( initObj.Copper   || {} ) || [] );
+    this.Silver   = ( objectKeysAsNumber( initObj.Silver   || {} ) || [] );
+    this.Gold     = ( objectKeysAsNumber( initObj.Gold     || {} ) || [] );
+    this.Estate   = ( objectKeysAsNumber( initObj.Estate   || {} ) || [] );
+    this.Duchy    = ( objectKeysAsNumber( initObj.Duchy    || {} ) || [] );
+    this.Province = ( objectKeysAsNumber( initObj.Province || {} ) || [] );
+    this.Platinum = ( objectKeysAsNumber( initObj.Platinum || {} ) || [] );
+    this.Colony   = ( objectKeysAsNumber( initObj.Colony   || {} ) || [] );
+    this.Potion   = ( objectKeysAsNumber( initObj.Potion   || {} ) || [] );
+  }
+}
+
+
+
+export class PlayersCards {
+  Deck:        number[] = [];
+  DiscardPile: number[] = [];
+  HandCards:   number[] = [];
+  PlayArea:    number[] = [];
+  Aside:       number[] = [];
+  Open:        number[] = [];
+
+  constructor( initObj?: {
+    Deck:        any[],
+    DiscardPile: any[],
+    HandCards:   any[],
+    PlayArea:    any[],
+    Aside:       any[],
+    Open:        any[],
+  } ) {
+    if ( !initObj ) return;
+    this.Deck        = ( objectKeysAsNumber( initObj.Deck        || {} ) || [] );
+    this.DiscardPile = ( objectKeysAsNumber( initObj.DiscardPile || {} ) || [] );
+    this.HandCards   = ( objectKeysAsNumber( initObj.HandCards   || {} ) || [] );
+    this.PlayArea    = ( objectKeysAsNumber( initObj.PlayArea    || {} ) || [] );
+    this.Aside       = ( objectKeysAsNumber( initObj.Aside       || {} ) || [] );
+    this.Open        = ( objectKeysAsNumber( initObj.Open        || {} ) || [] );
+  }
+}
+
+
+
+export class KingdomCards extends Array<number[]> {
+  0: number[] = [];
+  1: number[] = [];
+  2: number[] = [];
+  3: number[] = [];
+  4: number[] = [];
+  5: number[] = [];
+  6: number[] = [];
+  7: number[] = [];
+  8: number[] = [];
+  9: number[] = [];
+
+  constructor( initObj?: any[][] ) {
+    super();
+    if ( !initObj ) return;
+    for ( let i = 0; i < 10; ++i ) {
+      this[i] = ( objectKeysAsNumber( initObj[i] || {} ) || [] );
+    }
+  }
+}
+
+
+
+export class PlayerData {
+  VPtoken:     number       = 0;
+  VPtotal:     number       = 0;
+  TurnCount:   number       = 0;
+  Connection:  boolean      = true;
 
 
   constructor( initObj?: {
-    name:        string,
-    itsMyTurn:   boolean,
-    Deck:        GameCardID[],
-    DiscardPile: GameCardID[],
-    HandCards:   GameCardID[],
-    PlayArea:    GameCardID[],
-    Aside:       GameCardID[],
-    Open:        GameCardID[],
     VPtoken:     number,
     VPtotal:     number,
     TurnCount:   number,
     Connection:  boolean,
   } ) {
     if ( !initObj ) return;
-    this.name        = ( initObj.name        || '' );
-    this.itsMyTurn   = ( initObj.itsMyTurn   || false );
-    this.Deck        = ( initObj.Deck        || [] );
-    this.DiscardPile = ( initObj.DiscardPile || [] );
-    this.HandCards   = ( initObj.HandCards   || [] );
-    this.PlayArea    = ( initObj.PlayArea    || [] );
-    this.Aside       = ( initObj.Aside       || [] );
-    this.Open        = ( initObj.Open        || [] );
     this.VPtoken     = ( initObj.VPtoken     || 0 );
     this.VPtotal     = ( initObj.VPtotal     || 0 );
     this.TurnCount   = ( initObj.TurnCount   || 0 );
@@ -112,195 +160,50 @@ export class GamePlayer {
 }
 
 
+
 export class TurnInfo {
   action: number = 0;
   buy:    number = 0;
   coin:   number = 0;
+  phase:  string = '';
 
   constructor( initObj?: {
     action: number,
     buy:    number,
     coin:   number,
+    phase:  string,
   } ) {
     if ( !initObj ) return;
-    this.action = initObj.action;
-    this.buy    = initObj.buy;
-    this.coin   = initObj.coin;
+    this.action = ( initObj.action || 0  );
+    this.buy    = ( initObj.buy    || 0  );
+    this.coin   = ( initObj.coin   || 0  );
+    this.phase  = ( initObj.phase  || '' );
   }
 }
 
 
+
+
+
 export class GameState {
-  databaseKey:       string;
-  cardPropertyList:  CardProperty[] = [];
-  chatList:          string[] = [];
-  turnInfo:          TurnInfo = new TurnInfo();
-  private whoseTurn: number; // permute[0] -> permute[1] -> permute[2] -> ...
-  numberOfPlayers:   number = 0;
-  private permute:   number[];  // shuffle players
-  players:           GamePlayer[] = [];
-  gameCardData:      GameCardData[] = [];
-  BasicCards:        BasicCards = new BasicCards();
-  KingdomCards:      GameCardID[][] = Array.from( new Array(10), () => new Array() );
-  TrashPile:         GameCardID[] = [];
+  permute: number[] = [];  // shuffle players
+  turnCounter: number = 0; // permute[0] -> permute[1] -> permute[2] -> ...
+  chatList:    ChatMessage[] = [];
+  turnInfo:    TurnInfo = new TurnInfo();
+  playersData: PlayerData[] = [];
+  commonCardData:    CommonCardData = new CommonCardData();
+  cardDataForPlayer: CardDataForPlayer[] = [];
 
+  cards: {
+    playersCards: PlayersCards[],
+    BasicCards:   BasicCards,
+    KingdomCards: KingdomCards,
+    TrashPile:    number[],
+  } = {
+    playersCards: [],
+    BasicCards:   new BasicCards(),
+    KingdomCards: new KingdomCards(),
+    TrashPile:    [],
+  };
 
-  constructor( databaseKey?: string, initObj?: {
-    id:                string,
-    cardPropertyList:  CardProperty[],
-    chatList:          string[],
-    turnInfo:          TurnInfo,
-    whoseTurn:         number,
-    numberOfPlayers:   number,
-    permute:           number[],
-    players:           GamePlayer[],
-    gameCardData:      GameCardData[],
-    BasicCards:        BasicCards,
-    KingdomCards:      GameCardID[][],
-    TrashPile:         GameCardID[],
-  } ) {
-    this.databaseKey      = ( databaseKey || '' );
-
-    if ( !initObj ) return;
-    this.cardPropertyList = ( initObj.cardPropertyList || [] );
-    this.chatList         = ( initObj.chatList         || [] );
-    this.turnInfo         = new TurnInfo( initObj.turnInfo );
-    this.whoseTurn        = ( initObj.whoseTurn        || 0 );
-    this.numberOfPlayers  = ( initObj.numberOfPlayers  || 0 );
-    this.permute          = ( initObj.permute          || [] );
-    this.players          = ( initObj.players          || [] ).map( e => new GamePlayer(e) );
-    this.gameCardData     = ( initObj.gameCardData     || [] );
-    this.BasicCards       = new BasicCards( initObj.BasicCards );
-    this.KingdomCards     = ( initObj.KingdomCards     || [] );
-    this.TrashPile        = ( initObj.TrashPile        || [] );
-  }
-
-
-  incrementWhoseTurnIndex() { this.whoseTurn = (this.whoseTurn + 1) % this.numberOfPlayers; }
-  turnPlayerIndex()     { return this.permute[ this.whoseTurn ]; }
-  turnPlayer()          { return this.players[ this.turnPlayerIndex() ]; }
-  nextTurnPlayerIndex() { return this.permute[ (this.whoseTurn + 1) % this.numberOfPlayers ]; }
-
-  setNumberOfPlayers( numberOfPlayers: number ) {
-    this.numberOfPlayers = numberOfPlayers;
-    this.players = Array.from( new Array(numberOfPlayers), () => new GamePlayer() );
-    this.permute = permutation( numberOfPlayers );
-  }
-
-  initCards( selectedCards: SelectedCards, cardPropertyList: CardProperty[] ) {
-    this.cardPropertyList = cardPropertyList;
-    const toIndex = ( cardID: string ) => toListIndex( cardPropertyList, cardID );
-
-    const addMultipleCards = ( placePath: (string|number)[], cardListIndex: number ) => {
-      const N = numberToPrepare(
-                  cardPropertyList,
-                  cardListIndex,
-                  this.players.length,
-                  selectedCards.DarkAges );
-      for ( let i = 0; i < N; ++i ) {
-        addCard( cardListIndex, placePath );
-      }
-    }
-
-    const addCard = ( cardListIndex: number, placePath: (string|number)[] ) => {
-      const card = new GameCardData( { cardPropertyListIndex: cardListIndex, visible: true, visibleToMe: true } );
-      const gameCardID = this.gameCardData.push( card ) - 1;  // get index
-      let ref = this[placePath[0]];
-      for ( let i = 1; i < placePath.length; ++i ) {
-        ref = ref[placePath[i]];
-      }
-      ref.push( gameCardID );
-    }
-
-    const usePotion = () => false;
-
-    // basic cards
-    addMultipleCards( ['BasicCards', 'Curse'   ], toIndex('Curse'   ) );
-    addMultipleCards( ['BasicCards', 'Copper'  ], toIndex('Copper'  ) );
-    addMultipleCards( ['BasicCards', 'Silver'  ], toIndex('Silver'  ) );
-    addMultipleCards( ['BasicCards', 'Gold'    ], toIndex('Gold'    ) );
-    addMultipleCards( ['BasicCards', 'Estate'  ], toIndex('Estate'  ) );
-    addMultipleCards( ['BasicCards', 'Duchy'   ], toIndex('Duchy'   ) );
-    addMultipleCards( ['BasicCards', 'Province'], toIndex('Province') );
-    if ( selectedCards.Prosperity ) {
-      addMultipleCards( ['BasicCards', 'Platinum'], toIndex('Platinum') );
-      addMultipleCards( ['BasicCards', 'Colony'  ], toIndex('Colony'  ) );
-    }
-    if ( usePotion() ) {
-      addMultipleCards( ['BasicCards', 'Potion'  ], toIndex('Potion'  ) );
-    }
-
-    // KingdomCards
-    selectedCards.KingdomCards10.forEach( (cardListIndex, index) => {
-      addMultipleCards( ['KingdomCards', index], cardListIndex );
-    });
-  }
-
-  initDecks() {
-    this.players.forEach( (player, index) => {
-      /* get 7 Coppers from supply */
-      for ( let i = 0; i < 7; ++i ) {
-        player.Deck.push( this.BasicCards.Copper.pop() );
-      }
-      /* get 3 Estates from supply */
-      for ( let i = 0; i < 3; ++i ) {
-        player.Deck.push( this.BasicCards.Estate.pop() );
-      }
-
-      shuffle( player.Deck );
-
-      for ( let i = 0; i < 5; ++i ) {
-        player.HandCards.push( player.Deck.pop() );
-      }
-
-      this.sortHandCards( index );
-    });
-  }
-
-  getPlacePath( gameCardID: GameCardID ): (string|number)[] {
-    let result: (string|number)[] = [];
-
-    // found in BasicCards
-    Object.keys( this.BasicCards ).forEach( key => {
-      if ( this.BasicCards[key].includes( gameCardID ) ) { result = ['BasicCards', key]; return; }
-    });
-
-    // found in KingdomCards
-    this.KingdomCards.forEach( (pile, index) => {
-      if ( pile.includes( gameCardID ) ) { result = ['KingdomCards', index]; return; }
-    });
-
-    // found in TrashPile
-    if ( this.TrashPile.includes( gameCardID ) ) result = ['TrashPile'];
-
-    // found in players
-    this.players.forEach( (player, index) => {
-      if ( player.Deck       .includes( gameCardID ) ) { result = ['players', index, 'Deck'       ]; return }
-      if ( player.DiscardPile.includes( gameCardID ) ) { result = ['players', index, 'DiscardPile']; return }
-      if ( player.HandCards  .includes( gameCardID ) ) { result = ['players', index, 'HandCards'  ]; return }
-      if ( player.PlayArea   .includes( gameCardID ) ) { result = ['players', index, 'PlayArea'   ]; return }
-      if ( player.Aside      .includes( gameCardID ) ) { result = ['players', index, 'Aside'      ]; return }
-      if ( player.Open       .includes( gameCardID ) ) { result = ['players', index, 'Open'       ]; return }
-    });
-
-    return result;
-  }
-
-  cardPropertyListIndex( gameCardID: GameCardID ): number {
-    return this.gameCardData[ gameCardID ].cardPropertyListIndex;
-  }
-
-  cardProperty( gameCardID: GameCardID ): CardProperty {
-    return this.cardPropertyList[ this.cardPropertyListIndex( gameCardID ) ];
-  }
-
-  sortHandCards( playerIndex: number ): void {
-    let sorted = this.players[playerIndex].HandCards
-        .sort( (a, b) => this.cardPropertyListIndex(a) - this.cardPropertyListIndex(b) );
-    let actionCards, treasureCards, victoryCards;
-    [actionCards  , sorted] = filterRemove( sorted, id => this.cardProperty(id).cardTypes.Action );
-    [treasureCards, sorted] = filterRemove( sorted, id => this.cardProperty(id).cardTypes.Treasure );
-    [victoryCards , sorted] = filterRemove( sorted, id => this.cardProperty(id).cardTypes.Victory );
-    this.players[playerIndex].HandCards = [].concat( actionCards, treasureCards, victoryCards, sorted );
-  }
 }

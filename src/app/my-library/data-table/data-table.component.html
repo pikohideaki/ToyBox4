@@ -26,72 +26,91 @@
     <thead>
       <tr>
         <th *ngFor='let column of columnSettings'
-            [class.data-table--cell-alignLeft]  ="column.align == 'l' "
-            [class.data-table--cell-alignCenter]="column.align == 'c' "
-            [class.data-table--cell-alignRight] ="column.align == 'r' " >
+            [class.data-table--cell-alignLeft]  ="column.align === 'l' "
+            [class.data-table--cell-alignCenter]="column.align === 'c' "
+            [class.data-table--cell-alignRight] ="column.align === 'r' " >
 
-          <span *ngIf="column.manip == 'none'">
-            {{column.headerTitle}}
-          </span>
+          <ng-container [ngSwitch]="column.manip">
+            <ng-container *ngSwitchCase="'none'">
+              <span> {{column.headerTitle}} </span>
+            </ng-container>
 
-          <!--
-          <button md-button disableRipple *ngIf="column.manip == 'sort'"
-              class="headerSortButton"
-              (click)="sortColumn( column.manipState, column.name )" >
-            {{column.headerTitle}}
-            <md-icon *ngIf="column.manipState == 'accending' " class='sortIcon'>arrow_drop_up</md-icon>
-            <md-icon *ngIf="column.manipState == 'descending'" class='sortIcon'>arrow_drop_down</md-icon>
-          </button>-->
-
-          <ng-container *ngIf="column.manip == 'filterBySelecter'">
-            <md-select
-                [(ngModel)]="column.manipState"
-                [placeholder]="column.headerTitle"
-                (change)="updateView()" >
-              <!--<md-option *ngFor="let option of selectorOptions[ column.name ]"-->
-              <md-option *ngFor="let option of column.options"
-                  [value]="option">
-                {{ option }}
-              </md-option>
-            </md-select>
-            <button md-icon-button (click)="reset( column.name )">
-              <md-icon class='clearSelectIcon'>clear</md-icon>
-            </button>
-          </ng-container>
-
-          <ng-container *ngIf="column.manip == 'incrementalSearch'" >
-            <md-input-container>
-              <input mdInput
-                  id="filteringInputBox"
-                  [placeholder]="column.headerTitle"
+            <ng-container *ngSwitchCase="'multiSelect'">
+              <md-select multiple="true"
                   [(ngModel)]="column.manipState"
-                  (keyup)="updateView()" >
-              <button mdSuffix md-icon-button (click)="reset( column.name )">
+                  [placeholder]="column.headerTitle"
+                  (change)="updateView()" >
+                <md-option *ngFor="let option of column.options"
+                    [value]="option">
+                  {{ option }}
+                </md-option>
+              </md-select>
+              <button md-icon-button (click)="reset( column.name )">
                 <md-icon class='clearSelectIcon'>clear</md-icon>
               </button>
-            </md-input-container>
-            <!--<button md-icon-button (click)="reset( column.name )">
-              <md-icon class='clearSelectIcon'>clear</md-icon>
-            </button>-->
-          </ng-container>
+            </ng-container>
 
-          <ng-container *ngIf="column.manip == 'autoComplete'" >
-            <md-input-container>
+            <ng-container *ngSwitchCase="'filterBySelecter'">
+              <md-select
+                  [(ngModel)]="column.manipState"
+                  [placeholder]="column.headerTitle"
+                  (change)="updateView()" >
+                <md-option *ngFor="let option of column.options"
+                    [value]="option">
+                  {{ option }}
+                </md-option>
+              </md-select>
+              <button md-icon-button (click)="reset( column.name )">
+                <md-icon class='clearSelectIcon'>clear</md-icon>
+              </button>
+            </ng-container>
+
+            <ng-container *ngSwitchCase="'incrementalSearch'">
+              <md-input-container>
                 <input mdInput
+                    id="filteringInputBox"
                     [placeholder]="column.headerTitle"
                     [(ngModel)]="column.manipState"
-                    [mdAutocomplete]=autoCompColumn
-                    [formControl]="stateCtrl">
-            </md-input-container>
-            <md-autocomplete #autoCompColumn="mdAutocomplete">
-                <md-option *ngFor="let option of column.asyncOptions | async" [value]="option">
-                    {{ option }}
-                </md-option>
-            </md-autocomplete>
+                    (keyup)="updateView()" >
+                <button mdSuffix md-icon-button (click)="reset( column.name )">
+                  <md-icon class='clearSelectIcon'>clear</md-icon>
+                </button>
+              </md-input-container>
+            </ng-container>
+
+            <ng-container *ngSwitchCase="'autoComplete'">
+              <!-- <md-input-container>
+                  <input mdInput
+                      [placeholder]="column.headerTitle"
+                      [(ngModel)]="column.manipState"
+                      [mdAutocomplete]=autoCompColumn
+                      [formControl]="stateCtrl">
+              </md-input-container>
+              <md-autocomplete #autoCompColumn="mdAutocomplete">
+                  <md-option *ngFor="let option of column.asyncOptions | async" [value]="option">
+                      {{ option }}
+                  </md-option>
+              </md-autocomplete> -->
+            </ng-container>
+
+            <ng-container>
+              <!-- <button md-icon-button (click)="sort( column.name )">
+                <md-icon class='sort'>sort</md-icon>
+              </button>
+              <md-icon>arrow_upwards</md-icon>
+              <md-icon>arrow_downwards</md-icon> -->
+<!--
+              <button md-button disableRipple *ngIf="column.manip == 'sort'"
+                  class="headerSortButton"
+                  (click)="sortColumn( column.manipState, column.name )" >
+                {{column.headerTitle}}
+                <md-icon *ngIf="column.manipState == 'accending' " class='sortIcon'>arrow_drop_up</md-icon>
+                <md-icon *ngIf="column.manipState == 'descending'" class='sortIcon'>arrow_drop_down</md-icon>
+              </button> -->
+            </ng-container>
+
           </ng-container>
-
         </th>
-
       </tr>
     </thead>
     <tbody>

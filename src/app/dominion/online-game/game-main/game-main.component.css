@@ -18,6 +18,9 @@
   min-width: 48px;
 }
 
+.goToNextPhaseIcon {
+  transform: rotate( -90deg );
+}
 
 /********* side navi ***************/
 .sidenavContainer {

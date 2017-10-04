@@ -2,6 +2,8 @@ import { SelectedCards } from './selected-cards';
 import { SelectedCardsCheckbox } from './selected-cards-checkbox-values';
 import { PlayerResult } from './player-result';
 import { BlackMarketPileCard } from './black-market-pile-card';
+import { BlackMarketPhase    } from '../classes/black-market-phase.enum';
+
 
 export class RandomizerGroup {
   databaseKey:               string;       // set only when newly created
@@ -13,7 +15,7 @@ export class RandomizerGroup {
   selectedCards:             SelectedCards = new SelectedCards();
   selectedCardsCheckbox:     SelectedCardsCheckbox = new SelectedCardsCheckbox();
   BlackMarketPileShuffled:   BlackMarketPileCard[] = [];
-  BlackMarketPhase:          number = 1;
+  BlackMarketPhase:          number = BlackMarketPhase.init;
   startPlayerName:           string;
   newGameResultDialogOpened: boolean = false;
   newGameResult: {
@@ -59,9 +61,11 @@ export class RandomizerGroup {
     this.selectedCards             = new SelectedCards( initObj.selectedCards );
     this.selectedCardsCheckbox     = new SelectedCardsCheckbox( initObj.selectedCardsCheckbox );
     this.BlackMarketPileShuffled   = ( initObj.BlackMarketPileShuffled || [] );
-    this.BlackMarketPhase          = ( initObj.BlackMarketPhase || 0 );
+    this.BlackMarketPhase          = ( initObj.BlackMarketPhase || BlackMarketPhase.init );
     this.startPlayerName           = ( initObj.startPlayerName || '' );
     this.newGameResultDialogOpened = !!initObj.newGameResultDialogOpened;
+
+    if ( !initObj.newGameResult ) return;
     this.newGameResult.players     = ( entries( initObj.newGameResult.players )
                                           .map( e => new PlayerResult( e.key, e.value ) ) || [] );
     this.newGameResult.place       = ( initObj.newGameResult.place || '' );

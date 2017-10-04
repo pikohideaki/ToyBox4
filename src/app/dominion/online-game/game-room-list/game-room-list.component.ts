@@ -24,11 +24,10 @@ export class GameRoomListComponent implements OnInit, OnDestroy {
   constructor(
     public snackBar: MdSnackBar,
     public dialog: MdDialog,
-    private utils: UtilitiesService,
+    public utils: UtilitiesService,
     private database: FireDatabaseMediatorService,
   ) {
     this.database.onlineGameRoomList$
-      .map( list => list.reverse() )
       .takeWhile( () => this.alive )
       .subscribe( val => this.gameRoomList = val );
   }
@@ -40,13 +39,13 @@ export class GameRoomListComponent implements OnInit, OnDestroy {
     this.alive = false;
   }
 
-  private roomByID( roomID ): GameRoom {
-    return this.gameRoomList.find( g => g.databaseKey === roomID );
-  }
 
-  signIn( roomID: string ) {
+  signIn = async ( roomID: string ) => {
     const dialogRef = this.dialog.open( SignInToGameRoomDialogComponent );
-    dialogRef.componentInstance.newRoom = this.roomByID( roomID );
+
+    dialogRef.componentInstance.newRoom
+      = this.gameRoomList.find( g => g.databaseKey === roomID );
+
     dialogRef.componentInstance.dialogRef = dialogRef;
     dialogRef.disableClose = true;
     const myMemberID = this.database.onlineGameRoom.addMember( roomID, this.myName ).key;
@@ -67,7 +66,7 @@ export class GameRoomListComponent implements OnInit, OnDestroy {
     this.snackBar.open( message, undefined, { duration: 3000 } );
   }
 
-  roomClicked( clickedRoomID ) {
+  roomClicked( clickedRoomID: string ) {
     if ( this.selectedRoomID === clickedRoomID ) this.selectedRoomID = '';  // toggle
     else this.selectedRoomID = clickedRoomID;
     event.stopPropagation();
@@ -77,4 +76,10 @@ export class GameRoomListComponent implements OnInit, OnDestroy {
     this.selectedRoomID = '';
   }
 
+
+
+  resetRooms() {
+    this.gameRoomList.map( e => e.gameStateID ).forEach( key => this.database.onlineGameState.remove(key) );
+    this.gameRoomList.map( e => e.databaseKey ).forEach( key => this.database.onlineGameRoom.remove(key) );
+  }
 }

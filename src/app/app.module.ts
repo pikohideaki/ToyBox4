@@ -19,6 +19,7 @@ import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule     } from 'angularfire2/auth';
 import { environment               } from '../environments/environment';
 
+import { NgPipesModule } from 'ngx-pipes';
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -79,23 +80,26 @@ import { RandomizerGroupListComponent   } from './dominion/online-randomizer/ran
 import { BlackMarketPileComponent       } from './dominion/online-randomizer/black-market-pile/black-market-pile.component';
 
 // dominion online
+import { SignInToGameRoomDialogComponent } from './dominion/online-game/sign-in-to-game-room-dialog/sign-in-to-game-room-dialog.component';
 import { OnlineGameComponent             } from './dominion/online-game/online-game.component';
 import { GameRoomListComponent           } from './dominion/online-game/game-room-list/game-room-list.component';
 import { AddGameGroupComponent           } from './dominion/online-game/add-game-group/add-game-group.component';
-import { SignInToGameRoomDialogComponent } from './dominion/online-game/sign-in-to-game-room-dialog/sign-in-to-game-room-dialog.component';
-import { GameMainComponent } from './dominion/online-game/game-main/game-main.component';
-import { ChatComponent } from './dominion/online-game/game-main/chat/chat.component';
-import { ManipDataComponent } from './manip-data.component';
-import { SharedAreaComponent } from './dominion/online-game/game-main/shared-area/shared-area.component';
-import { CardsPileComponent } from './dominion/online-game/game-main/cards-pile.component';
-import { TurnPlayerAreaComponent } from './dominion/online-game/game-main/turn-player-area/turn-player-area.component';
-import { OtherPlayerAreaComponent } from './dominion/online-game/game-main/other-player-area/other-player-area.component';
-import { TurnInfoComponent } from './dominion/online-game/game-main/turn-info/turn-info.component';
+import { GameMainComponent               } from './dominion/online-game/game-main/game-main.component';
+import { ChatComponent                   } from './dominion/online-game/game-main/chat/chat.component';
+import { SharedAreaComponent             } from './dominion/online-game/game-main/shared-area/shared-area.component';
+import { TurnPlayerAreaComponent         } from './dominion/online-game/game-main/turn-player-area/turn-player-area.component';
+import { OtherPlayerAreaComponent        } from './dominion/online-game/game-main/other-player-area/other-player-area.component';
+import { TurnInfoComponent               } from './dominion/online-game/game-main/turn-info/turn-info.component';
+import { CardsPileComponent              } from './dominion/online-game/game-main/cards-area/cards-pile.component';
+import { CardsLinedUpComponent           } from './dominion/online-game/game-main/cards-area/cards-lined-up.component';
+import { ManipDataComponent                     } from './manip-data.component';
 import { OnlineVictoryPointsCalculatorComponent } from './dominion/online-randomizer/online-victory-points-calculator.component';
-import { SelectedCardsListComponent } from './dominion/selected-cards-list/selected-cards-list.component';
-import { SelectedExpansionsComponent } from './dominion/selected-expansions.component';
-import { ExpansionsToggleComponent } from './dominion/expansions-toggle.component';
-import { VictoryPointsCalculatorComponent } from './dominion/victory-points-calculator/victory-points-calculator.component';
+import { SelectedCardsListComponent             } from './dominion/selected-cards-list/selected-cards-list.component';
+import { SelectedExpansionsComponent            } from './dominion/selected-expansions.component';
+import { ExpansionsToggleComponent              } from './dominion/expansions-toggle.component';
+import { VictoryPointsCalculatorComponent       } from './dominion/victory-points-calculator/victory-points-calculator.component';
+import { MessageDialogComponent                 } from './my-library/message-dialog.component';
+
 
 
 
@@ -154,6 +158,8 @@ import { VictoryPointsCalculatorComponent } from './dominion/victory-points-calc
     SelectedExpansionsComponent,
     ExpansionsToggleComponent,
     VictoryPointsCalculatorComponent,
+    MessageDialogComponent,
+    CardsLinedUpComponent,
   ],
   imports: [
     BrowserModule,
@@ -170,7 +176,8 @@ import { VictoryPointsCalculatorComponent } from './dominion/victory-points-calc
       { component: ScoringTableComponent     , path: 'scoring' },
       { component: OnlineRandomizerComponent , path: 'online-randomizer' },
       { component: OnlineGameComponent       , path: 'online-game' },
-      { component: GameMainComponent         , path: 'online-game-main/:id' },
+      { component: GameMainComponent         , path: 'online-game-main' },
+      // { component: GameMainComponent         , path: 'online-game-main/:id' },
       { component: UserAdminComponent        , path: 'user_admin' },
       { component: ManipDataComponent        , path: 'manip-data' },
     ], { useHash: true } ),
@@ -180,6 +187,7 @@ import { VictoryPointsCalculatorComponent } from './dominion/victory-points-calc
     AngularFireModule.initializeApp(environment.firebase, 'DominionApps'), // imports firebase/app needed for everything
     AngularFireDatabaseModule, // imports firebase/database, only needed for database features
     AngularFireAuthModule, // imports firebase/auth, only needed for auth features
+    NgPipesModule,
   ],
   providers: [
     { provide: 'DATA_DIR', useValue: 'assets' },
@@ -193,6 +201,7 @@ import { VictoryPointsCalculatorComponent } from './dominion/victory-points-calc
   ],
   /* for dialog, snackbar */
   entryComponents: [
+    MessageDialogComponent,
     AlertDialogComponent,
     ConfirmDialogComponent,
     CardPropertyDialogComponent,

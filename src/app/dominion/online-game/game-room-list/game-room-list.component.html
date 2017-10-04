@@ -1,5 +1,5 @@
 <div class="bodyWithPadding" (click)="backgroundClicked()">
-  <div *ngFor="let room of gameRoomList">
+  <div *ngFor="let room of gameRoomList | reverse">
     <md-card class="roomListItem"
         [class.notWaitingForPlayers]="!room.waitingForPlayers"
         (click)="roomClicked( room.databaseKey )">
@@ -9,7 +9,7 @@
         <md-card-title> {{room.name}} </md-card-title>
         <md-card-subtitle>
           {{room.players.join(", ")}}<br>
-          {{utils.toYMDHMS(room.timeStamp)}}
+          {{utils.toYMDHMS(room.date)}}
         </md-card-subtitle>
       </md-card-header>
 
@@ -27,4 +27,6 @@
 
     </md-card>
   </div>
+
+  <button md-raised-button (click)="resetRooms()">Reset rooms</button>
 </div>

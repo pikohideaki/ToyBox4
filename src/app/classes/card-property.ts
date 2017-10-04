@@ -17,10 +17,6 @@ export class CardProperty {
   buy:                    number = 0;
   coin:                   number = 0;
   VPtoken:                number = 0;
-  // effect:                 string = '';
-  // description:            string = '';
-  // recommendedCombination: string = '';
-  // memo:                   string = '';
   implemented:            boolean = false;
   randomizerCandidate:    boolean = false;
   linkId:                 number = -1;
@@ -42,10 +38,6 @@ export class CardProperty {
     buy:                    number,
     coin:                   number,
     VPtoken:                number,
-    // effect:                 string,
-    // description:            string,
-    // recommendedCombination: string,
-    // memo:                   string,
     implemented:            boolean,
     randomizerCandidate:    boolean,
     linkId:                 number,
@@ -68,10 +60,6 @@ export class CardProperty {
     this.buy                    = ( initObj.buy                    || 0 );
     this.coin                   = ( initObj.coin                   || 0 );
     this.VPtoken                = ( initObj.VPtoken                || 0 );
-    // this.effect                 = ( initObj.effect                 || '' );
-    // this.description            = ( initObj.description            || '' );
-    // this.recommendedCombination = ( initObj.recommendedCombination || '' );
-    // this.memo                   = ( initObj.memo                   || '' );
     this.implemented            = !!initObj.implemented;
     this.randomizerCandidate    = !!initObj.randomizerCandidate;
     this.linkId                 = ( initObj.linkId                 || -1 );
@@ -118,10 +106,6 @@ export class CardProperty {
       buy                    : this.buy,
       coin                   : this.coin,
       VPtoken                : this.VPtoken,
-      // effect                 : this.effect,
-      // description            : this.description,
-      // recommendedCombination : this.recommendedCombination,
-      // memo                   : this.memo,
       implemented            : ( this.implemented ?  '実装済み' : '未実装' ),
       randomizerCandidate    : ( this.randomizerCandidate ?  '〇' : '×' ),
     };

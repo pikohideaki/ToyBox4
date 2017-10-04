@@ -10,6 +10,12 @@
   align-items: center;
 }
 
+.phase {
+  background-color: green;
+  color: white;
+  border-radius: 9px;
+}
+
 .action {
   background-color: #FF4081;
   color: white;

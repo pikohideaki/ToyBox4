@@ -1,17 +1,21 @@
 <div class="body">
   <div class="message-list">
-    <div class="balloon6"  *ngFor="let message of chatList">
-      <div class="faceicon">
-        <md-icon>account_circle</md-icon>piko
+    <div class="balloon6"  *ngFor="let message of chatList$ | async">
+
+      <div *ngIf="message.playerName === (myName$ | async); else otherPlayer" class="mycomment">
+        <p>{{message.content}}</p>
+        <!-- <p>{{message.date | date:'shortTime'}}</p> -->
       </div>
-      <div class="chatting">
-        <div class="says">
-          <p>{{message}}</p>
+      <ng-template #otherPlayer >
+        <div class="faceicon">
+          <md-icon>account_circle</md-icon>{{message.playerName}}
         </div>
-      </div>
-    </div>
-    <div class="mycomment">
-      <p> ( ˘ω˘ )ｽﾔｧ... </p>
+        <div class="chatting">
+          <div class="says"> <p>{{message.content}}</p> </div>
+        </div>
+        <!-- <p>{{message.date | date:'shortTime'}}</p> -->
+      </ng-template>
+
     </div>
   </div>
 
@@ -19,7 +23,8 @@
     <md-input-container class="new-message-input-box">
       <input mdInput [(ngModel)]="newMessage" placeholder="メッセージを入力">
     </md-input-container>
-    <button md-raised-button class="send-button" color="primary" (click)="submitMessage()" >
+    <button md-raised-button class="send-button" color="primary"
+        [disabled]="disableSubmitButton" (click)="submitMessage()" >
       <md-icon>send</md-icon>
     </button>
   </div>

@@ -57,6 +57,7 @@ export class SignUpComponent implements OnInit {
               numberOfPlayers:       2,
               roomID:               '',
               gameStateID:          '',
+              chatOpened:           true,
             }
           } ) );
 

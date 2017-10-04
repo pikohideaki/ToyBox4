@@ -1,9 +1,12 @@
 import { Component, OnInit, OnDestroy, Inject, Input, Output, EventEmitter } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
 
-import { GameState, GameCardID } from '../../../../classes/game-state';
+import { MyGameRoomService  } from '../my-game-room.service';
+import { MyGameStateService } from '../my-game-state.service';
+
 import { CardProperty } from '../../../../classes/card-property';
 import { GameRoom } from '../../../../classes/game-room';
+import { CommonCardData$$, CardDataForPlayer$$, PlayersCards } from '../../../../classes/game-state';
 
 @Component({
   selector: 'app-other-player-area',
@@ -13,36 +16,31 @@ import { GameRoom } from '../../../../classes/game-room';
 export class OtherPlayerAreaComponent implements OnInit, OnDestroy {
   private alive: boolean = true;
 
-  receiveDataDone: boolean = false;
+  dataIsReady = false;
 
-  @Input() private cardPropertyList$: Observable<CardProperty[]>;
-  @Input() private myGameState$: Observable<GameState>;
-  @Input() private myGameRoom$: Observable<GameRoom>;
-  cardPropertyList: CardProperty[];
-  myGameState: GameState;
-  myGameRoom: GameRoom;
+  players: string[] = [];
+  turnPlayerIndex$: Observable<number>;
+  playersCards$:    Observable<PlayersCards[]>;
 
   @Output() private cardClicked = new EventEmitter<any>();
 
-  constructor() { }
 
-  ngOnInit() {
-    Observable.combineLatest(
-        this.cardPropertyList$,
-        this.myGameState$,
-        this.myGameRoom$,
-        (cardPropertyList, myGameState, myGameRoom) => ({
-          cardPropertyList: cardPropertyList,
-          myGameState: myGameState,
-          myGameRoom: myGameRoom
-        }) )
+  constructor(
+    private myGameRoomService: MyGameRoomService,
+    private myGameStateService: MyGameStateService,
+  ) {
+    this.myGameRoomService.myGameRoom$.map( e => e.players )
       .takeWhile( () => this.alive )
       .subscribe( val => {
-        this.cardPropertyList = val.cardPropertyList;
-        this.myGameState = val.myGameState;
-        this.myGameRoom = val.myGameRoom;
-        this.receiveDataDone = true;
+        this.players = val;
+        this.dataIsReady = true;
       });
+
+    this.turnPlayerIndex$ = this.myGameStateService.turnPlayerIndex$;
+    this.playersCards$    = this.myGameStateService.playersCards$;
+  }
+
+  ngOnInit() {
   }
 
   ngOnDestroy() {

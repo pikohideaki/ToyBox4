@@ -1,111 +1,135 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
 
-import { UtilitiesService } from '../../../my-library/utilities.service';
+import { UtilitiesService, Stopwatch } from '../../../my-library/utilities.service';
 import { MyUserInfoService } from '../../../my-user-info.service';
 import { FireDatabaseMediatorService } from '../../../fire-database-mediator.service';
+import { MyGameRoomService  } from './my-game-room.service';
+import { MyGameStateService } from './my-game-state.service';
+import { GameLoopService } from './game-loop.service';
+import { ManipCardFunctionsService } from './manip-card-functions.service';
 
-import { GameRoom     } from '../../../classes/game-room';
-import { GameState    } from '../../../classes/game-state';
 import { CardProperty } from '../../../classes/card-property';
+import { GameRoom } from '../../../classes/game-room';
+import {
+    TurnInfo,
+    CommonCardData$$,
+    CardDataForPlayer$$,
+    PlayersCards,
+    BasicCards,
+    KingdomCards,
+   } from '../../../classes/game-state';
 
 
 @Component({
+  providers: [
+    MyGameRoomService,
+    MyGameStateService,
+    GameLoopService,
+    ManipCardFunctionsService,
+  ],
   selector: 'app-game-main',
   templateUrl: './game-main.component.html',
   styleUrls: ['./game-main.component.css']
 })
 export class GameMainComponent implements OnInit, OnDestroy {
   private alive: boolean = true;
-  receiveDataDone: boolean = false;
+  receiveDataDone$: Observable<boolean>;
 
   myIndex$: Observable<number>;
   myIndex: number;
 
-  roomID$: Observable<string>;
-  myGameRoom$: Observable<GameRoom>;
-  myGameRoom: GameRoom;
-
-  myGameState$: Observable<GameState>;
-  myGameState: GameState;
-
   cardPropertyList$ = this.database.cardPropertyList$;
-  cardPropertyList: CardProperty[];
+  chatOpened$:  Observable<boolean> = this.myUserInfo.onlineGame.chatOpened$;
+  myGameRoom$:  Observable<GameRoom>;
+  turnInfo$:    Observable<TurnInfo>;
+  itsMyTurn$:   Observable<boolean>;
 
-  json: string;
+  commonCardData$$:  CommonCardData$$;
+  cardDataForMe$$:   CardDataForPlayer$$;
+
+  turnPlayersCards$: Observable<PlayersCards>;
+  playersCards$:     Observable<PlayersCards[]>;
+  BasicCards$:       Observable<BasicCards>;
+  KingdomCards$:     Observable<KingdomCards>;
+  TrashPile$:        Observable<number[]>;
+  turnPlayerIndex$:  Observable<number>;
 
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
     private utils: UtilitiesService,
     private database: FireDatabaseMediatorService,
-    private myUserInfo: MyUserInfoService
+    private myUserInfo: MyUserInfoService,
+    private myGameRoomService: MyGameRoomService,
+    private myGameStateService: MyGameStateService,
+    private manipCard: ManipCardFunctionsService,
+    private gameLoopService: GameLoopService,
   ) {
   }
 
   ngOnInit() {
-    this.roomID$ = this.route.paramMap.switchMap( (params: ParamMap) => params.getAll('id') );
+    this.myGameRoom$ = this.myGameRoomService.myGameRoom$;
+    this.myIndex$    = this.myGameRoomService.myIndex$;
 
-    this.myGameRoom$
-      = this.database.onlineGameRoomList$.combineLatest(
-          this.roomID$,
-          (list, id) => list.find( e => e.databaseKey === id ) );
+    this.turnInfo$         = this.myGameStateService.turnInfo$;
+    this.commonCardData$$  = this.myGameStateService.commonCardData$$;
+    this.cardDataForMe$$   = this.myGameStateService.cardDataForMe$$;
+    this.turnPlayersCards$ = this.myGameStateService.turnPlayersCards$;
+    this.playersCards$     = this.myGameStateService.playersCards$;
+    this.BasicCards$       = this.myGameStateService.BasicCards$;
+    this.KingdomCards$     = this.myGameStateService.KingdomCards$;
+    this.TrashPile$        = this.myGameStateService.TrashPile$;
+    this.turnPlayerIndex$  = this.myGameStateService.turnPlayerIndex$;
 
-    const myGameStateID$ = this.myGameRoom$.map( (myGameRoom: GameRoom) => myGameRoom.gameStateID );
+    this.itsMyTurn$ = Observable.combineLatest(
+        this.turnPlayerIndex$, this.myIndex$,
+        (turnPlayerIndex, myIndex) => (turnPlayerIndex === myIndex) )
+      .distinctUntilChanged()
+      .startWith( false );
 
-    this.myGameState$
-      = this.database.onlineGameStateList$.combineLatest(
-          myGameStateID$,
-          (list, id) => list.find( e => e.databaseKey === id ) );
-
-    Observable.combineLatest(
-        this.myGameRoom$,
-        this.myGameState$,
-        this.database.cardPropertyList$,
-        (myGameRoom, myGameState, cardPropertyList) => ({
-          myGameRoom: myGameRoom,
-          myGameState: myGameState,
-          cardPropertyList: cardPropertyList,
-        }) )
+    this.itsMyTurn$.filter( e => e === true )
       .takeWhile( () => this.alive )
-      .subscribe( val => {
-        this.myGameRoom = val.myGameRoom;
-        this.myGameState = val.myGameState;
-        this.cardPropertyList = val.cardPropertyList;
-        console.log( this.myGameRoom, this.myGameState );
-        this.receiveDataDone = true;
-      });
+      .subscribe( () => this.gameLoopService.startMyTurn() );
 
-    this.myIndex$ = Observable.combineLatest(
-        this.myGameRoom$,
-        this.myUserInfo.name$,
-        (myGameRoom, myName) => myGameRoom.players.findIndex( e => e === myName ) )
-      .first();
-
-    this.myIndex$
-      .takeWhile( () => this.alive )
-      .subscribe( val => this.myIndex = val );
-
-    this.startGame();
+    this.receiveDataDone$
+      = Observable.combineLatest(
+            this.myGameRoomService.myGameRoom$,
+            this.database.cardPropertyList$,
+            this.myIndex$,
+            () => true ).first().delay( new Date( Date.now() + 500 ) )
+        .startWith(false);
   }
 
   ngOnDestroy() {
     this.alive = false;
   }
 
-  onCardClicked( value ) {
-    console.log( value );
+
+
+  async toggleSideNav( sidenav ) {
+    this.myUserInfo.setOnlineGameChatOpened( (await sidenav.toggle()).type === 'open' );
   }
 
   sortMyHandCards() {
-    if ( !this.receiveDataDone ) return;
-    this.myGameState.sortHandCards( this.myIndex );
+    this.manipCard.sortHandCards( this.myIndex );
   }
 
-  startGame() {
-
+  onCardClicked( value ) {
+    this.gameLoopService.clickedCardIdSource.next( value );
   }
 
+  goToNextPhase() {
+    this.gameLoopService.clickedCardIdSource.next( this.gameLoopService.GO_TO_NEXT_PHASE_ID );
+  }
+
+  goToNextPlayer() {
+    this.gameLoopService.clickedCardIdSource.next( this.gameLoopService.GO_TO_NEXT_PLAYER_ID );
+    this.gameLoopService.goToNextPlayerState = true;
+  }
+
+
+
+  test() { this.gameLoopService.test() }
+  faceUpCurse() { this.gameLoopService.faceUpCurse(); }
+  faceDownCurse() { this.gameLoopService.faceDownCurse(); }
 }

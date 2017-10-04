@@ -61,7 +61,7 @@ export class ManipDataComponent implements OnInit {
   }
 
 
-  setNewData = async () => {
+  async setNewData() {
     console.log('start');
     // let data;
     // data = await this.afDatabase.object('/newData/data/expansionsNameList').first().toPromise();
@@ -69,7 +69,7 @@ export class ManipDataComponent implements OnInit {
     console.log('done')
   }
 
-  backup = async () => {
+  async backup() {
     console.log('start')
     // let data;
     // data = await this.afDatabase.object('/data').first().toPromise();
@@ -81,7 +81,7 @@ export class ManipDataComponent implements OnInit {
     console.log('done')
   }
 
-  convert = async () => {
+  async convert() {
     console.log('start');
     const expansionsNameList
       = await this.afDatabase.object('/data/expansionsNameList').first().toPromise()
@@ -184,11 +184,9 @@ export class ManipDataComponent implements OnInit {
     //   .then( () => this.afDatabase.object('/onlineGameRooms').remove() );
     // });
     // this.afDatabase.object('/data/gameResultList_bk').first().subscribe( obj =>
-    //   Object.keys(obj).forEach( key => {
-        // ( async () => {
-        //   await this.afDatabase.object(`/data/gameResultList/${key}/DominionSetSelected`).remove()
-        // })();
-      // }
+    //   Object.keys(obj).forEach( async key => {
+    //     await this.afDatabase.object(`/data/gameResultList/${key}/DominionSetSelected`).remove()
+    //   }
         // this.afDatabase.object(`/data/gameResultList/${key}/DominionSetSelected`).remove()
         // .then( () =>
         //   this.afDatabase.object(`/data/gameResultList/${key}/DominionSetSelected`)
@@ -214,7 +212,7 @@ export class ManipDataComponent implements OnInit {
   //   }
   // }
 
-  promiseTest = async () => {
+  async promiseTest() {
     console.log('start')
     // const array = new Array(100000).fill(0);
     // await this.afDatabase.list('/testData').push( array );

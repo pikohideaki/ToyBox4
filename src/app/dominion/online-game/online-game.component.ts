@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
+
+import { MyUserInfoService } from '../../my-user-info.service';
+
 
 @Component({
   providers: [],
@@ -8,9 +12,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class OnlineGameComponent implements OnInit {
 
+  signedIn$: Observable<boolean>;
   myName: string;
 
-  constructor() { }
+  constructor(
+    private myUserInfo: MyUserInfoService
+  ) {
+    this.signedIn$ = this.myUserInfo.signedIn$;
+  }
 
   ngOnInit() {
   }

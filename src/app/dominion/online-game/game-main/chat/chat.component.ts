@@ -1,4 +1,11 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { Observable } from 'rxjs/Rx';
+
+import { MyUserInfoService } from '../../../../my-user-info.service';
+import { MyGameStateService } from '../my-game-state.service';
+
+import { ChatMessage } from '../../../../classes/chat-message';
+
 
 @Component({
   selector: 'app-chat',
@@ -9,15 +16,27 @@ export class ChatComponent implements OnInit {
 
   @Input() private sidenav;
 
-  chatList: string[] = Array(10).fill( '( ˘ω˘ )ｸｩｩｩｩｩｩｩｿｫｫｫｫｩｩｩｩｩﾈｪｪｪｪﾐｨｨｨｨｨｲｵｫｫｫｩｩｳｳｳwwwww( ˘ω˘ )ｸｩｩｩｩｩｩｩｿｫｫｫｫｩｩｩｩｩﾈｪｪｪｪﾐｨｨｨｨｨｲｵｫｫｫｩｩｳｳｳwwwww' );
+  chatList$: Observable<ChatMessage[]>;
   newMessage: string = '';
+  myName$: Observable<string>;
+  disableSubmitButton = false;
 
-  constructor() { }
+  constructor(
+    private myUserInfo: MyUserInfoService,
+    private myGameState: MyGameStateService
+  ) {
+    this.myName$ = this.myUserInfo.name$;
+    this.chatList$ = this.myGameState.chatList$;
+  }
 
   ngOnInit() {
   }
 
-  submitMessage() {
-    this.chatList.push( this.newMessage );
+  async submitMessage() {
+    if ( this.newMessage === '' ) return;
+    this.disableSubmitButton = true;
+    await this.myGameState.addMessageToChatList( this.newMessage );
+    this.newMessage = '';
+    this.disableSubmitButton = false;
   }
 }

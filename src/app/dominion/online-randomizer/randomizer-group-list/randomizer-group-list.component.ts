@@ -15,6 +15,7 @@ import { UserInfo              } from '../../../classes/user-info';
 import { PlayerResult          } from '../../../classes/player-result';
 import { SelectedCardsCheckbox } from '../../../classes/selected-cards-checkbox-values';
 import { BlackMarketPileCard   } from '../../../classes/black-market-pile-card';
+import { BlackMarketPhase      } from '../../../classes/black-market-phase.enum';
 
 
 @Component({
@@ -100,7 +101,7 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
     this.signInPassword = undefined;
   }
 
-  addRandomizerGroup = async () => {
+  async addRandomizerGroup() {
     const expansionsNameList
       = await this.database.expansionsNameList$.first().toPromise();
     const isSelectedExpansionsInit = expansionsNameList.map( _ => true );
@@ -125,7 +126,7 @@ export class RandomizerGroupListComponent implements OnInit, OnDestroy {
         selectedCards:             new SelectedCards(),
         selectedCardsCheckbox:     new SelectedCardsCheckbox(),
         BlackMarketPileShuffled:   [],
-        BlackMarketPhase:          0,
+        BlackMarketPhase:          BlackMarketPhase.init,
         newGameResult: {
           players: playerResults,
           place:   '',

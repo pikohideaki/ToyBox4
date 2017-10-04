@@ -22,6 +22,7 @@ export class MyUserInfoService {
     numberOfPlayers$:      Observable<number>,
     roomID$:               Observable<string>,
     gameStateID$:          Observable<string>,
+    chatOpened$:           Observable<boolean>,
   }
 
   signedInToRandomizerGroup$: Observable<boolean>;
@@ -46,10 +47,14 @@ export class MyUserInfoService {
     this.name$              = this.myUserInfo$.map( e => e.name              ).distinctUntilChanged();
     this.randomizerGroupID$ = this.myUserInfo$.map( e => e.randomizerGroupID ).distinctUntilChanged();
     this.onlineGame = {
-      numberOfPlayers$    : this.myUserInfo$.map( e => e.onlineGame.numberOfPlayers    ).distinctUntilChanged(),
-      roomID$             : this.myUserInfo$.map( e => e.onlineGame.roomID             ).distinctUntilChanged(),
-      gameStateID$        : this.myUserInfo$.map( e => e.onlineGame.gameStateID        ).distinctUntilChanged(),
-      isSelectedExpansions$ : this.myUserInfo$.map( e => e.onlineGame.isSelectedExpansions ).distinctUntilChanged(),
+      isSelectedExpansions$ : Observable.combineLatest(
+                this.database.expansionsNameList$.map( list => list.map( _ => false ) ),
+                this.myUserInfo$.map( e => e.onlineGame.isSelectedExpansions ).distinctUntilChanged(),
+                (initArray, isSelectedExpansions) => initArray.map( (_, i) => !!isSelectedExpansions[i] ) ),
+      numberOfPlayers$      : this.myUserInfo$.map( e => e.onlineGame.numberOfPlayers      ).distinctUntilChanged(),
+      roomID$               : this.myUserInfo$.map( e => e.onlineGame.roomID               ).distinctUntilChanged(),
+      gameStateID$          : this.myUserInfo$.map( e => e.onlineGame.gameStateID          ).distinctUntilChanged(),
+      chatOpened$           : this.myUserInfo$.map( e => e.onlineGame.chatOpened           ).distinctUntilChanged(),
     }
 
     this.signedInToRandomizerGroup$ = this.randomizerGroupID$.map( groupID => !!groupID );
@@ -86,6 +91,11 @@ export class MyUserInfoService {
   setOnlineGameStateID( value: string ) {
     if ( !this.myID ) return Promise.resolve();
     return this.database.userInfo.set.onlineGame.gameStateID( this.myID, value );
+  }
+
+  setOnlineGameChatOpened( value: boolean ) {
+    if ( !this.myID ) return Promise.resolve();
+    return this.database.userInfo.set.onlineGame.chatOpened( this.myID, value );
   }
 
 }

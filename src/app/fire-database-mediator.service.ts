@@ -7,6 +7,7 @@ import { Observable } from 'rxjs/Observable';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import * as firebase from 'firebase/app';
 
+import { UtilitiesService } from './my-library/utilities.service';
 
 import { UserInfo              } from './classes/user-info';
 import { CardProperty          } from './classes/card-property';
@@ -16,14 +17,15 @@ import { GameResult            } from './classes/game-result';
 import { PlayerName            } from './classes/player-name';
 import { RandomizerGroup       } from './classes/randomizer-group';
 import { GameRoom              } from './classes/game-room';
-import { GameState             } from './classes/game-state';
+import { GameState, CardDataForPlayer } from './classes/game-state';
 import { BlackMarketPileCard   } from './classes/black-market-pile-card';
+import { ChatMessage           } from './classes/chat-message';
 
 
 
 @Injectable()
 export class FireDatabaseMediatorService {
-  private fdPath = {
+  fdPath = {
     userInfoList        : '/userInfoList',
     expansionsNameList  : '/data/expansionsNameList',
     cardPropertyList    : '/data/cardPropertyList',
@@ -44,7 +46,6 @@ export class FireDatabaseMediatorService {
   gameResultList$:      Observable<GameResult[]>;
   randomizerGroupList$: Observable<RandomizerGroup[]>;
   onlineGameRoomList$:  Observable<GameRoom[]>;
-  onlineGameStateList$: Observable<GameState[]>;
 
 
 
@@ -59,6 +60,7 @@ export class FireDatabaseMediatorService {
         numberOfPlayers:      ( uid: string, value: number    ) => firebase.Promise<void>,
         roomID:               ( uid: string, value: string    ) => firebase.Promise<void>,
         gameStateID:          ( uid: string, value: string    ) => firebase.Promise<void>,
+        chatOpened:           ( uid: string, value: boolean   ) => firebase.Promise<void>,
       }
     }
   };
@@ -111,6 +113,13 @@ export class FireDatabaseMediatorService {
   onlineGameState: {
     add: ( gameState: GameState ) => firebase.database.ThenableReference,
     remove: ( id: string ) => firebase.Promise<void>,
+    addMessage: ( gameStateId: string, newMessage: ChatMessage ) => firebase.database.ThenableReference,
+    update: ( gameStateId: string, object: Object ) => firebase.Promise<void>,
+    set: {
+      turnCounter: ( gameStateId: string, value: number ) => firebase.Promise<void>,
+      turnInfo: ( gameStateId: string, value ) => firebase.Promise<void>,
+      phase: ( gameStateId: string, value ) => firebase.Promise<void>,
+    },
   };
 
 
@@ -121,6 +130,7 @@ export class FireDatabaseMediatorService {
 
   constructor(
     private afdb: AngularFireDatabase,
+    private utils: UtilitiesService
   ) {
     this.userInfoList$
       = this.afdb.list( this.fdPath.userInfoList, { preserveSnapshot: true } )
@@ -160,10 +170,6 @@ export class FireDatabaseMediatorService {
 
     this.onlineGameRoomList$
       = this.afdb.list( this.fdPath.onlineGameRoomsList, { preserveSnapshot: true } )
-          .map( snapshots => snapshots.map( e => new GameState( e.key, e.val() ) ) );
-
-    this.onlineGameStateList$
-      = this.afdb.list( this.fdPath.onlineGameStateList, { preserveSnapshot: true } )
           .map( snapshots => snapshots.map( e => new GameRoom( e.key, e.val() ) ) );
 
 
@@ -178,7 +184,7 @@ export class FireDatabaseMediatorService {
 
     this.userInfo = {
       setUserInfo: ( uid: string, newUser: UserInfo ) => {
-        const newUserObj = JSON.parse( JSON.stringify(newUser) );
+        const newUserObj = this.utils.copyObject( newUser );
         delete newUserObj.databaseKey;
         return this.afdb.object(`${this.fdPath.userInfoList}/${uid}`).set( newUserObj );
       },
@@ -202,6 +208,9 @@ export class FireDatabaseMediatorService {
 
           gameStateID: ( uid: string, value: string ) =>
             userInfoSetProperty( uid, 'onlineGame/gameStateID', value ),
+
+          chatOpened: ( uid: string, value: boolean ) =>
+            userInfoSetProperty( uid, 'onlineGame/chatOpened', value ),
         }
       }
     }
@@ -221,12 +230,11 @@ export class FireDatabaseMediatorService {
 
     this.randomizerGroup = {
       addGroup: ( newGroup: RandomizerGroup ) => {
-        const newGroupObj = JSON.parse( JSON.stringify( newGroup ) );  // deep copy
+        const newGroupObj = this.utils.copyObject( newGroup );  // deep copy
         newGroupObj.dateString = newGroup.date.toString();
         delete newGroupObj.date;
         delete newGroupObj.databaseKey;
         newGroupObj.newGameResult.players = {};
-        console.log(newGroup.newGameResult.players)
         newGroup.newGameResult.players.forEach( e =>
             newGroupObj.newGameResult.players[e.id] = {
               name      : e.name,
@@ -342,8 +350,9 @@ export class FireDatabaseMediatorService {
 
     this.onlineGameRoom = {
       add: ( newGameRoom: GameRoom ) => {
-        const newGameRoomObj = JSON.parse( JSON.stringify(newGameRoom) );  // deep copy
-        newGameRoomObj.timeStamp = newGameRoomObj.timeStamp.toString();
+        const newGameRoomObj = this.utils.copyObject( newGameRoom );  // deep copy
+        newGameRoomObj.dateString = newGameRoomObj.date.toString();
+        delete newGameRoomObj.date;
         delete newGameRoomObj.databaseKey;
         return this.afdb.list( this.fdPath.onlineGameRoomsList ).push( newGameRoomObj );
       },
@@ -362,20 +371,69 @@ export class FireDatabaseMediatorService {
     }
 
 
-
     this.onlineGameState = {
       add: ( newGameState: GameState ) => {
-        const newGameStateObj = JSON.parse( JSON.stringify(newGameState) );  // deep copy
-        newGameStateObj.timeStamp = newGameStateObj.timeStamp.toString();
-        delete newGameStateObj.databaseKey;
+        const newGameStateObj = this.utils.copyObject( newGameState );
+
+        /* convert array to { val: true } object */
+        newGameStateObj.cards = {};
+
+        newGameStateObj.cards.BasicCards = {};
+        this.utils.objectForEach( newGameState.cards.BasicCards, (val: number[], key) => {
+          newGameStateObj.cards.BasicCards[key] = {};
+          val.forEach( (id, i) => newGameStateObj.cards.BasicCards[key][id] = i );
+        } );
+
+        newGameStateObj.cards.KingdomCards = {};
+        newGameState.cards.KingdomCards.forEach( (val: number[], key) => {
+          newGameStateObj.cards.KingdomCards[key] = {};
+          val.forEach( (id, i) => newGameStateObj.cards.KingdomCards[key][id] = i );
+        } );
+
+        newGameStateObj.cards.playersCards = [];
+        newGameState.cards.playersCards.forEach( (player, playerIndex) => {
+          newGameStateObj.cards.playersCards[playerIndex] = {};
+          this.utils.objectForEach( player, (val: number[], key) => {
+            newGameStateObj.cards.playersCards[playerIndex][key] = {};
+            val.forEach( (id, i) => newGameStateObj.cards.playersCards[playerIndex][key][id] = i );
+          } );
+        });
+
+        newGameStateObj.cards.TrashPile = {};
+        newGameState.cards.TrashPile.forEach( (id, i) => newGameStateObj.cards.TrashPile[id] = i );
+
         return this.afdb.list( this.fdPath.onlineGameStateList ).push( newGameStateObj );
       },
 
       remove: ( id: string ) =>
         this.afdb.list( this.fdPath.onlineGameStateList ).remove( id ),
-    }
 
+      addMessage: ( gameStateId: string, newMessage: ChatMessage ) =>
+        this.afdb.list( `${this.fdPath.onlineGameStateList}/${gameStateId}/chatList` ).push( newMessage ),
+
+      update: ( gameStateId: string, object: Object ) =>
+        this.afdb.object(`${this.fdPath.onlineGameStateList}/${gameStateId}`).update( object ),
+
+      set: {
+        turnCounter: ( gameStateId: string, value: number ) =>
+          this.afdb.object(`${this.fdPath.onlineGameStateList}/${gameStateId}/turnCounter`)
+            .set( value ),
+
+        turnInfo: ( gameStateId: string, value ) =>
+          this.afdb.object(`${this.fdPath.onlineGameStateList}/${gameStateId}/turnInfo`)
+            .set( value ),
+
+        phase: ( gameStateId: string, value ) =>
+          this.afdb.object(`${this.fdPath.onlineGameStateList}/${gameStateId}/turnInfo/phase`)
+            .set( value ),
+
+      }
+    }
 
   }
 
+
+  update( object ) {
+    return this.afdb.object('/').update( object );
+  }
 }

@@ -9,6 +9,7 @@ import { MyRandomizerGroupService       } from './my-randomizer-group.service';
 import { SelectedCards         } from '../../classes/selected-cards';
 import { SelectedCardsCheckbox } from '../../classes/selected-cards-checkbox-values';
 import { BlackMarketPileCard   } from '../../classes/black-market-pile-card';
+import { BlackMarketPhase      } from '../../classes/black-market-phase.enum';
 
 import { CardPropertyDialogComponent } from '../pure-components/card-property-dialog/card-property-dialog.component';
 
@@ -88,7 +89,7 @@ export class RandomizerSelectCardsComponent implements OnInit, OnDestroy {
 
   BlackMarketPileShuffledOnChange( value: BlackMarketPileCard[] ) {
     this.myRandomizerGroup.setBlackMarketPileShuffled( value );
-    this.myRandomizerGroup.setBlackMarketPhase(1);
+    this.myRandomizerGroup.setBlackMarketPhase( BlackMarketPhase.init );
   }
 
   selectedCardsCheckboxOnChange( value: { category: string, index: number, checked: boolean } ) {

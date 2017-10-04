@@ -1,9 +1,44 @@
 import { Injectable } from '@angular/core';
 
+
+export class Stopwatch {
+  private _startTime;
+  private _endTime;
+  private _result = 0;
+  private _name = '';
+
+  constructor( name = '' ) {
+    this._name = name;
+  }
+
+  start( log = false ) {
+    this._startTime = (new Date()).valueOf();
+    this._result = 0;
+    if ( log ) console.log( `${this._name} started.` )
+  }
+
+  stop ( log = false ) {
+    this._endTime = (new Date()).valueOf();
+    this._result = this._endTime - this._startTime;
+    if ( log ) console.log( `${this._name} stopped.` )
+  }
+
+  result() {
+    return this._result;
+  }
+
+  printResult() {
+    console.log( `${this._name} ${this._result} msec` )
+  }
+
+}
+
+
 @Injectable()
 export class UtilitiesService {
 
   constructor() { }
+
 
   localStorage_set( key: string, value: any ) {
     localStorage.setItem( key, JSON.stringify( value ) );
@@ -24,8 +59,20 @@ export class UtilitiesService {
     return target.indexOf( key ) !== -1;
   }
 
-  objectForEach( object: any, f: (element: any, key?: any, object?: any) => any ) {
-    Object.keys( object ).forEach( key => f( object[key], key, object ) );
+  objectKeysAsNumber( object: Object ): number[] {
+    return Object.keys( object || {} ).map( e => Number(e) );
+  }
+
+  objectForEach( object: Object, f: (element: any, key?: string, object?: any) => any ) {
+    Object.keys( object || {} ).forEach( key => f( object[key], key, object ) );
+  }
+
+  objectMap( object: Object, f: (element: any, key?: string, object?: any) => any ) {
+    return Object.keys( object || {} ).map( key => f( object[key], key, object ) );
+  }
+
+  copyObject( object: Object ) {
+    return JSON.parse( JSON.stringify( object || {} ) );
   }
 
 
@@ -103,6 +150,11 @@ export class UtilitiesService {
     return ar[0];
   };
 
+
+  remove<T>( ar: Array<T>, value: T ): T|undefined {
+    return this.removeIf( ar, e => e === value );
+  }
+
   removeIf<T>( ar: Array<T>, f: (T) => boolean ): T {
     return this.removeAt( ar, ar.findIndex(f) );
   }
@@ -113,6 +165,7 @@ export class UtilitiesService {
    * @return the deleted element
    */
   removeAt<T>( ar: Array<T>, index: number ): T {
+    if ( index < 0 ) return undefined;
     return ar.splice( index, 1 )[0];
   };
 
@@ -251,8 +304,19 @@ export class UtilitiesService {
    * @param step step number (default = 1)
    * @return the number sequence array
    */
+  seq0( length: number, step: number = 1 ): number[] {
+    return this.numberSequence( 0, length, step );
+  }
+  numSeq( start: number, length: number, step: number = 1 ): number[] {
+    return this.numberSequence( start, length, step );
+  }
   numberSequence( start: number, length: number, step: number = 1 ): number[] {
     return Array.from( new Array(length) ).map( (_, i) => i * step + start );
+  }
+
+  async asyncFilter( array: any[], asyncFunction: Function ) {
+    const result = await Promise.all( array.map( e => asyncFunction(e) ) );
+    return array.filter( (_, i) => result[i] );
   }
 }
 

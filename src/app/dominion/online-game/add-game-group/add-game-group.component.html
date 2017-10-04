@@ -1,7 +1,7 @@
 <div class="bodyWithPadding" >
   <span class="marginedElement">
     <button md-raised-button color='primary'
-      (click)="newGame()"
+      (click)="makeNewGameRoom()"
       [disabled]="!formIsValid()">
       部屋を作成
     </button>
@@ -11,13 +11,13 @@
     <div>
       <span>人数（自分含む）：</span>
       <button md-raised-button class="miniButton"
-          [disabled]="newRoom.numberOfPlayers <= 2"
+          [disabled]="numberOfPlayers <= 2"
           (click)="decrement()">
         <md-icon>exposure_neg_1</md-icon>
       </button>
-      <span>{{newRoom.numberOfPlayers}}人</span>
+      <span>{{numberOfPlayers}}人</span>
       <button md-raised-button class="miniButton"
-          [disabled]="newRoom.numberOfPlayers >= 6"
+          [disabled]="numberOfPlayers >= 6"
           (click)="increment()">
         <md-icon>exposure_plus_1</md-icon>
       </button>
@@ -27,9 +27,9 @@
   <hr>
   <app-randomizer
       implementedOnly="true"
-      [(selectedCards)]="newRoom.selectedCards"
-      [(BlackMarketPileShuffled)]="newRoom.BlackMarketPileShuffled"
-      [isSelectedExpansions]="newRoom.isSelectedExpansions"
+      [(selectedCards)]="selectedCards"
+      [(BlackMarketPileShuffled)]="BlackMarketPileShuffled"
+      [isSelectedExpansions]="isSelectedExpansions"
       (isSelectedExpansionsPartEmitter)="isSelectedExpansionsOnChange( $event )" >
   </app-randomizer>
 </div>

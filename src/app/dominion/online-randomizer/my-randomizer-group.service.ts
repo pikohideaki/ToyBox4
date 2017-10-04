@@ -26,7 +26,11 @@ export class MyRandomizerGroupService {
 
   name$                      = this.myRandomizerGroup$.map( e => e.name                      ).distinctUntilChanged();
   randomizerButtonLocked$    = this.myRandomizerGroup$.map( e => e.randomizerButtonLocked    ).distinctUntilChanged();
-  isSelectedExpansions$      = this.myRandomizerGroup$.map( e => e.isSelectedExpansions      ).distinctUntilChanged();
+  isSelectedExpansions$      = Observable.combineLatest(
+                this.database.expansionsNameList$.map( list => list.map( _ => false ) ),
+                this.myRandomizerGroup$.map( e => e.isSelectedExpansions      ).distinctUntilChanged(),
+                (initArray, isSelectedExpansions) => initArray.map( (_, i) => !!isSelectedExpansions[i] ) );
+
   selectedCards$             = this.myRandomizerGroup$.map( e => e.selectedCards             ).distinctUntilChanged();
   selectedCardsCheckbox$     = this.myRandomizerGroup$.map( e => e.selectedCardsCheckbox     ).distinctUntilChanged();
   BlackMarketPileShuffled$   = this.myRandomizerGroup$.map( e => e.BlackMarketPileShuffled   ).distinctUntilChanged();

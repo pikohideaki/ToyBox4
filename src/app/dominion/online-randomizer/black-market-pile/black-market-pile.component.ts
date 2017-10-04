@@ -13,6 +13,7 @@ import { CardPropertyDialogComponent } from '../../pure-components/card-property
 
 import { CardProperty        } from '../../../classes/card-property';
 import { BlackMarketPileCard } from '../../../classes/black-market-pile-card';
+import { BlackMarketPhase    } from '../../../classes/black-market-phase.enum';
 
 
 @Component({
@@ -24,13 +25,15 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
   private alive = true;
   receiveDataDone = false;
 
+  BMPhase = BlackMarketPhase;
+
   faceUp = false;
   @Input() longSideLength = 180;
 
   cardPropertyList: CardProperty[];
 
   BlackMarketPileShuffled: BlackMarketPileCard[] = [];
-  BlackMarketPhase = 1;
+  currentPhase = BlackMarketPhase.init;
 
   private promiseResolver = {};
 
@@ -40,11 +43,11 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
     public dialog: MdDialog,
     private utils: UtilitiesService,
     private database: FireDatabaseMediatorService,
-    private myRandomizerGroup: MyRandomizerGroupService,
+    private myRandomizerGroup: MyRandomizerGroupService
   ) {
     this.myRandomizerGroup.BlackMarketPhase$
       .takeWhile( () => this.alive )
-      .subscribe( val => this.BlackMarketPhase = val );
+      .subscribe( val => this.currentPhase = val );
 
     Observable.combineLatest(
         this.database.cardPropertyList$,
@@ -94,9 +97,9 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
     return numberOfFaceDownCards === firstIndexOfFaceUpCard;
   }
 
-  revealTop3Cards = async () => {
+  async revealTop3Cards() {
     // 上から3枚をめくる
-    this.myRandomizerGroup.setBlackMarketPhase(1);
+    this.myRandomizerGroup.setBlackMarketPhase( this.BMPhase.init );
 
 
     this.BlackMarketPileShuffled.forEach( (e, i) => e.faceUp = (i < 3) );
@@ -104,7 +107,7 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
 
 
     // 3枚のうち1枚を購入するか，1枚も購入しない
-    this.myRandomizerGroup.setBlackMarketPhase(2);
+    this.myRandomizerGroup.setBlackMarketPhase( this.BMPhase.buy );
 
     while (true) {
       const clickedElementValue
@@ -126,7 +129,7 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
     }
 
     // 残りは好きな順に闇市場デッキの下に置く
-    this.myRandomizerGroup.setBlackMarketPhase(3);
+    this.myRandomizerGroup.setBlackMarketPhase( this.BMPhase.putOnTheBottom );
 
     while (true) {
       const clickedElementValue2
@@ -142,7 +145,7 @@ export class BlackMarketPileComponent implements OnInit, OnDestroy {
     this.BlackMarketPileShuffled.forEach( e => e.faceUp = false );  // reset
     this.myRandomizerGroup.setBlackMarketPileShuffled( this.BlackMarketPileShuffled );
 
-    this.myRandomizerGroup.setBlackMarketPhase(1);
+    this.myRandomizerGroup.setBlackMarketPhase( this.BMPhase.init );
   }
 
 }

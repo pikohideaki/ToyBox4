@@ -34,14 +34,14 @@ export class AutoBackupOnFirebaseService {
   }
 
 
-  checkAndExecuteBackup = async () => {
+  async checkAndExecuteBackup() {
     const latestBackupDate = await this.getLatestBackupDate();
     if ( !isToday( latestBackupDate ) ) {
       this.createBackup();
     }
   }
 
-  private getLatestBackupDate = async () => {
+  private async getLatestBackupDate() {
     const date = await this.afdb.object( this.latestBackupDatePath ).first().toPromise();
     return new Date( date.$value );
   }

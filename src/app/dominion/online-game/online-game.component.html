@@ -1,13 +1,18 @@
-<div class="marginedElement">
-    <app-my-name-selector [(myName)]="myName">
-    </app-my-name-selector>
+<div *ngIf="!(signedIn$ | async)" >
+  ログインしてください。
 </div>
 
-<md-tab-group>
-  <md-tab label="New Game">
-    <app-add-game-group [myName]="myName"></app-add-game-group>
-  </md-tab>
-  <md-tab label="Game Rooms">
-    <app-game-room-list [myName]="myName"></app-game-room-list>
-  </md-tab>
-</md-tab-group>
+<div *ngIf="signedIn$ | async" >
+  <div class="marginedElement">
+    <app-my-name-selector [(myName)]="myName"> </app-my-name-selector>
+  </div>
+
+  <md-tab-group *ngIf="myName !== '' ">
+    <md-tab label="New Game">
+      <app-add-game-group [myName]="myName"></app-add-game-group>
+    </md-tab>
+    <md-tab label="Game Rooms">
+      <app-game-room-list [myName]="myName"></app-game-room-list>
+    </md-tab>
+  </md-tab-group>
+</div>

@@ -1,44 +1,60 @@
 <div class="body">
   <div class="sidebar">
-    <button md-button (click)="sidenav.toggle()"> <md-icon>textsms</md-icon> </button>
+    <button md-button (click)="toggleSideNav( sidenav )"> <md-icon>textsms</md-icon> </button>
 
     <span class="spacer"></span>
-    <app-turn-info *ngIf="receiveDataDone" [turnInfo]="myGameState.turnInfo"></app-turn-info>
-    <div myToolTip="sort hand cards" mdTooltipPosition="after">
-      <button md-button (click)="sortMyHandCards()"> <md-icon>sort</md-icon> </button>
-    </div>
+
+    <ng-container *ngIf="receiveDataDone$ | async">
+
+      <ng-container *ngIf="itsMyTurn$ | async">
+        <div mdTooltip="Go to next phase" mdTooltipPosition="after">
+          <button md-button (click)="goToNextPhase()">
+            <md-icon class="goToNextPhaseIcon">file_download</md-icon>
+          </button>
+        </div>
+        <div mdTooltip="Finish my turn" mdTooltipPosition="after">
+          <button md-button (click)="goToNextPlayer()">
+            <md-icon>forward</md-icon>
+          </button>
+        </div>
+      </ng-container>
+
+      <app-turn-info [turnInfo$]="turnInfo$"> </app-turn-info>
+
+      <div mdTooltip="Sort hand cards" mdTooltipPosition="after">
+        <button md-button (click)="sortMyHandCards()"> <md-icon>sort</md-icon> </button>
+      </div>
+    </ng-container>
   </div>
 
   <md-sidenav-container class="sidenavContainer">
-    <md-sidenav #sidenav class="sidenav" mode="side" opened="true" disableClose="true">
+    <md-sidenav #sidenav class="sidenav" mode="side" [opened]="chatOpened$ | async" disableClose="true">
       <app-chat [sidenav]="sidenav"> </app-chat>
     </md-sidenav>
 
     <div class="marginedElement">
-      <app-waiting-spinner [done]="receiveDataDone">
+      <app-waiting-spinner [done]="receiveDataDone$ | async">
       </app-waiting-spinner>
     </div>
     <div>
       <div class="shared-area_other-player-area">
         <app-shared-area class="shared-area"
-          [cardPropertyList$]="cardPropertyList$"
-          [myGameState$]="myGameState$"
-          [myGameRoom$]="myGameRoom$"
           (cardClicked)="onCardClicked( $event )">
         </app-shared-area>
         <app-other-player-area
-          [cardPropertyList$]="cardPropertyList$"
-          [myGameState$]="myGameState$"
-          [myGameRoom$]="myGameRoom$"
           (cardClicked)="onCardClicked( $event )">
         </app-other-player-area>
       </div>
       <app-turn-player-area
-        [cardPropertyList$]="cardPropertyList$"
-        [myGameState$]="myGameState$"
-        [myGameRoom$]="myGameRoom$"
         (cardClicked)="onCardClicked( $event )">
       </app-turn-player-area>
     </div>
+
+<button md-raised-button (click)="test()">test</button>
+<button md-raised-button (click)="faceUpCurse()">faceUpCurse</button>
+<button md-raised-button (click)="faceDownCurse()">faceDownCurse</button>
+
   </md-sidenav-container>
 </div>
+
+

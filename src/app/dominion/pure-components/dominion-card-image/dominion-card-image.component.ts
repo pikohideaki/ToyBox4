@@ -21,8 +21,8 @@ export class DominionCardImageComponent implements OnInit, OnChanges {
   @Input() public  description: string = '';
   @Input() public  empty: boolean = false;
 
-  @Input() private returnValueOnClicked: any = -1;
-  @Output() private cardClicked = new EventEmitter<any>();
+  @Input() private returnValueOnClicked: number = -1;
+  @Output() private cardClicked = new EventEmitter<number>();
 
   public borderRadius: number;
 
@@ -30,9 +30,6 @@ export class DominionCardImageComponent implements OnInit, OnChanges {
   constructor(
     @Inject('DOMINION_DATA_DIR') private DOMINION_DATA_DIR: string
   ) { }
-
-  ngOnInit() {
-  }
 
   ngOnChanges( changes ) {
     if ( changes.width || changes.height ) {
@@ -43,6 +40,9 @@ export class DominionCardImageComponent implements OnInit, OnChanges {
     if ( changes.faceUp || changes.card || changes.empty ) {
       this.setSourceDir();
     }
+  }
+
+  ngOnInit() {
   }
 
 

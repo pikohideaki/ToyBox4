@@ -53,10 +53,6 @@ export class DataTableComponent implements OnInit, OnChanges  {
     this.stateCtrl = new FormControl();
   }
 
-  ngOnInit() {
-    this.itemsPerPage = this.itemsPerPageDefault;
-  }
-
   ngOnChanges( changes: SimpleChanges ) {
     if ( changes.data !== undefined ) {  // at http-get done
       this.columnSettings.forEach( e => {
@@ -66,6 +62,10 @@ export class DataTableComponent implements OnInit, OnChanges  {
       });
       this.updateView();
     }
+  }
+
+  ngOnInit() {
+    this.itemsPerPage = this.itemsPerPageDefault;
   }
 
 
@@ -148,4 +148,8 @@ export class DataTableComponent implements OnInit, OnChanges  {
     }
     return this.data.length - 1;
   }
+
+  // sort( columnName: string ) {
+  //   console.log('sort', columnName );
+  // }
 }

@@ -1,4 +1,9 @@
 
+
+export function objectKeysAsNumber( object: Object ): number[] {
+  return Object.keys( object ).map( e => Number(e) );
+}
+
 export function submatch( target: string, key: string, ignoreCase: boolean = false ): boolean {
   if ( ignoreCase ) {
     return submatch( target.toUpperCase(), key.toUpperCase() );

@@ -1,64 +1,44 @@
-<ng-container *ngIf="receiveDataDone">
+<ng-container *ngIf="dataIsReady">
   <div class="player-area"
-      *ngFor="let player of myGameState.players; let idx = index"
-      [class.turnPlayer]="idx === myGameState.turnPlayerIndex()">
-    <div>{{myGameRoom.players[idx]}}</div>
+      *ngFor="let playerCards of (playersCards$ | async); let idx = index"
+      [class.turnPlayer]="idx === (turnPlayerIndex$ | async)">
+    <div>{{players[idx]}}</div>
     <div class="PlayArea_Aside">
-      <div class="CardArea box-shadow PlayArea" *ngIf="player.PlayArea.length > 0">
-        <app-cards-pile
-          [cardPropertyList]="cardPropertyList"
-          [gameCardData]="myGameState.gameCardData"
-          [gameCardIDarray]="player.PlayArea"
+      <div class="CardArea box-shadow PlayArea" *ngIf="playerCards.PlayArea.length > 0">
+        <app-cards-lined-up
+          [cardIdArray]="playerCards.PlayArea"
           width='40'
-          [faceUp]="false"
-          [isButton]="true"
           (cardClicked)="onClick( $event )" >
-        </app-cards-pile>
+        </app-cards-lined-up>
       </div>
-      <div class="CardArea box-shadow Aside" *ngIf="player.Aside.length > 0">
-        <app-cards-pile
-          [cardPropertyList]="cardPropertyList"
-          [gameCardData]="myGameState.gameCardData"
-          [gameCardIDarray]="player.Aside"
+      <div class="CardArea box-shadow Aside" *ngIf="playerCards.Aside.length > 0">
+        <app-cards-lined-up
+          [cardIdArray]="playerCards.Aside"
           width='40'
-          [faceUp]="false"
-          [isButton]="true"
           (cardClicked)="onClick( $event )" >
-        </app-cards-pile>
+        </app-cards-lined-up>
       </div>
     </div>
 
     <div class="Deck_HandCards_DiscardPile">
       <div class="CardArea box-shadow Deck">
         <app-cards-pile
-          [cardPropertyList]="cardPropertyList"
-          [gameCardData]="myGameState.gameCardData"
-          [gameCardIDarray]="player.Deck"
+          [cardIdArray]="playerCards.Deck"
           width='40'
-          [faceUp]="false"
-          [isButton]="true"
           (cardClicked)="onClick( $event )" >
         </app-cards-pile>
       </div>
       <div class="CardArea box-shadow HandCards">
-        <app-dominion-card-image *ngFor="let gameCardID of player.HandCards"
-          [card]="cardPropertyList[ myGameState.gameCardData[ gameCardID ].cardPropertyListIndex ]"
-          [isButton]="true"
-          width="40"
-          [faceUp]="true"
-          [isButton]="true"
-          [returnValueOnClicked]="gameCardID"
+        <app-cards-lined-up
+          [cardIdArray]="playerCards.HandCards"
+          width='40'
           (cardClicked)="onClick( $event )" >
-        </app-dominion-card-image>
+        </app-cards-lined-up>
       </div>
       <div class="CardArea box-shadow DiscardPile">
         <app-cards-pile
-          [cardPropertyList]="cardPropertyList"
-          [gameCardData]="myGameState.gameCardData"
-          [gameCardIDarray]="player.DiscardPile"
+          [cardIdArray]="playerCards.DiscardPile | reverse"
           width='40'
-          [faceUp]="true"
-          [isButton]="true"
           (cardClicked)="onClick( $event )" >
         </app-cards-pile>
       </div>

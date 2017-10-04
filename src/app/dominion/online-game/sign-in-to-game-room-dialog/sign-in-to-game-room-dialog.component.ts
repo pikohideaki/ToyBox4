@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
 import { MdDialog, MdDialogRef } from '@angular/material';
 
+import { MyUserInfoService } from '../../../my-user-info.service';
 import { FireDatabaseMediatorService } from '../../../fire-database-mediator.service';
 import { GameRoom } from '../../../classes/game-room';
 
@@ -18,15 +19,24 @@ export class SignInToGameRoomDialogComponent implements OnInit, OnDestroy {
   @Input() newRoom: GameRoom;
   @Input() dialogRef;
   players$: Observable<string[]>;
+  selectedExpansions: string[] = [];
 
 
   constructor(
     private router: Router,
     public dialog: MdDialog,
     private database: FireDatabaseMediatorService,
+    private myUserInfo: MyUserInfoService
   ) { }
 
   ngOnInit() {
+    this.myUserInfo.setOnlineGameRoomID( this.newRoom.databaseKey );
+    this.myUserInfo.setOnlineGameStateID( this.newRoom.gameStateID );
+
+    this.database.expansionsNameList$
+      .takeWhile( () => this.alive )
+      .subscribe( val => this.selectedExpansions = val.filter( (_, i) => this.newRoom.isSelectedExpansions[i] ) );
+
     this.database.onlineGameRoomList$
       .map( list => list.findIndex( room => room.databaseKey === this.newRoom.databaseKey ) )
       .filter( result => result === -1 )  // selecting room has removed
@@ -42,9 +52,9 @@ export class SignInToGameRoomDialogComponent implements OnInit, OnDestroy {
       .subscribe( () => {
         this.database.onlineGameRoom.setWaitingForPlayersValue( this.newRoom.databaseKey, false );
         setTimeout( () => {
-          this.router.navigate( ['/dominion/online-game-main', this.newRoom.databaseKey] );
+          this.router.navigate( ['/online-game-main'] );
           this.dialogRef.close();
-        }, 3000);
+        }, 1000);
       });
   }
 

@@ -75,6 +75,7 @@
   max-width: 250px;
   border-radius: 12px;
   background: #edf1ee;
+  min-height: 35px;
 }
 
 .says:after {
@@ -94,7 +95,8 @@
   padding: 0;
 }
 
-/*以下、③右側の緑コメント*/
+
+/*以下、右側の緑コメント*/
 .mycomment {
   margin: 10px 0;
 }
@@ -107,6 +109,8 @@
   border-radius: 12px;
   background: #C2FF65;  /* #30e852; */
   font-size: 15px;
+  min-height: 35px;
+  text-align: left;
 }
 
 .mycomment p:after {
