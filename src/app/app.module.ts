@@ -1,8 +1,8 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
-import { RouterModule } from '@angular/router';
 
 // Angular Material
 import { MaterialModule,
@@ -14,10 +14,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations'; 
 import 'hammerjs';
 
 // Firebase
-import { AngularFireModule         } from 'angularfire2';
-import { AngularFireDatabaseModule } from 'angularfire2/database';
-import { AngularFireAuthModule     } from 'angularfire2/auth';
-import { environment               } from '../environments/environment';
+// import { AngularFireModule         } from 'angularfire2';
+// import { AngularFireDatabaseModule } from 'angularfire2/database';
+// import { AngularFireAuthModule     } from 'angularfire2/auth';
+// import { environment               } from '../environments/environment';
 
 import { NgPipesModule } from 'ngx-pipes';
 
@@ -29,11 +29,12 @@ import { HomeComponent } from './home.component';
 
 /* My library */
 import { UtilitiesService        } from './my-library/utilities.service';
+import { MessageDialogComponent  } from './my-library/message-dialog.component';
 import { AlertDialogComponent    } from './my-library/alert-dialog/alert-dialog.component';
 import { ConfirmDialogComponent  } from './my-library/confirm-dialog/confirm-dialog.component';
 import { WaitingSpinnerComponent } from './my-library/waiting-spinner.component';
 import { AppListComponent        } from './my-library/app-list/app-list.component';
-// My data table
+/* My data table */
 import { DataTableComponent    } from './my-library/data-table/data-table.component';
 import { ItemsPerPageComponent } from './my-library/data-table/items-per-page/items-per-page.component';
 import { PagenationComponent   } from './my-library/data-table/pagenation/pagenation.component';
@@ -41,9 +42,9 @@ import { ResetButtonComponent  } from './my-library/data-table/reset-button.comp
 
 
 /* My global services */
-import { MyUserInfoService        } from './my-user-info.service';
+import { MyUserInfoService           } from './my-user-info.service';
 import { FireDatabaseMediatorService } from './fire-database-mediator.service';
-import { MyRandomizerGroupService } from './dominion/online-randomizer/my-randomizer-group.service';
+import { MyRandomizerGroupService    } from './dominion/online-randomizer/my-randomizer-group.service';
 
 // user admin
 import { UserAdminComponent } from './user-admin/user-admin.component';
@@ -98,7 +99,6 @@ import { SelectedCardsListComponent             } from './dominion/selected-card
 import { SelectedExpansionsComponent            } from './dominion/selected-expansions.component';
 import { ExpansionsToggleComponent              } from './dominion/expansions-toggle.component';
 import { VictoryPointsCalculatorComponent       } from './dominion/victory-points-calculator/victory-points-calculator.component';
-import { MessageDialogComponent                 } from './my-library/message-dialog.component';
 
 
 
@@ -184,9 +184,9 @@ import { MessageDialogComponent                 } from './my-library/message-dia
     MaterialModule,
     MdDatepickerModule,
     MdNativeDateModule,
-    AngularFireModule.initializeApp(environment.firebase, 'DominionApps'), // imports firebase/app needed for everything
-    AngularFireDatabaseModule, // imports firebase/database, only needed for database features
-    AngularFireAuthModule, // imports firebase/auth, only needed for auth features
+    // AngularFireModule.initializeApp(environment.firebase, 'DominionApps'), // imports firebase/app needed for everything
+    // AngularFireDatabaseModule, // imports firebase/database, only needed for database features
+    // AngularFireAuthModule, // imports firebase/auth, only needed for auth features
     NgPipesModule,
   ],
   providers: [
